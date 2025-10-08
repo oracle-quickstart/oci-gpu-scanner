@@ -1,0 +1,216 @@
+title: "OCI GPU Scanner - Deploy on OKE"
+description: "Deploy OCI GPU Scanner (Control Plane, Portal, Prometheus, Grafana) on a new or existing OKE cluster."
+informationalText: "This stack deploys OCI GPU Scanner application stack on OKE. It includes the Portal, API Backend, Prometheus, and Grafana for monitoring GPU resources."
+schemaVersion: 1.1.0
+version: "1.0.0"
+locale: "en"
+
+variableGroups:
+  - title: "Target tenancy & compartment"
+    visible: true
+    variables:
+      - tenancy_ocid
+      - compartment_ocid
+  - title: "OKE Cluster Configuration"
+    visible: true
+    variables:
+      - create_new_cluster
+      - region
+      - cluster_ocid
+  - title: "Application"
+    visible: true
+    variables:
+      - namespace
+      - create_iam_policy
+      - policy_name
+
+variables:
+  tenancy_ocid:
+    type: oci:identity:tenancy:id
+    title: "Tenancy"
+    description: "Your tenancy OCID (prefilled by OCI)."
+  compartment_ocid:
+    type: oci:identity:compartment:id
+    title: "Compartment"
+    description: "Compartment where the OKE cluster and app will be created."
+  create_new_cluster:
+    type: boolean
+    title: "Create new OKE cluster?"
+    description: "Creates a new OKE cluster, node pool and network resources. If unchecked, you can select an existing cluster."
+    default: true
+  
+  region:
+    type: oci:identity:region:name
+    title: "Region"
+    description: "Region where the new OKE cluster will be created."
+    visible: create_new_cluster
+  
+  cluster_ocid:
+    type: oci:container:cluster:id
+    title: "Existing OKE Cluster"
+    description: "Select the existing OKE cluster where OCI Lens will be deployed. The region will be auto-detected from the cluster."
+    required: true
+    visible:
+      not:
+        - create_new_cluster
+    dependsOn:
+      compartmentId: compartment_ocid
+  
+  namespace:
+    type: string
+    title: "Kubernetes Namespace"
+    description: "Namespace for all Lens resources."
+    default: "lens"
+
+  create_iam_policy:
+    type: boolean
+    title: "Create IAM Policy"
+    description: "Create the workload Identity IAM policy for the backend service account (requires Resource Manager to have manage policies permission)."
+    default: false
+
+  policy_name:
+    type: string
+    title: "IAM Policy Name"
+    description: "Name for the IAM policy if create_iam_policy is true."
+    default: "lens-backend-workload-policy"
+    visible:
+      and:
+        - create_iam_policy
+
+  superuser_username:
+    type: string
+    title: "Superuser Username"
+    description: "Username for OCI GPU Scanner portal and backend API. (default: admin)"
+    default: "admin"
+
+  superuser_email:
+    type: string
+    title: "Superuser Email"
+    description: "Email for OCI GPU Scanner portal and backend API. (default: admin@oracle.com)"
+    default: "admin@oracle.com"
+
+  superuser_password:
+    type: string
+    title: "Superuser Password"
+    description: "Password for the superuser of OCI GPU Scanner portal and backend API. (default: supersecret)"
+    sensitive: true
+    default: "supersecret"
+
+  grafana_admin_password:
+    type: string
+    title: "Grafana Admin Password"
+    description: "Password for logging into Grafana. (default: admin123)"
+    sensitive: true
+    default: "admin123"
+
+outputs:
+  # OCI GPU Scanner Portal
+  portal_url:
+    type: string
+    title: "Portal URL"
+    description: "Access URL for the OCI GPU Scanner Portal"
+    visible: true
+  
+  admin_username:
+    type: string
+    title: "Admin Username"
+    description: "Username for the OCI GPU Scanner Portal"
+    visible: true
+  
+  admin_password:
+    type: string
+    title: "Admin Password"
+    description: "Password for the OCI GPU Scanner Portal"
+    visible: true
+  
+  # OCI GPU Scanner API
+  api_url:
+    type: string
+    title: "API URL"
+    description: "Access URL for the OCI GPU Scanner API"
+    visible: true
+  
+  # Grafana
+  grafana_url:
+    type: string
+    title: "Grafana URL"
+    description: "Access URL for Grafana dashboards"
+    visible: true
+  
+  grafana_username:
+    type: string
+    title: "Grafana Username"
+    description: "Username for Grafana (admin)"
+    visible: true
+  
+  grafana_password:
+    type: string
+    title: "Grafana Password"
+    description: "Password for Grafana admin user"
+    visible: true
+  
+  # Other Information
+  cluster_id:
+    type: ocid
+    title: "OKE Cluster OCID"
+    description: "The OCID of the OKE cluster"
+    visible: true
+  
+  cluster_name:
+    type: string
+    title: "Cluster Name"
+    description: "The name of the OKE cluster"
+    visible: true
+  
+  namespace_name:
+    type: string
+    title: "Namespace"
+    description: "Kubernetes namespace where resources are deployed"
+    visible: true
+  
+  deployment_status:
+    type: string
+    title: "Deployment Status"
+    description: "Status of the deployment"
+    visible: true
+  
+  prometheus_url:
+    type: string
+    title: "Prometheus URL"
+    description: "Access URL for Prometheus"
+    visible: true
+  
+  notes:
+    type: string
+    title: "Post-Deployment Instructions"
+    description: "Additional information and instructions"
+    visible: true
+
+outputGroups:
+  - title: "OKE Cluster Details"
+    outputs:
+      - cluster_name
+      - cluster_id
+  
+  - title: "OCI GPU Scanner Portal"
+    outputs:
+      - portal_url
+      - admin_username
+      - admin_password
+  
+  - title: "OCI GPU Scanner API"
+    outputs:
+      - api_url
+  
+  - title: "Grafana Information"
+    outputs:
+      - grafana_url
+      - grafana_username
+      - grafana_password
+  
+  - title: "Other Information"
+    outputs:
+      - namespace_name
+      - deployment_status
+      - prometheus_url
+      - notes

@@ -1,0 +1,153 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: metrics-push-job
+  namespace: oci-monitoring
+  annotations:
+    kueue.x-k8s.io/queue-name: "" 
+  labels:
+    app: metrics-push-job
+    component: monitoring
+spec:
+  # Run every 1 minute
+  schedule: "* * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: metrics-push-job
+            component: monitoring
+        spec:
+          serviceAccountName: metrics-push-sa
+          restartPolicy: OnFailure
+          containers:
+          - name: metrics-pusher
+            image: curlimages/curl:latest
+            command:
+            - /bin/sh
+            - -c
+            - |
+              #!/bin/sh
+              set -e
+              
+              # Log function
+              log() {
+                echo "$(date '+%Y-%m-%d %H:%M:%S') [$$] $*"
+              }
+              
+              # Error handling
+              handle_error() {
+                log "ERROR: $1"
+                exit 1
+              }
+              
+              # Check if pushgateway URL is set
+              if [ -z "$PUSHGATEWAY_URL" ]; then
+                handle_error "PUSHGATEWAY_URL environment variable is not set"
+              fi
+              
+              log "Starting metrics collection and push..."
+              log "Push Gateway URL: $PUSHGATEWAY_URL"
+              
+              # Get node name for labeling
+              NODE_NAME=${NODE_NAME:-$(hostname)}
+              log "Node Name: $NODE_NAME"
+              
+              # Function to push metrics
+              push_metrics() {
+                local job_name="$1"
+                local metrics="$2"
+                local instance_name="$3"
+                
+                if [ -z "$metrics" ]; then
+                  log "Warning: No metrics data for $job_name"
+                  return 1
+                fi
+                
+                local push_url="${PUSHGATEWAY_URL}/job/${job_name}/instance/${instance_name}"
+                log "Pushing $job_name metrics to: $push_url"
+                
+                if echo "$metrics" | curl -k --connect-timeout 10 --max-time 30 --data-binary @- "$push_url" 2>/dev/null; then
+                  log "$job_name metrics pushed successfully"
+                  return 0
+                else
+                  log "ERROR: Failed to push $job_name metrics"
+                  return 1
+                fi
+              }
+              
+              # Collect AMD GPU metrics if available
+              log "Checking for AMD GPU exporter..."
+              if curl -s --connect-timeout 5 --max-time 10 "http://localhost:5000/metrics" > /dev/null 2>&1; then
+                log "AMD GPU exporter found, collecting metrics..."
+                AMD_METRICS=$(curl -s --connect-timeout 5 --max-time 10 "http://localhost:5000/metrics" 2>/dev/null || echo "")
+                push_metrics "amd-gpu-exporter" "$AMD_METRICS" "$NODE_NAME"
+              else
+                log "AMD GPU exporter not available on this node (port 5000 not responding)"
+              fi
+              
+              # Collect Node Exporter metrics
+              log "Checking for Node Exporter..."
+              if curl -s --connect-timeout 5 --max-time 10 "http://localhost:9100/metrics" > /dev/null 2>&1; then
+                log "Node Exporter found, collecting metrics..."
+                NODE_METRICS=$(curl -s --connect-timeout 5 --max-time 10 "http://localhost:9100/metrics" 2>/dev/null || echo "")
+                push_metrics "node-exporter" "$NODE_METRICS" "$NODE_NAME"
+              else
+                log "Node Exporter not available on this node (port 9100 not responding)"
+              fi
+              
+              log "Metrics collection and push completed successfully"
+            env:
+            - name: PUSHGATEWAY_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: pushgateway-config
+                  key: url
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            resources:
+              requests:
+                memory: "32Mi"
+                cpu: "50m"
+              limits:
+                memory: "64Mi"
+                cpu: "100m"
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 1000
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                - ALL
+          # Use host networking to access daemonset services
+          hostNetwork: true
+          # Tolerate all taints to run on all nodes
+          # Only run on nodes with AMD GPUs
+          nodeSelector:
+            kubernetes.io/arch: amd64
+
+          # Use nodeAffinity to ensure AMD GPU presence
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: amd.com/gpu
+                    operator: In
+                    values: ["true", "present"]
+
+          # Tolerations for GPU nodes
+          tolerations:
+          - key: amd.com/gpu
+            operator: Exists
+            effect: NoSchedule
+          - key: nvidia.com/gpu
+            operator: Exists
+            effect: NoSchedule

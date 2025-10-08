@@ -1,0 +1,1436 @@
+{
+    "dtype": "float16",
+    "timestamp": "2025-09-11T21:09:26.814430",
+    "tests": {
+        "compute_throughput": {
+            "status": "completed",
+            "result": "passed",
+            "num_gpus": 8,
+            "total_tflops": 3434.2770273783567,
+            "total_bandwidth_gbps": 628.8349049154706,
+            "gpu_results": {
+                "GPU-0x26e0303fba66ca48": {
+                    "gpu_name": "AMD MI300",
+                    "matrix_size": 16384,
+                    "duration": 18.92744779586792,
+                    "tflops": 464.7268409916464,
+                    "bandwidth_gbps": 85.09402606048214
+                },
+                "GPU-0x9f448abf7df11a19": {
+                    "gpu_name": "AMD MI300",
+                    "matrix_size": 16384,
+                    "duration": 19.463294982910156,
+                    "tflops": 451.93236961837414,
+                    "bandwidth_gbps": 82.75128838227066
+                },
+                "GPU-0xe8eea3e87d6fecfa": {
+                    "gpu_name": "AMD MI300",
+                    "matrix_size": 16384,
+                    "duration": 20.0570707321167,
+                    "tflops": 438.55322343372495,
+                    "bandwidth_gbps": 80.30149354865569
+                },
+                "GPU-0xdb3145eb82c0cb33": {
+                    "gpu_name": "AMD MI300",
+                    "matrix_size": 16384,
+                    "duration": 20.713669061660767,
+                    "tflops": 424.6516151254351,
+                    "bandwidth_gbps": 77.75603304298738
+                },
+                "GPU-0x71c1a75a7475eca1": {
+                    "gpu_name": "AMD MI300",
+                    "matrix_size": 16384,
+                    "duration": 21.44743585586548,
+                    "tflops": 410.1232931209551,
+                    "bandwidth_gbps": 75.09581783220614
+                },
+                "GPU-0x2ee1a65bcb57dee6": {
+                    "gpu_name": "AMD MI300",
+                    "matrix_size": 16384,
+                    "duration": 21.685274362564087,
+                    "tflops": 405.6251664213642,
+                    "bandwidth_gbps": 74.27218623438065
+                },
+                "GPU-0xdfaeb06bd4fad3ab": {
+                    "gpu_name": "AMD MI300",
+                    "matrix_size": 16384,
+                    "duration": 22.233752250671387,
+                    "tflops": 395.6189186169593,
+                    "bandwidth_gbps": 72.43998753972645
+                },
+                "GPU-0xbfcbdc918b525995": {
+                    "gpu_name": "AMD MI300",
+                    "matrix_size": 16384,
+                    "duration": 19.853696823120117,
+                    "tflops": 443.0456000498977,
+                    "bandwidth_gbps": 81.12407227476155
+                }
+            }
+        },
+        "memory_bandwidth": {
+            "GPU-0x9f448abf7df11a19": {
+                "gpu_name": "AMD INSTINCT MI300X",
+                "duration": 0.6073541641235352,
+                "bytes_transferred": 1610612736000,
+                "bandwidth_gbps": 2651.850981089846,
+                "threshold_gbps": 5300,
+                "status": "WARNING"
+            },
+            "GPU-0xdfaeb06bd4fad3ab": {
+                "gpu_name": "AMD INSTINCT MI300X",
+                "duration": 0.6080348491668701,
+                "bytes_transferred": 1610612736000,
+                "bandwidth_gbps": 2648.882277400486,
+                "threshold_gbps": 5300,
+                "status": "FAILED"
+            },
+            "GPU-0x71c1a75a7475eca1": {
+                "gpu_name": "AMD INSTINCT MI300X",
+                "duration": 0.6245448589324951,
+                "bytes_transferred": 1610612736000,
+                "bandwidth_gbps": 2578.8583685612975,
+                "threshold_gbps": 5300,
+                "status": "FAILED"
+            },
+            "GPU-0x2ee1a65bcb57dee6": {
+                "gpu_name": "AMD INSTINCT MI300X",
+                "duration": 0.6085057258605957,
+                "bytes_transferred": 1610612736000,
+                "bandwidth_gbps": 2646.8325071586587,
+                "threshold_gbps": 5300,
+                "status": "FAILED"
+            },
+            "GPU-0xe8eea3e87d6fecfa": {
+                "gpu_name": "AMD INSTINCT MI300X",
+                "duration": 0.6090421676635742,
+                "bytes_transferred": 1610612736000,
+                "bandwidth_gbps": 2644.5011881175333,
+                "threshold_gbps": 5300,
+                "status": "FAILED"
+            },
+            "GPU-0xbfcbdc918b525995": {
+                "gpu_name": "AMD INSTINCT MI300X",
+                "duration": 0.6251108646392822,
+                "bytes_transferred": 1610612736000,
+                "bandwidth_gbps": 2576.5233450699943,
+                "threshold_gbps": 5300,
+                "status": "FAILED"
+            },
+            "GPU-0xdb3145eb82c0cb33": {
+                "gpu_name": "AMD INSTINCT MI300X",
+                "duration": 0.5300619602203369,
+                "bytes_transferred": 1610612736000,
+                "bandwidth_gbps": 3038.5367313106153,
+                "threshold_gbps": 5300,
+                "status": "WARNING"
+            },
+            "GPU-0x26e0303fba66ca48": {
+                "gpu_name": "AMD INSTINCT MI300X",
+                "duration": 0.631399393081665,
+                "bytes_transferred": 1610612736000,
+                "bandwidth_gbps": 2550.8620275022718,
+                "threshold_gbps": 5300,
+                "status": "FAILED"
+            }
+        },
+        "error_detection": {
+            "GPU-0x71c1a75a7475eca1": {
+                "status": "passed",
+                "max_diff": 0.0625,
+                "mean_diff": 9e-06,
+                "tolerance": 0.5
+            },
+            "GPU-0xdfaeb06bd4fad3ab": {
+                "status": "passed",
+                "max_diff": 0.0625,
+                "mean_diff": 9e-06,
+                "tolerance": 0.5
+            },
+            "GPU-0xbfcbdc918b525995": {
+                "status": "passed",
+                "max_diff": 0.0625,
+                "mean_diff": 1e-05,
+                "tolerance": 0.5
+            },
+            "GPU-0xe8eea3e87d6fecfa": {
+                "status": "passed",
+                "max_diff": 0.0625,
+                "mean_diff": 1e-05,
+                "tolerance": 0.5
+            },
+            "GPU-0x26e0303fba66ca48": {
+                "status": "passed",
+                "max_diff": 0.0625,
+                "mean_diff": 1e-05,
+                "tolerance": 0.5
+            },
+            "GPU-0xdb3145eb82c0cb33": {
+                "status": "passed",
+                "max_diff": 0.0625,
+                "mean_diff": 9e-06,
+                "tolerance": 0.5
+            },
+            "GPU-0x9f448abf7df11a19": {
+                "status": "passed",
+                "max_diff": 0.0625,
+                "mean_diff": 9e-06,
+                "tolerance": 0.5
+            },
+            "GPU-0x2ee1a65bcb57dee6": {
+                "status": "passed",
+                "max_diff": 0.0625,
+                "mean_diff": 1e-05,
+                "tolerance": 0.5
+            }
+        },
+        "tensor_core_utilization": {
+            "GPU-0x71c1a75a7475eca1": {
+                "status": "skipped",
+                "reason": "Not applicable for AMD MI300"
+            },
+            "GPU-0x26e0303fba66ca48": {
+                "status": "skipped",
+                "reason": "Not applicable for AMD MI300"
+            },
+            "GPU-0xbfcbdc918b525995": {
+                "status": "skipped",
+                "reason": "Not applicable for AMD MI300"
+            },
+            "GPU-0xdb3145eb82c0cb33": {
+                "status": "skipped",
+                "reason": "Not applicable for AMD MI300"
+            },
+            "GPU-0xdfaeb06bd4fad3ab": {
+                "status": "skipped",
+                "reason": "Not applicable for AMD MI300"
+            },
+            "GPU-0xe8eea3e87d6fecfa": {
+                "status": "skipped",
+                "reason": "Not applicable for AMD MI300"
+            },
+            "GPU-0x2ee1a65bcb57dee6": {
+                "status": "skipped",
+                "reason": "Not applicable for AMD MI300"
+            },
+            "GPU-0x9f448abf7df11a19": {
+                "status": "skipped",
+                "reason": "Not applicable for AMD MI300"
+            }
+        },
+        "sustained_workload": {
+            "GPU-0xdfaeb06bd4fad3ab": {
+                "status": "completed",
+                "duration_sec": 60,
+                "iterations": 9174,
+                "total_time_sec": 103.58545541763306,
+                "average_iteration_time_sec": 0.011291198541272406,
+                "effective_tflops": 779.0220843301872
+            },
+            "GPU-0x71c1a75a7475eca1": {
+                "status": "completed",
+                "duration_sec": 60,
+                "iterations": 9174,
+                "total_time_sec": 105.23133563995361,
+                "average_iteration_time_sec": 0.011470605585344846,
+                "effective_tflops": 766.8377189645615
+            },
+            "GPU-0x9f448abf7df11a19": {
+                "status": "completed",
+                "duration_sec": 60,
+                "iterations": 9174,
+                "total_time_sec": 105.5944492816925,
+                "average_iteration_time_sec": 0.011510186318039297,
+                "effective_tflops": 764.2007504624279
+            },
+            "GPU-0xe8eea3e87d6fecfa": {
+                "status": "completed",
+                "duration_sec": 60,
+                "iterations": 9174,
+                "total_time_sec": 105.79197454452515,
+                "average_iteration_time_sec": 0.011531717303741569,
+                "effective_tflops": 762.77390353248
+            },
+            "GPU-0xbfcbdc918b525995": {
+                "status": "completed",
+                "duration_sec": 60,
+                "iterations": 9174,
+                "total_time_sec": 106.17436695098877,
+                "average_iteration_time_sec": 0.011573399493240545,
+                "effective_tflops": 760.0267343528033
+            },
+            "GPU-0x2ee1a65bcb57dee6": {
+                "status": "completed",
+                "duration_sec": 60,
+                "iterations": 9174,
+                "total_time_sec": 106.40548753738403,
+                "average_iteration_time_sec": 0.011598592493719646,
+                "effective_tflops": 758.3759000905385
+            },
+            "GPU-0xdb3145eb82c0cb33": {
+                "status": "completed",
+                "duration_sec": 60,
+                "iterations": 9174,
+                "total_time_sec": 107.32204747200012,
+                "average_iteration_time_sec": 0.011698500923479412,
+                "effective_tflops": 751.8991603918969
+            },
+            "GPU-0x26e0303fba66ca48": {
+                "status": "completed",
+                "duration_sec": 60,
+                "iterations": 9174,
+                "total_time_sec": 108.05311846733093,
+                "average_iteration_time_sec": 0.0117781903714117,
+                "effective_tflops": 746.8119248231956
+            }
+        },
+        "mixed_precision_testing": {
+            "GPU-0xdfaeb06bd4fad3ab": {
+                "status": "completed",
+                "matrix_size": 16384,
+                "iterations": 20,
+                "average_time_sec": 0.016029620170593263,
+                "tflops": 548.7399531989317
+            },
+            "GPU-0x71c1a75a7475eca1": {
+                "status": "completed",
+                "matrix_size": 16384,
+                "iterations": 20,
+                "average_time_sec": 0.016093289852142333,
+                "tflops": 546.5689801788457
+            },
+            "GPU-0x9f448abf7df11a19": {
+                "status": "completed",
+                "matrix_size": 16384,
+                "iterations": 20,
+                "average_time_sec": 0.016179156303405762,
+                "tflops": 543.668214661873
+            },
+            "GPU-0xe8eea3e87d6fecfa": {
+                "status": "completed",
+                "matrix_size": 16384,
+                "iterations": 20,
+                "average_time_sec": 0.01617476940155029,
+                "tflops": 543.8156677130078
+            },
+            "GPU-0xbfcbdc918b525995": {
+                "status": "completed",
+                "matrix_size": 16384,
+                "iterations": 20,
+                "average_time_sec": 0.016459882259368896,
+                "tflops": 534.3958652681918
+            },
+            "GPU-0x2ee1a65bcb57dee6": {
+                "status": "completed",
+                "matrix_size": 16384,
+                "iterations": 20,
+                "average_time_sec": 0.01647533178329468,
+                "tflops": 533.8947426313371
+            },
+            "GPU-0xdb3145eb82c0cb33": {
+                "status": "completed",
+                "matrix_size": 16384,
+                "iterations": 20,
+                "average_time_sec": 0.016553270816802978,
+                "tflops": 531.3809651008197
+            },
+            "GPU-0x26e0303fba66ca48": {
+                "status": "completed",
+                "matrix_size": 16384,
+                "iterations": 20,
+                "average_time_sec": 0.01667470932006836,
+                "tflops": 527.5110260316034
+            }
+        },
+        "background_computation": {
+            "GPU-0xdfaeb06bd4fad3ab": {
+                "duration": 1.543684720993042
+            },
+            "GPU-0x9f448abf7df11a19": {
+                "duration": 1.5482027530670166
+            },
+            "GPU-0x71c1a75a7475eca1": {
+                "duration": 1.5513455867767334
+            },
+            "GPU-0xe8eea3e87d6fecfa": {
+                "duration": 1.5698914527893066
+            },
+            "GPU-0x2ee1a65bcb57dee6": {
+                "duration": 1.577253818511963
+            },
+            "GPU-0xbfcbdc918b525995": {
+                "duration": 1.583543062210083
+            },
+            "GPU-0xdb3145eb82c0cb33": {
+                "duration": 1.588592529296875
+            },
+            "GPU-0x26e0303fba66ca48": {
+                "duration": 1.5933477878570557
+            }
+        },
+        "model_mfu": {
+            "GPU-0xdfaeb06bd4fad3ab": {
+                "gpu_name": "AMD MI300",
+                "achieved_tflops": 516.2852825365292,
+                "mfu_percentage": 93.87005137027803,
+                "mfu_baseline": 65,
+                "status": "PASSED"
+            },
+            "GPU-0x9f448abf7df11a19": {
+                "gpu_name": "AMD MI300",
+                "achieved_tflops": 515.4372503291781,
+                "mfu_percentage": 93.71586369621421,
+                "mfu_baseline": 65,
+                "status": "PASSED"
+            },
+            "GPU-0x71c1a75a7475eca1": {
+                "gpu_name": "AMD MI300",
+                "achieved_tflops": 514.1609898860912,
+                "mfu_percentage": 93.48381634292568,
+                "mfu_baseline": 65,
+                "status": "PASSED"
+            },
+            "GPU-0xe8eea3e87d6fecfa": {
+                "gpu_name": "AMD MI300",
+                "achieved_tflops": 509.39239812934534,
+                "mfu_percentage": 92.61679965988097,
+                "mfu_baseline": 65,
+                "status": "PASSED"
+            },
+            "GPU-0x2ee1a65bcb57dee6": {
+                "gpu_name": "AMD MI300",
+                "achieved_tflops": 507.23582266131746,
+                "mfu_percentage": 92.22469502933045,
+                "mfu_baseline": 65,
+                "status": "PASSED"
+            },
+            "GPU-0xbfcbdc918b525995": {
+                "gpu_name": "AMD MI300",
+                "achieved_tflops": 504.6054143653707,
+                "mfu_percentage": 91.74643897552194,
+                "mfu_baseline": 65,
+                "status": "PASSED"
+            },
+            "GPU-0x26e0303fba66ca48": {
+                "gpu_name": "AMD MI300",
+                "achieved_tflops": 503.11458551272136,
+                "mfu_percentage": 91.47537918413116,
+                "mfu_baseline": 65,
+                "status": "PASSED"
+            },
+            "GPU-0xdb3145eb82c0cb33": {
+                "gpu_name": "AMD MI300",
+                "achieved_tflops": 503.1983030006565,
+                "mfu_percentage": 91.49060054557391,
+                "mfu_baseline": 65,
+                "status": "PASSED"
+            }
+        },
+        "gpu_topology": {
+            "status": "skipped",
+            "reason": "AMD topology not supported"
+        },
+        "gpu_temperature_check": {
+            "overall_status": "PASSED",
+            "per_gpu": {
+                "GPU-0x71c1a75a7475eca1": {
+                    "average_temperature": 63.18518518518518,
+                    "status": "BELOW IDEAL (PASSED)"
+                },
+                "GPU-0x26e0303fba66ca48": {
+                    "average_temperature": 71.92592592592592,
+                    "status": "IDEAL (PASSED)"
+                },
+                "GPU-0xbfcbdc918b525995": {
+                    "average_temperature": 63.77777777777778,
+                    "status": "BELOW IDEAL (PASSED)"
+                },
+                "GPU-0xdb3145eb82c0cb33": {
+                    "average_temperature": 79.22222222222223,
+                    "status": "IDEAL (PASSED)"
+                },
+                "GPU-0xdfaeb06bd4fad3ab": {
+                    "average_temperature": 60.148148148148145,
+                    "status": "BELOW IDEAL (PASSED)"
+                },
+                "GPU-0xe8eea3e87d6fecfa": {
+                    "average_temperature": 69.70370370370371,
+                    "status": "IDEAL (PASSED)"
+                },
+                "GPU-0x2ee1a65bcb57dee6": {
+                    "average_temperature": 74.0,
+                    "status": "IDEAL (PASSED)"
+                },
+                "GPU-0x9f448abf7df11a19": {
+                    "average_temperature": 67.74074074074075,
+                    "status": "IDEAL (PASSED)"
+                }
+            }
+        },
+        "gpu_power_check": {
+            "overall_status": "PASSED",
+            "per_gpu": {
+                "GPU-0x71c1a75a7475eca1": {
+                    "gpu_name": "AMD MI300",
+                    "average_power_w": 454.18518518518516,
+                    "threshold": "50-750 W (0W = FAILED, <50W = WARNING, >750W = FAILED)",
+                    "status": "PASSED"
+                },
+                "GPU-0x26e0303fba66ca48": {
+                    "gpu_name": "AMD MI300",
+                    "average_power_w": 500.6296296296296,
+                    "threshold": "50-750 W (0W = FAILED, <50W = WARNING, >750W = FAILED)",
+                    "status": "PASSED"
+                },
+                "GPU-0xbfcbdc918b525995": {
+                    "gpu_name": "AMD MI300",
+                    "average_power_w": 459.51851851851853,
+                    "threshold": "50-750 W (0W = FAILED, <50W = WARNING, >750W = FAILED)",
+                    "status": "PASSED"
+                },
+                "GPU-0xdb3145eb82c0cb33": {
+                    "gpu_name": "AMD MI300",
+                    "average_power_w": 492.0,
+                    "threshold": "50-750 W (0W = FAILED, <50W = WARNING, >750W = FAILED)",
+                    "status": "PASSED"
+                },
+                "GPU-0xdfaeb06bd4fad3ab": {
+                    "gpu_name": "AMD MI300",
+                    "average_power_w": 478.44444444444446,
+                    "threshold": "50-750 W (0W = FAILED, <50W = WARNING, >750W = FAILED)",
+                    "status": "PASSED"
+                },
+                "GPU-0xe8eea3e87d6fecfa": {
+                    "gpu_name": "AMD MI300",
+                    "average_power_w": 496.1111111111111,
+                    "threshold": "50-750 W (0W = FAILED, <50W = WARNING, >750W = FAILED)",
+                    "status": "PASSED"
+                },
+                "GPU-0x2ee1a65bcb57dee6": {
+                    "gpu_name": "AMD MI300",
+                    "average_power_w": 501.74074074074076,
+                    "threshold": "50-750 W (0W = FAILED, <50W = WARNING, >750W = FAILED)",
+                    "status": "PASSED"
+                },
+                "GPU-0x9f448abf7df11a19": {
+                    "gpu_name": "AMD MI300",
+                    "average_power_w": 507.14814814814815,
+                    "threshold": "50-750 W (0W = FAILED, <50W = WARNING, >750W = FAILED)",
+                    "status": "PASSED"
+                }
+            }
+        },
+        "gpu_utilization_check": {
+            "overall_status": "PASSED",
+            "per_gpu": {
+                "GPU-0x71c1a75a7475eca1": {
+                    "average_utilization": 43.0,
+                    "min_required": 10,
+                    "status": "PASSED"
+                },
+                "GPU-0x26e0303fba66ca48": {
+                    "average_utilization": 48.074074074074076,
+                    "min_required": 10,
+                    "status": "PASSED"
+                },
+                "GPU-0xbfcbdc918b525995": {
+                    "average_utilization": 50.24,
+                    "min_required": 10,
+                    "status": "PASSED"
+                },
+                "GPU-0xdb3145eb82c0cb33": {
+                    "average_utilization": 52.46153846153846,
+                    "min_required": 10,
+                    "status": "PASSED"
+                },
+                "GPU-0xdfaeb06bd4fad3ab": {
+                    "average_utilization": 54.12,
+                    "min_required": 10,
+                    "status": "PASSED"
+                },
+                "GPU-0xe8eea3e87d6fecfa": {
+                    "average_utilization": 55.68,
+                    "min_required": 10,
+                    "status": "PASSED"
+                },
+                "GPU-0x2ee1a65bcb57dee6": {
+                    "average_utilization": 57.48,
+                    "min_required": 10,
+                    "status": "PASSED"
+                },
+                "GPU-0x9f448abf7df11a19": {
+                    "average_utilization": 56.96153846153846,
+                    "min_required": 10,
+                    "status": "PASSED"
+                }
+            }
+        }
+    },
+    "monitoring": {
+        "temperature": [
+            [
+                "38.0",
+                "49.0",
+                "37.0",
+                "44.0",
+                "39.0",
+                "43.0",
+                "43.0",
+                "38.0"
+            ],
+            [
+                "38.0",
+                "49.0",
+                "38.0",
+                "44.0",
+                "39.0",
+                "43.0",
+                "43.0",
+                "38.0"
+            ],
+            [
+                "58.0",
+                "66.0",
+                "46.0",
+                "68.0",
+                "50.0",
+                "62.0",
+                "62.0",
+                "66.0"
+            ],
+            [
+                "63.0",
+                "69.0",
+                "59.0",
+                "75.0",
+                "58.0",
+                "65.0",
+                "69.0",
+                "69.0"
+            ],
+            [
+                "64.0",
+                "70.0",
+                "62.0",
+                "78.0",
+                "59.0",
+                "68.0",
+                "72.0",
+                "70.0"
+            ],
+            [
+                "46.0",
+                "55.0",
+                "59.0",
+                "53.0",
+                "51.0",
+                "51.0",
+                "55.0",
+                "45.0"
+            ],
+            [
+                "61.0",
+                "70.0",
+                "61.0",
+                "75.0",
+                "60.0",
+                "67.0",
+                "72.0",
+                "67.0"
+            ],
+            [
+                "64.0",
+                "73.0",
+                "65.0",
+                "80.0",
+                "63.0",
+                "71.0",
+                "75.0",
+                "70.0"
+            ],
+            [
+                "66.0",
+                "75.0",
+                "67.0",
+                "82.0",
+                "64.0",
+                "73.0",
+                "77.0",
+                "72.0"
+            ],
+            [
+                "67.0",
+                "77.0",
+                "68.0",
+                "84.0",
+                "65.0",
+                "76.0",
+                "79.0",
+                "73.0"
+            ],
+            [
+                "68.0",
+                "78.0",
+                "69.0",
+                "86.0",
+                "67.0",
+                "77.0",
+                "81.0",
+                "74.0"
+            ],
+            [
+                "69.0",
+                "79.0",
+                "69.0",
+                "87.0",
+                "67.0",
+                "78.0",
+                "82.0",
+                "75.0"
+            ],
+            [
+                "69.0",
+                "79.0",
+                "69.0",
+                "87.0",
+                "66.0",
+                "78.0",
+                "82.0",
+                "74.0"
+            ],
+            [
+                "68.0",
+                "78.0",
+                "69.0",
+                "86.0",
+                "65.0",
+                "77.0",
+                "81.0",
+                "73.0"
+            ],
+            [
+                "68.0",
+                "76.0",
+                "68.0",
+                "85.0",
+                "64.0",
+                "75.0",
+                "79.0",
+                "72.0"
+            ],
+            [
+                "67.0",
+                "75.0",
+                "67.0",
+                "84.0",
+                "63.0",
+                "74.0",
+                "78.0",
+                "71.0"
+            ],
+            [
+                "66.0",
+                "74.0",
+                "67.0",
+                "83.0",
+                "62.0",
+                "73.0",
+                "77.0",
+                "70.0"
+            ],
+            [
+                "66.0",
+                "73.0",
+                "66.0",
+                "83.0",
+                "62.0",
+                "72.0",
+                "77.0",
+                "70.0"
+            ],
+            [
+                "66.0",
+                "73.0",
+                "66.0",
+                "82.0",
+                "62.0",
+                "71.0",
+                "76.0",
+                "70.0"
+            ],
+            [
+                "66.0",
+                "73.0",
+                "67.0",
+                "82.0",
+                "62.0",
+                "71.0",
+                "76.0",
+                "70.0"
+            ],
+            [
+                "66.0",
+                "73.0",
+                "67.0",
+                "82.0",
+                "62.0",
+                "72.0",
+                "76.0",
+                "70.0"
+            ],
+            [
+                "66.0",
+                "73.0",
+                "67.0",
+                "82.0",
+                "62.0",
+                "72.0",
+                "77.0",
+                "70.0"
+            ],
+            [
+                "66.0",
+                "73.0",
+                "67.0",
+                "83.0",
+                "62.0",
+                "72.0",
+                "77.0",
+                "70.0"
+            ],
+            [
+                "67.0",
+                "73.0",
+                "67.0",
+                "83.0",
+                "62.0",
+                "72.0",
+                "77.0",
+                "70.0"
+            ],
+            [
+                "67.0",
+                "73.0",
+                "67.0",
+                "83.0",
+                "62.0",
+                "72.0",
+                "77.0",
+                "70.0"
+            ],
+            [
+                "66.0",
+                "73.0",
+                "67.0",
+                "83.0",
+                "62.0",
+                "72.0",
+                "77.0",
+                "70.0"
+            ],
+            [
+                "51.0",
+                "73.0",
+                "59.0",
+                "83.0",
+                "47.0",
+                "62.0",
+                "73.0",
+                "56.0"
+            ],
+            [
+                "57.0",
+                "69.0",
+                "59.0",
+                "76.0",
+                "56.0",
+                "66.0",
+                "71.0",
+                "64.0"
+            ]
+        ],
+        "power": [
+            [
+                "172.0",
+                "185.0",
+                "140.0",
+                "147.0",
+                "139.0",
+                "147.0",
+                "145.0",
+                "147.0"
+            ],
+            [
+                "170.0",
+                "455.0",
+                "155.0",
+                "160.0",
+                "152.0",
+                "162.0",
+                "161.0",
+                "176.0"
+            ],
+            [
+                "436.0",
+                "457.0",
+                "440.0",
+                "459.0",
+                "464.0",
+                "480.0",
+                "490.0",
+                "500.0"
+            ],
+            [
+                "436.0",
+                "463.0",
+                "436.0",
+                "464.0",
+                "465.0",
+                "484.0",
+                "493.0",
+                "503.0"
+            ],
+            [
+                "456.0",
+                "467.0",
+                "463.0",
+                "480.0",
+                "488.0",
+                "503.0",
+                "511.0",
+                "519.0"
+            ],
+            [
+                "475.0",
+                "493.0",
+                "489.0",
+                "510.0",
+                "519.0",
+                "535.0",
+                "546.0",
+                "551.0"
+            ],
+            [
+                "450.0",
+                "474.0",
+                "453.0",
+                "474.0",
+                "476.0",
+                "495.0",
+                "502.0",
+                "511.0"
+            ],
+            [
+                "442.0",
+                "469.0",
+                "449.0",
+                "467.0",
+                "468.0",
+                "485.0",
+                "494.0",
+                "500.0"
+            ],
+            [
+                "452.0",
+                "481.0",
+                "460.0",
+                "479.0",
+                "477.0",
+                "500.0",
+                "508.0",
+                "514.0"
+            ],
+            [
+                "464.0",
+                "493.0",
+                "470.0",
+                "492.0",
+                "494.0",
+                "515.0",
+                "519.0",
+                "524.0"
+            ],
+            [
+                "456.0",
+                "486.0",
+                "459.0",
+                "485.0",
+                "483.0",
+                "503.0",
+                "509.0",
+                "518.0"
+            ],
+            [
+                "470.0",
+                "500.0",
+                "477.0",
+                "497.0",
+                "495.0",
+                "517.0",
+                "523.0",
+                "526.0"
+            ],
+            [
+                "476.0",
+                "507.0",
+                "481.0",
+                "505.0",
+                "500.0",
+                "522.0",
+                "525.0",
+                "533.0"
+            ],
+            [
+                "492.0",
+                "518.0",
+                "497.0",
+                "520.0",
+                "517.0",
+                "535.0",
+                "541.0",
+                "545.0"
+            ],
+            [
+                "522.0",
+                "543.0",
+                "527.0",
+                "545.0",
+                "544.0",
+                "561.0",
+                "566.0",
+                "572.0"
+            ],
+            [
+                "472.0",
+                "496.0",
+                "476.0",
+                "497.0",
+                "492.0",
+                "513.0",
+                "522.0",
+                "527.0"
+            ],
+            [
+                "474.0",
+                "501.0",
+                "483.0",
+                "503.0",
+                "504.0",
+                "522.0",
+                "528.0",
+                "534.0"
+            ],
+            [
+                "474.0",
+                "518.0",
+                "501.0",
+                "521.0",
+                "518.0",
+                "533.0",
+                "535.0",
+                "542.0"
+            ],
+            [
+                "469.0",
+                "489.0",
+                "467.0",
+                "488.0",
+                "502.0",
+                "522.0",
+                "527.0",
+                "519.0"
+            ],
+            [
+                "464.0",
+                "503.0",
+                "497.0",
+                "525.0",
+                "525.0",
+                "542.0",
+                "550.0",
+                "556.0"
+            ],
+            [
+                "497.0",
+                "516.0",
+                "498.0",
+                "519.0",
+                "516.0",
+                "533.0",
+                "537.0",
+                "542.0"
+            ],
+            [
+                "497.0",
+                "518.0",
+                "501.0",
+                "518.0",
+                "518.0",
+                "534.0",
+                "539.0",
+                "545.0"
+            ],
+            [
+                "498.0",
+                "523.0",
+                "504.0",
+                "525.0",
+                "521.0",
+                "539.0",
+                "542.0",
+                "546.0"
+            ],
+            [
+                "518.0",
+                "537.0",
+                "522.0",
+                "537.0",
+                "535.0",
+                "552.0",
+                "557.0",
+                "561.0"
+            ],
+            [
+                "516.0",
+                "536.0",
+                "516.0",
+                "534.0",
+                "532.0",
+                "547.0",
+                "549.0",
+                "554.0"
+            ],
+            [
+                "503.0",
+                "525.0",
+                "510.0",
+                "528.0",
+                "526.0",
+                "543.0",
+                "546.0",
+                "551.0"
+            ],
+            [
+                "176.0",
+                "522.0",
+                "165.0",
+                "523.0",
+                "162.0",
+                "179.0",
+                "180.0",
+                "173.0"
+            ],
+            [
+                "508.0",
+                "527.0",
+                "511.0",
+                "529.0",
+                "525.0",
+                "539.0",
+                "547.0",
+                "551.0"
+            ]
+        ],
+        "utilization": [
+            [
+                "1",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0"
+            ],
+            [
+                "1",
+                "43",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "1"
+            ],
+            [
+                "41",
+                "43",
+                "46",
+                "51",
+                "53",
+                "55",
+                "57",
+                "58"
+            ],
+            [
+                "45",
+                "48",
+                "50",
+                "52",
+                "53",
+                "55",
+                "57",
+                "59"
+            ],
+            [
+                "44",
+                "45",
+                "49",
+                "54",
+                "53",
+                "55",
+                "56",
+                "58"
+            ],
+            [
+                "48",
+                "53",
+                "54",
+                "57",
+                "59",
+                "61",
+                "63",
+                "64"
+            ],
+            [
+                "47",
+                "49",
+                "51",
+                "53",
+                "55",
+                "57",
+                "58",
+                "57"
+            ],
+            [
+                "42",
+                "45",
+                "47",
+                "49",
+                "50",
+                "52",
+                "56",
+                "58"
+            ],
+            [
+                "48",
+                "50",
+                "52",
+                "54",
+                "56",
+                "57",
+                "59",
+                "60"
+            ],
+            [
+                "49",
+                "49",
+                "50",
+                "52",
+                "54",
+                "56",
+                "58",
+                "59"
+            ],
+            [
+                "44",
+                "47",
+                "48",
+                "50",
+                "53",
+                "54",
+                "56",
+                "58"
+            ],
+            [
+                "47",
+                "49",
+                "51",
+                "53",
+                "55",
+                "57",
+                "58",
+                "60"
+            ],
+            [
+                "48",
+                "51",
+                "52",
+                "54",
+                "56",
+                "57",
+                "59",
+                "61"
+            ],
+            [
+                "51",
+                "53",
+                "55",
+                "59",
+                "59",
+                "60",
+                "62",
+                "63"
+            ],
+            [
+                "47",
+                "49",
+                "51",
+                "53",
+                "54",
+                "56",
+                "57",
+                "65"
+            ],
+            [
+                "48",
+                "50",
+                "52",
+                "54",
+                "55",
+                "57",
+                "59",
+                "60"
+            ],
+            [
+                "49",
+                "51",
+                "53",
+                "55",
+                "57",
+                "58",
+                "60",
+                "61"
+            ],
+            [
+                "49",
+                "50",
+                "52",
+                "54",
+                "56",
+                "57",
+                "59",
+                "60"
+            ],
+            [
+                "48",
+                "49",
+                "51",
+                "52",
+                "54",
+                "56",
+                "57",
+                "59"
+            ],
+            [
+                "47",
+                "48",
+                "51",
+                "53",
+                "54",
+                "56",
+                "57",
+                "58"
+            ],
+            [
+                "44",
+                "46",
+                "48",
+                "49",
+                "51",
+                "53",
+                "54",
+                "56"
+            ],
+            [
+                "44",
+                "46",
+                "47",
+                "49",
+                "51",
+                "52",
+                "54",
+                "56"
+            ],
+            [
+                "46",
+                "47",
+                "49",
+                "51",
+                "53",
+                "54",
+                "56",
+                "58"
+            ],
+            [
+                "46",
+                "48",
+                "49",
+                "51",
+                "53",
+                "54",
+                "56",
+                "57"
+            ],
+            [
+                "47",
+                "49",
+                "51",
+                "52",
+                "54",
+                "55",
+                "57",
+                "59"
+            ],
+            [
+                "46",
+                "48",
+                "50",
+                "52",
+                "54",
+                "55",
+                "57",
+                "59"
+            ],
+            [
+                "1",
+                "47",
+                "0",
+                "51",
+                "0",
+                "0",
+                "0",
+                "0"
+            ],
+            [
+                "44",
+                "45",
+                "47",
+                "50",
+                "51",
+                "53",
+                "55",
+                "57"
+            ]
+        ]
+    },
+    "machine_metadata": {
+        "hostname": "inst-cud1w-instancepool-ezask-mi300x-bp8",
+        "ip": "10.0.76.186",
+        "ocid": "ocid1.instance.oc1.iad.anuwcljrm3augwacephgua4jvm3xhtqosp6uu52qob3ryqz3v6dnwguqhxua",
+        "region": "iad",
+        "uuid": "15fe2bc063634404a1185ca56493cab1",
+        "uuid_source": "/etc/machine-id"
+    },
+    "gpu_info": {
+        "gpu_count": 8,
+        "gpu_name": "AMD Instinct MI300X",
+        "supported_dtypes": [
+            "FP16",
+            "BF16",
+            "FP32",
+            "FP64"
+        ]
+    },
+    "total_execution_time": 145.07680201530457,
+    "final_result": "pass"
+}

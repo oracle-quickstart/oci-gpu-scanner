@@ -1,0 +1,126 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+  namespace: oci-monitoring
+  labels:
+    app: node-exporter
+    component: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: node-exporter
+  template:
+    metadata:
+      labels:
+        app: node-exporter
+        component: monitoring
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9100"
+        prometheus.io/path: "/metrics"
+    spec:
+      # Use host networking for direct access
+      hostNetwork: true
+      hostPID: true
+      
+      # Mount host filesystem for system metrics
+      volumes:
+      - name: rootfs
+        hostPath:
+          path: /
+          type: Directory
+      - name: proc
+        hostPath:
+          path: /proc
+          type: Directory
+      - name: sys
+        hostPath:
+          path: /sys
+          type: Directory
+      
+      containers:
+      - name: node-exporter
+        image: quay.io/prometheus/node-exporter:latest
+        args:
+        - --path.rootfs=/host
+        - --path.procfs=/host/proc
+        - --path.sysfs=/host/sys
+        - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)
+        - --collector.filesystem.fs-types-exclude=^(sys|proc|auto)fs$$
+        
+        ports:
+        - name: metrics
+          containerPort: 9100
+          protocol: TCP
+        
+        volumeMounts:
+        - name: rootfs
+          mountPath: /host
+          readOnly: true
+        - name: proc
+          mountPath: /host/proc
+          readOnly: true
+        - name: sys
+          mountPath: /host/sys
+          readOnly: true
+        
+        # Security context
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 65534  # nobody user
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+        
+        # Resource limits
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        
+        # Health checks
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 9100
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 9100
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+      
+      # Restart policy
+      restartPolicy: Always
+      
+      # Termination grace period
+      terminationGracePeriodSeconds: 30
+
+---
+
+kind: Service
+metadata:
+  name: node-exporter
+  namespace: oci-monitoring
+  labels:
+    app: node-exporter
+    component: monitoring
+spec:
+  selector:
+    app: node-exporter
+  ports:
+  - name: metrics
+    port: 9100
+    targetPort: 9100
+    protocol: TCP
+  type: ClusterIP

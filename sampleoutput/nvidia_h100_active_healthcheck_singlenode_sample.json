@@ -1,0 +1,774 @@
+[
+  {
+    "dtype": "float16",
+    "timestamp": "2025-07-24T20:15:04.432666",
+    "tests": {
+      "compute_throughput": {
+        "status": "completed",
+        "result": "passed",
+        "num_gpus": 8,
+        "total_tflops": 5312.959155673028,
+        "total_bandwidth_gbps": 972.831876649114,
+        "gpu_results": {
+          "GPU-30ad6183-8b71-2bb3-ac89-5528898394ec": {
+            "gpu_name": "NVIDIA H100",
+            "matrix_size": 16384,
+            "duration": 13.108826875686646,
+            "tflops": 671.0053543023283,
+            "bandwidth_gbps": 122.86474993328764
+          },
+          "GPU-169fb70f-7002-715c-5451-1ea1b39a33fe": {
+            "gpu_name": "NVIDIA H100",
+            "matrix_size": 16384,
+            "duration": 13.174309253692627,
+            "tflops": 667.6701489865621,
+            "bandwidth_gbps": 122.25405560056679
+          },
+          "GPU-61ce8d5d-2eb3-9181-4cdd-80e106b4ae2e": {
+            "gpu_name": "NVIDIA H100",
+            "matrix_size": 16384,
+            "duration": 13.205384492874146,
+            "tflops": 666.0989709882757,
+            "bandwidth_gbps": 121.96636431670086
+          },
+          "GPU-231e84e6-9c47-e2de-948f-b1d06ca8f8d4": {
+            "gpu_name": "NVIDIA H100",
+            "matrix_size": 16384,
+            "duration": 13.234998226165771,
+            "tflops": 664.6085531630828,
+            "bandwidth_gbps": 121.69346066218556
+          },
+          "GPU-dee0306f-5c16-2275-a7f3-d2d2eee45d8e": {
+            "gpu_name": "NVIDIA H100",
+            "matrix_size": 16384,
+            "duration": 13.249634265899658,
+            "tflops": 663.8744017898173,
+            "bandwidth_gbps": 121.55903353085033
+          },
+          "GPU-058d3209-649b-a60c-28e2-7417505658c7": {
+            "gpu_name": "NVIDIA H100",
+            "matrix_size": 16384,
+            "duration": 13.283056020736694,
+            "tflops": 662.2040145337095,
+            "bandwidth_gbps": 121.2531764893267
+          },
+          "GPU-c8bf0ca6-706a-315a-518c-3569652eb6d7": {
+            "gpu_name": "NVIDIA H100",
+            "matrix_size": 16384,
+            "duration": 13.315229654312134,
+            "tflops": 660.6039287771043,
+            "bandwidth_gbps": 120.9601920368233
+          },
+          "GPU-be0942e8-21de-cb98-a056-2fede637d0dd": {
+            "gpu_name": "NVIDIA H100",
+            "matrix_size": 16384,
+            "duration": 13.390434265136719,
+            "tflops": 656.8937831321477,
+            "bandwidth_gbps": 120.28084407937276
+          }
+        }
+      },
+      "memory_bandwidth": {
+        "GPU-169fb70f-7002-715c-5451-1ea1b39a33fe": {
+          "gpu_name": "NVIDIA H100 80GB HBM3",
+          "duration": 0.3781745433807373,
+          "bytes_transferred": 1610612736000,
+          "bandwidth_gbps": 4258.913679386591,
+          "threshold_gbps": 3000,
+          "status": "IDEAL"
+        },
+        "GPU-30ad6183-8b71-2bb3-ac89-5528898394ec": {
+          "gpu_name": "NVIDIA H100 80GB HBM3",
+          "duration": 0.3879082202911377,
+          "bytes_transferred": 1610612736000,
+          "bandwidth_gbps": 4152.045900938069,
+          "threshold_gbps": 3000,
+          "status": "IDEAL"
+        },
+        "GPU-dee0306f-5c16-2275-a7f3-d2d2eee45d8e": {
+          "gpu_name": "NVIDIA H100 80GB HBM3",
+          "duration": 0.3771543502807617,
+          "bytes_transferred": 1610612736000,
+          "bandwidth_gbps": 4270.433934544373,
+          "threshold_gbps": 3000,
+          "status": "IDEAL"
+        },
+        "GPU-be0942e8-21de-cb98-a056-2fede637d0dd": {
+          "gpu_name": "NVIDIA H100 80GB HBM3",
+          "duration": 0.3766498565673828,
+          "bytes_transferred": 1610612736000,
+          "bandwidth_gbps": 4276.153854612874,
+          "threshold_gbps": 3000,
+          "status": "IDEAL"
+        },
+        "GPU-61ce8d5d-2eb3-9181-4cdd-80e106b4ae2e": {
+          "gpu_name": "NVIDIA H100 80GB HBM3",
+          "duration": 0.376758337020874,
+          "bytes_transferred": 1610612736000,
+          "bandwidth_gbps": 4274.922616804005,
+          "threshold_gbps": 3000,
+          "status": "IDEAL"
+        },
+        "GPU-c8bf0ca6-706a-315a-518c-3569652eb6d7": {
+          "gpu_name": "NVIDIA H100 80GB HBM3",
+          "duration": 0.37745213508605957,
+          "bytes_transferred": 1610612736000,
+          "bandwidth_gbps": 4267.064844216017,
+          "threshold_gbps": 3000,
+          "status": "IDEAL"
+        },
+        "GPU-231e84e6-9c47-e2de-948f-b1d06ca8f8d4": {
+          "gpu_name": "NVIDIA H100 80GB HBM3",
+          "duration": 0.3776228427886963,
+          "bytes_transferred": 1610612736000,
+          "bandwidth_gbps": 4265.135880302768,
+          "threshold_gbps": 3000,
+          "status": "IDEAL"
+        },
+        "GPU-058d3209-649b-a60c-28e2-7417505658c7": {
+          "gpu_name": "NVIDIA H100 80GB HBM3",
+          "duration": 0.37848973274230957,
+          "bytes_transferred": 1610612736000,
+          "bandwidth_gbps": 4255.367046103117,
+          "threshold_gbps": 3000,
+          "status": "IDEAL"
+        }
+      },
+      "error_detection": {
+        "GPU-169fb70f-7002-715c-5451-1ea1b39a33fe": {
+          "status": "passed",
+          "max_diff": 0.0625,
+          "mean_diff": 3.3e-05,
+          "tolerance": 0.5
+        },
+        "GPU-dee0306f-5c16-2275-a7f3-d2d2eee45d8e": {
+          "status": "passed",
+          "max_diff": 0.0625,
+          "mean_diff": 3e-05,
+          "tolerance": 0.5
+        },
+        "GPU-058d3209-649b-a60c-28e2-7417505658c7": {
+          "status": "passed",
+          "max_diff": 0.0625,
+          "mean_diff": 3.2e-05,
+          "tolerance": 0.5
+        },
+        "GPU-be0942e8-21de-cb98-a056-2fede637d0dd": {
+          "status": "passed",
+          "max_diff": 0.0625,
+          "mean_diff": 3.3e-05,
+          "tolerance": 0.5
+        },
+        "GPU-61ce8d5d-2eb3-9181-4cdd-80e106b4ae2e": {
+          "status": "passed",
+          "max_diff": 0.0625,
+          "mean_diff": 3.2e-05,
+          "tolerance": 0.5
+        },
+        "GPU-c8bf0ca6-706a-315a-518c-3569652eb6d7": {
+          "status": "passed",
+          "max_diff": 0.0625,
+          "mean_diff": 3.2e-05,
+          "tolerance": 0.5
+        },
+        "GPU-30ad6183-8b71-2bb3-ac89-5528898394ec": {
+          "status": "passed",
+          "max_diff": 0.0625,
+          "mean_diff": 3.2e-05,
+          "tolerance": 0.5
+        },
+        "GPU-231e84e6-9c47-e2de-948f-b1d06ca8f8d4": {
+          "status": "passed",
+          "max_diff": 0.0625,
+          "mean_diff": 3.2e-05,
+          "tolerance": 0.5
+        }
+      },
+      "tensor_core_utilization": {
+        "GPU-c8bf0ca6-706a-315a-518c-3569652eb6d7": {
+          "status": "completed",
+          "matrix_size": 16384,
+          "iterations": 20,
+          "average_time_sec": 0.012267518043518066,
+          "tflops": 717.0230352223281
+        },
+        "GPU-231e84e6-9c47-e2de-948f-b1d06ca8f8d4": {
+          "status": "completed",
+          "matrix_size": 16384,
+          "iterations": 20,
+          "average_time_sec": 0.012233984470367432,
+          "tflops": 718.9884083565312
+        },
+        "GPU-30ad6183-8b71-2bb3-ac89-5528898394ec": {
+          "status": "completed",
+          "matrix_size": 16384,
+          "iterations": 20,
+          "average_time_sec": 0.012453162670135498,
+          "tflops": 706.3340659077966
+        },
+        "GPU-dee0306f-5c16-2275-a7f3-d2d2eee45d8e": {
+          "status": "completed",
+          "matrix_size": 16384,
+          "iterations": 20,
+          "average_time_sec": 0.012574720382690429,
+          "tflops": 699.5060529788121
+        },
+        "GPU-be0942e8-21de-cb98-a056-2fede637d0dd": {
+          "status": "completed",
+          "matrix_size": 16384,
+          "iterations": 20,
+          "average_time_sec": 0.012527120113372803,
+          "tflops": 702.1640203495853
+        },
+        "GPU-169fb70f-7002-715c-5451-1ea1b39a33fe": {
+          "status": "completed",
+          "matrix_size": 16384,
+          "iterations": 20,
+          "average_time_sec": 0.01262129545211792,
+          "tflops": 696.92473768467
+        },
+        "GPU-61ce8d5d-2eb3-9181-4cdd-80e106b4ae2e": {
+          "status": "completed",
+          "matrix_size": 16384,
+          "iterations": 20,
+          "average_time_sec": 0.012706661224365234,
+          "tflops": 692.242664449206
+        },
+        "GPU-058d3209-649b-a60c-28e2-7417505658c7": {
+          "status": "completed",
+          "matrix_size": 16384,
+          "iterations": 20,
+          "average_time_sec": 0.012649321556091308,
+          "tflops": 695.380616517905
+        }
+      },
+      "sustained_workload": {
+        "GPU-169fb70f-7002-715c-5451-1ea1b39a33fe": {
+          "status": "completed",
+          "duration_sec": 60,
+          "iterations": 5853,
+          "total_time_sec": 65.737295627594,
+          "average_iteration_time_sec": 0.011231384867178198,
+          "effective_tflops": 783.1708312225217
+        },
+        "GPU-c8bf0ca6-706a-315a-518c-3569652eb6d7": {
+          "status": "completed",
+          "duration_sec": 60,
+          "iterations": 5782,
+          "total_time_sec": 65.81799912452698,
+          "average_iteration_time_sec": 0.011383258236687474,
+          "effective_tflops": 772.7219078504944
+        },
+        "GPU-30ad6183-8b71-2bb3-ac89-5528898394ec": {
+          "status": "completed",
+          "duration_sec": 60,
+          "iterations": 5796,
+          "total_time_sec": 65.8151421546936,
+          "average_iteration_time_sec": 0.011355269522893997,
+          "effective_tflops": 774.6265295133421
+        },
+        "GPU-058d3209-649b-a60c-28e2-7417505658c7": {
+          "status": "completed",
+          "duration_sec": 60,
+          "iterations": 5766,
+          "total_time_sec": 65.84686160087585,
+          "average_iteration_time_sec": 0.011419851127449853,
+          "effective_tflops": 770.2458573268844
+        },
+        "GPU-be0942e8-21de-cb98-a056-2fede637d0dd": {
+          "status": "completed",
+          "duration_sec": 60,
+          "iterations": 5748,
+          "total_time_sec": 65.86145091056824,
+          "average_iteration_time_sec": 0.011458150819514307,
+          "effective_tflops": 767.6712552279752
+        },
+        "GPU-61ce8d5d-2eb3-9181-4cdd-80e106b4ae2e": {
+          "status": "completed",
+          "duration_sec": 60,
+          "iterations": 5713,
+          "total_time_sec": 65.88187289237976,
+          "average_iteration_time_sec": 0.011531922438715168,
+          "effective_tflops": 762.7603349704821
+        },
+        "GPU-231e84e6-9c47-e2de-948f-b1d06ca8f8d4": {
+          "status": "completed",
+          "duration_sec": 60,
+          "iterations": 5682,
+          "total_time_sec": 65.94263458251953,
+          "average_iteration_time_sec": 0.011605532309489535,
+          "effective_tflops": 757.922410419354
+        },
+        "GPU-dee0306f-5c16-2275-a7f3-d2d2eee45d8e": {
+          "status": "completed",
+          "duration_sec": 60,
+          "iterations": 5633,
+          "total_time_sec": 65.95110440254211,
+          "average_iteration_time_sec": 0.011707989419943568,
+          "effective_tflops": 751.2897993591113
+        }
+      },
+      "mixed_precision_testing": {
+        "GPU-169fb70f-7002-715c-5451-1ea1b39a33fe": {
+          "status": "completed",
+          "matrix_size": 16384,
+          "iterations": 20,
+          "average_time_sec": 0.01380770206451416,
+          "tflops": 637.0424985352189
+        },
+        "GPU-30ad6183-8b71-2bb3-ac89-5528898394ec": {
+          "status": "completed",
+          "matrix_size": 16384,
+          "iterations": 20,
+          "average_time_sec": 0.014012455940246582,
+          "tflops": 627.7338576276168
+        },
+        "GPU-c8bf0ca6-706a-315a-518c-3569652eb6d7": {
+          "status": "completed",
+          "matrix_size": 16384,
+          "iterations": 20,
+          "average_time_sec": 0.01394432783126831,
+          "tflops": 630.8007907332703
+        },
+        "GPU-231e84e6-9c47-e2de-948f-b1d06ca8f8d4": {
+          "status": "completed",
+          "matrix_size": 16384,
+          "iterations": 20,
+          "average_time_sec": 0.014090955257415771,
+          "tflops": 624.23681443306
+        },
+        "GPU-dee0306f-5c16-2275-a7f3-d2d2eee45d8e": {
+          "status": "completed",
+          "matrix_size": 16384,
+          "iterations": 20,
+          "average_time_sec": 0.014170551300048828,
+          "tflops": 620.7304737803455
+        },
+        "GPU-058d3209-649b-a60c-28e2-7417505658c7": {
+          "status": "completed",
+          "matrix_size": 16384,
+          "iterations": 20,
+          "average_time_sec": 0.014036059379577637,
+          "tflops": 626.678242399448
+        },
+        "GPU-61ce8d5d-2eb3-9181-4cdd-80e106b4ae2e": {
+          "status": "completed",
+          "matrix_size": 16384,
+          "iterations": 20,
+          "average_time_sec": 0.01407855749130249,
+          "tflops": 624.7865257248185
+        },
+        "GPU-be0942e8-21de-cb98-a056-2fede637d0dd": {
+          "status": "completed",
+          "matrix_size": 16384,
+          "iterations": 20,
+          "average_time_sec": 0.014173555374145507,
+          "tflops": 620.598910436634
+        }
+      },
+      "background_computation": {
+        "GPU-169fb70f-7002-715c-5451-1ea1b39a33fe": {
+          "duration": 1.3277277946472168
+        },
+        "GPU-30ad6183-8b71-2bb3-ac89-5528898394ec": {
+          "duration": 1.3420922756195068
+        },
+        "GPU-058d3209-649b-a60c-28e2-7417505658c7": {
+          "duration": 1.3426668643951416
+        },
+        "GPU-c8bf0ca6-706a-315a-518c-3569652eb6d7": {
+          "duration": 1.3471696376800537
+        },
+        "GPU-be0942e8-21de-cb98-a056-2fede637d0dd": {
+          "duration": 1.3517234325408936
+        },
+        "GPU-61ce8d5d-2eb3-9181-4cdd-80e106b4ae2e": {
+          "duration": 1.3525266647338867
+        },
+        "GPU-231e84e6-9c47-e2de-948f-b1d06ca8f8d4": {
+          "duration": 1.3652541637420654
+        },
+        "GPU-dee0306f-5c16-2275-a7f3-d2d2eee45d8e": {
+          "duration": 1.3695602416992188
+        }
+      },
+      "model_mfu": {
+        "GPU-169fb70f-7002-715c-5451-1ea1b39a33fe": {
+          "gpu_name": "NVIDIA H100",
+          "achieved_tflops": 682.3401062903462,
+          "mfu_percentage": 68.23401062903461,
+          "status": "completed"
+        },
+        "GPU-058d3209-649b-a60c-28e2-7417505658c7": {
+          "gpu_name": "NVIDIA H100",
+          "achieved_tflops": 676.8786633565146,
+          "mfu_percentage": 67.68786633565146,
+          "status": "completed"
+        },
+        "GPU-30ad6183-8b71-2bb3-ac89-5528898394ec": {
+          "gpu_name": "NVIDIA H100",
+          "achieved_tflops": 675.6293049883814,
+          "mfu_percentage": 67.56293049883814,
+          "status": "completed"
+        },
+        "GPU-c8bf0ca6-706a-315a-518c-3569652eb6d7": {
+          "gpu_name": "NVIDIA H100",
+          "achieved_tflops": 671.2878127278456,
+          "mfu_percentage": 67.12878127278455,
+          "status": "completed"
+        },
+        "GPU-be0942e8-21de-cb98-a056-2fede637d0dd": {
+          "gpu_name": "NVIDIA H100",
+          "achieved_tflops": 671.247508029903,
+          "mfu_percentage": 67.12475080299029,
+          "status": "completed"
+        },
+        "GPU-61ce8d5d-2eb3-9181-4cdd-80e106b4ae2e": {
+          "gpu_name": "NVIDIA H100",
+          "achieved_tflops": 669.8648186165068,
+          "mfu_percentage": 66.98648186165069,
+          "status": "completed"
+        },
+        "GPU-231e84e6-9c47-e2de-948f-b1d06ca8f8d4": {
+          "gpu_name": "NVIDIA H100",
+          "achieved_tflops": 668.169888316592,
+          "mfu_percentage": 66.8169888316592,
+          "status": "completed"
+        },
+        "GPU-dee0306f-5c16-2275-a7f3-d2d2eee45d8e": {
+          "gpu_name": "NVIDIA H100",
+          "achieved_tflops": 646.5562375810656,
+          "mfu_percentage": 64.65562375810656,
+          "status": "completed"
+        }
+      },
+      "gpu_topology": {
+        "raw": "\t\u001b[4mGPU0\tGPU1\tGPU2\tGPU3\tGPU4\tGPU5\tGPU6\tGPU7\tNIC0\tNIC1\tNIC2\tNIC3\tNIC4\tNIC5\tNIC6\tNIC7\tNIC8\tNIC9\tNIC10\tNIC11\tNIC12\tNIC13\tNIC14\tNIC15\tNIC16\tNIC17\tCPU Affinity\tNUMA Affinity\tGPU NUMA ID\u001b[0m\nGPU0\t X \tNV18\tNV18\tNV18\tNV18\tNV18\tNV18\tNV18\tPXB\tPXB\tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\t0-55,112-167\t0\t\tN/A\nGPU1\tNV18\t X \tNV18\tNV18\tNV18\tNV18\tNV18\tNV18\tNODE\tNODE\tNODE\tPXB\tPXB\tNODE\tNODE\tNODE\tNODE\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\t0-55,112-167\t0\t\tN/A\nGPU2\tNV18\tNV18\t X \tNV18\tNV18\tNV18\tNV18\tNV18\tNODE\tNODE\tNODE\tNODE\tNODE\tPXB\tPXB\tNODE\tNODE\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\t0-55,112-167\t0\t\tN/A\nGPU3\tNV18\tNV18\tNV18\t X \tNV18\tNV18\tNV18\tNV18\tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\tPXB\tPXB\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\t0-55,112-167\t0\t\tN/A\nGPU4\tNV18\tNV18\tNV18\tNV18\t X \tNV18\tNV18\tNV18\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tPXB\tPXB\tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\t56-111,168-223\t1\t\tN/A\nGPU5\tNV18\tNV18\tNV18\tNV18\tNV18\t X \tNV18\tNV18\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tNODE\tNODE\tNODE\tPXB\tPXB\tNODE\tNODE\tNODE\tNODE\t56-111,168-223\t1\t\tN/A\nGPU6\tNV18\tNV18\tNV18\tNV18\tNV18\tNV18\t X \tNV18\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tNODE\tNODE\tNODE\tNODE\tNODE\tPXB\tPXB\tNODE\tNODE\t56-111,168-223\t1\t\tN/A\nGPU7\tNV18\tNV18\tNV18\tNV18\tNV18\tNV18\tNV18\t X \tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\tPXB\tPXB\t56-111,168-223\t1\t\tN/A\nNIC0\tPXB\tNODE\tNODE\tNODE\tSYS\tSYS\tSYS\tSYS\t X \tPIX\tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\t\t\t\t\nNIC1\tPXB\tNODE\tNODE\tNODE\tSYS\tSYS\tSYS\tSYS\tPIX\t X \tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\t\t\t\t\nNIC2\tNODE\tNODE\tNODE\tNODE\tSYS\tSYS\tSYS\tSYS\tNODE\tNODE\t X \tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\t\t\t\t\nNIC3\tNODE\tPXB\tNODE\tNODE\tSYS\tSYS\tSYS\tSYS\tNODE\tNODE\tNODE\t X \tPIX\tNODE\tNODE\tNODE\tNODE\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\t\t\t\t\nNIC4\tNODE\tPXB\tNODE\tNODE\tSYS\tSYS\tSYS\tSYS\tNODE\tNODE\tNODE\tPIX\t X \tNODE\tNODE\tNODE\tNODE\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\t\t\t\t\nNIC5\tNODE\tNODE\tPXB\tNODE\tSYS\tSYS\tSYS\tSYS\tNODE\tNODE\tNODE\tNODE\tNODE\t X \tPIX\tNODE\tNODE\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\t\t\t\t\nNIC6\tNODE\tNODE\tPXB\tNODE\tSYS\tSYS\tSYS\tSYS\tNODE\tNODE\tNODE\tNODE\tNODE\tPIX\t X \tNODE\tNODE\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\t\t\t\t\nNIC7\tNODE\tNODE\tNODE\tPXB\tSYS\tSYS\tSYS\tSYS\tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\t X \tPIX\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\t\t\t\t\nNIC8\tNODE\tNODE\tNODE\tPXB\tSYS\tSYS\tSYS\tSYS\tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\tPIX\t X \tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\t\t\t\t\nNIC9\tSYS\tSYS\tSYS\tSYS\tPXB\tNODE\tNODE\tNODE\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\t X \tPIX\tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\t\t\t\t\nNIC10\tSYS\tSYS\tSYS\tSYS\tPXB\tNODE\tNODE\tNODE\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tPIX\t X \tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\t\t\t\t\nNIC11\tSYS\tSYS\tSYS\tSYS\tNODE\tNODE\tNODE\tNODE\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tNODE\tNODE\t X \tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\t\t\t\t\nNIC12\tSYS\tSYS\tSYS\tSYS\tNODE\tPXB\tNODE\tNODE\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tNODE\tNODE\tNODE\t X \tPIX\tNODE\tNODE\tNODE\tNODE\t\t\t\t\nNIC13\tSYS\tSYS\tSYS\tSYS\tNODE\tPXB\tNODE\tNODE\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tNODE\tNODE\tNODE\tPIX\t X \tNODE\tNODE\tNODE\tNODE\t\t\t\t\nNIC14\tSYS\tSYS\tSYS\tSYS\tNODE\tNODE\tPXB\tNODE\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tNODE\tNODE\tNODE\tNODE\tNODE\t X \tPIX\tNODE\tNODE\t\t\t\t\nNIC15\tSYS\tSYS\tSYS\tSYS\tNODE\tNODE\tPXB\tNODE\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tNODE\tNODE\tNODE\tNODE\tNODE\tPIX\t X \tNODE\tNODE\t\t\t\t\nNIC16\tSYS\tSYS\tSYS\tSYS\tNODE\tNODE\tNODE\tPXB\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\t X \tPIX\t\t\t\t\nNIC17\tSYS\tSYS\tSYS\tSYS\tNODE\tNODE\tNODE\tPXB\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tSYS\tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\tNODE\tPIX\t X \t\t\t\t\n\nLegend:\n\n  X    = Self\n  SYS  = Connection traversing PCIe as well as the SMP interconnect between NUMA nodes (e.g., QPI/UPI)\n  NODE = Connection traversing PCIe as well as the interconnect between PCIe Host Bridges within a NUMA node\n  PHB  = Connection traversing PCIe as well as a PCIe Host Bridge (typically the CPU)\n  PXB  = Connection traversing multiple PCIe bridges (without traversing the PCIe Host Bridge)\n  PIX  = Connection traversing at most a single PCIe bridge\n  NV#  = Connection traversing a bonded set of # NVLinks\n\nNIC Legend:\n\n  NIC0: mlx5_0\n  NIC1: mlx5_1\n  NIC2: mlx5_2\n  NIC3: mlx5_3\n  NIC4: mlx5_4\n  NIC5: mlx5_5\n  NIC6: mlx5_6\n  NIC7: mlx5_7\n  NIC8: mlx5_8\n  NIC9: mlx5_9\n  NIC10: mlx5_10\n  NIC11: mlx5_11\n  NIC12: mlx5_12\n  NIC13: mlx5_13\n  NIC14: mlx5_14\n  NIC15: mlx5_15\n  NIC16: mlx5_16\n  NIC17: mlx5_17\n\n",
+        "parsed": {}
+      },
+      "gpu_temperature_check": {
+        "overall_status": "PASSED",
+        "per_gpu": {
+          "GPU-169fb70f-7002-715c-5451-1ea1b39a33fe": {
+            "average_temperature": 63,
+            "status": "IDEAL (PASSED)"
+          },
+          "GPU-30ad6183-8b71-2bb3-ac89-5528898394ec": {
+            "average_temperature": 73.75,
+            "status": "ACCEPTABLE (WARNING)"
+          },
+          "GPU-c8bf0ca6-706a-315a-518c-3569652eb6d7": {
+            "average_temperature": 65,
+            "status": "IDEAL (PASSED)"
+          },
+          "GPU-dee0306f-5c16-2275-a7f3-d2d2eee45d8e": {
+            "average_temperature": 75,
+            "status": "ACCEPTABLE (WARNING)"
+          },
+          "GPU-be0942e8-21de-cb98-a056-2fede637d0dd": {
+            "average_temperature": 65.5,
+            "status": "IDEAL (PASSED)"
+          },
+          "GPU-61ce8d5d-2eb3-9181-4cdd-80e106b4ae2e": {
+            "average_temperature": 74.5,
+            "status": "ACCEPTABLE (WARNING)"
+          },
+          "GPU-231e84e6-9c47-e2de-948f-b1d06ca8f8d4": {
+            "average_temperature": 75,
+            "status": "ACCEPTABLE (WARNING)"
+          },
+          "GPU-058d3209-649b-a60c-28e2-7417505658c7": {
+            "average_temperature": 68,
+            "status": "IDEAL (PASSED)"
+          }
+        }
+      },
+      "gpu_power_check": {
+        "overall_status": "PASSED",
+        "per_gpu": {
+          "GPU-169fb70f-7002-715c-5451-1ea1b39a33fe": {
+            "gpu_name": "NVIDIA H100",
+            "average_power_w": 698.11,
+            "threshold": "600-750 W",
+            "status": "PASSED"
+          },
+          "GPU-30ad6183-8b71-2bb3-ac89-5528898394ec": {
+            "gpu_name": "NVIDIA H100",
+            "average_power_w": 698.81,
+            "threshold": "600-750 W",
+            "status": "PASSED"
+          },
+          "GPU-c8bf0ca6-706a-315a-518c-3569652eb6d7": {
+            "gpu_name": "NVIDIA H100",
+            "average_power_w": 699.83,
+            "threshold": "600-750 W",
+            "status": "PASSED"
+          },
+          "GPU-dee0306f-5c16-2275-a7f3-d2d2eee45d8e": {
+            "gpu_name": "NVIDIA H100",
+            "average_power_w": 675.8675000000001,
+            "threshold": "600-750 W",
+            "status": "PASSED"
+          },
+          "GPU-be0942e8-21de-cb98-a056-2fede637d0dd": {
+            "gpu_name": "NVIDIA H100",
+            "average_power_w": 699.265,
+            "threshold": "600-750 W",
+            "status": "PASSED"
+          },
+          "GPU-61ce8d5d-2eb3-9181-4cdd-80e106b4ae2e": {
+            "gpu_name": "NVIDIA H100",
+            "average_power_w": 691.815,
+            "threshold": "600-750 W",
+            "status": "PASSED"
+          },
+          "GPU-231e84e6-9c47-e2de-948f-b1d06ca8f8d4": {
+            "gpu_name": "NVIDIA H100",
+            "average_power_w": 696.6325,
+            "threshold": "600-750 W",
+            "status": "PASSED"
+          },
+          "GPU-058d3209-649b-a60c-28e2-7417505658c7": {
+            "gpu_name": "NVIDIA H100",
+            "average_power_w": 699.0224999999999,
+            "threshold": "600-750 W",
+            "status": "PASSED"
+          }
+        }
+      },
+      "gpu_utilization_check": {
+        "overall_status": "PASSED",
+        "per_gpu": {
+          "GPU-169fb70f-7002-715c-5451-1ea1b39a33fe": {
+            "average_utilization": 100,
+            "min_required": 80,
+            "status": "PASSED"
+          },
+          "GPU-30ad6183-8b71-2bb3-ac89-5528898394ec": {
+            "average_utilization": 100,
+            "min_required": 80,
+            "status": "PASSED"
+          },
+          "GPU-c8bf0ca6-706a-315a-518c-3569652eb6d7": {
+            "average_utilization": 100,
+            "min_required": 80,
+            "status": "PASSED"
+          },
+          "GPU-dee0306f-5c16-2275-a7f3-d2d2eee45d8e": {
+            "average_utilization": 100,
+            "min_required": 80,
+            "status": "PASSED"
+          },
+          "GPU-be0942e8-21de-cb98-a056-2fede637d0dd": {
+            "average_utilization": 100,
+            "min_required": 80,
+            "status": "PASSED"
+          },
+          "GPU-61ce8d5d-2eb3-9181-4cdd-80e106b4ae2e": {
+            "average_utilization": 100,
+            "min_required": 80,
+            "status": "PASSED"
+          },
+          "GPU-231e84e6-9c47-e2de-948f-b1d06ca8f8d4": {
+            "average_utilization": 100,
+            "min_required": 80,
+            "status": "PASSED"
+          },
+          "GPU-058d3209-649b-a60c-28e2-7417505658c7": {
+            "average_utilization": 100,
+            "min_required": 80,
+            "status": "PASSED"
+          }
+        }
+      }
+    },
+    "monitoring": {
+      "temperature": [
+        [
+          "30",
+          "35",
+          "31",
+          "37",
+          "33",
+          "36",
+          "37",
+          "32"
+        ],
+        [
+          "59",
+          "66",
+          "61",
+          "68",
+          "62",
+          "67",
+          "67",
+          "64"
+        ],
+        [
+          "65",
+          "75",
+          "67",
+          "77",
+          "68",
+          "77",
+          "77",
+          "70"
+        ],
+        [
+          "65",
+          "78",
+          "67",
+          "78",
+          "67",
+          "78",
+          "79",
+          "70"
+        ],
+        [
+          "63",
+          "76",
+          "65",
+          "77",
+          "65",
+          "76",
+          "77",
+          "68"
+        ]
+      ],
+      "power": [
+        [
+          "122.07 W",
+          "123.40 W",
+          "125.32 W",
+          "130.37 W",
+          "132.05 W",
+          "128.13 W",
+          "132.70 W",
+          "127.89 W"
+        ],
+        [
+          "697.98 W",
+          "699.51 W",
+          "701.05 W",
+          "699.98 W",
+          "700.66 W",
+          "701.00 W",
+          "701.46 W",
+          "700.37 W"
+        ],
+        [
+          "698.23 W",
+          "698.41 W",
+          "699.18 W",
+          "678.23 W",
+          "697.73 W",
+          "698.61 W",
+          "697.03 W",
+          "699.31 W"
+        ],
+        [
+          "697.83 W",
+          "698.29 W",
+          "699.57 W",
+          "643.78 W",
+          "699.71 W",
+          "669.45 W",
+          "690.72 W",
+          "697.64 W"
+        ],
+        [
+          "698.40 W",
+          "699.03 W",
+          "699.52 W",
+          "681.48 W",
+          "698.96 W",
+          "698.20 W",
+          "697.32 W",
+          "698.77 W"
+        ]
+      ],
+      "utilization": [
+        [
+          "0 %",
+          "0 %",
+          "0 %",
+          "0 %",
+          "0 %",
+          "0 %",
+          "0 %",
+          "0 %"
+        ],
+        [
+          "100 %",
+          "100 %",
+          "100 %",
+          "100 %",
+          "100 %",
+          "100 %",
+          "100 %",
+          "100 %"
+        ],
+        [
+          "100 %",
+          "100 %",
+          "100 %",
+          "100 %",
+          "100 %",
+          "100 %",
+          "100 %",
+          "100 %"
+        ],
+        [
+          "100 %",
+          "100 %",
+          "100 %",
+          "100 %",
+          "100 %",
+          "100 %",
+          "100 %",
+          "100 %"
+        ],
+        [
+          "100 %",
+          "100 %",
+          "100 %",
+          "100 %",
+          "100 %",
+          "100 %",
+          "100 %",
+          "100 %"
+        ]
+      ]
+    },
+    "machine_metadata": {
+      "hostname": "inst-64ded-instancepool-5jsmp-h100-rdma-pool",
+      "ip": "10.0.77.241",
+      "ocid": "ocid1.instance.oc1.eu-frankfurt-1.antheljsm3augwacwbslkxymzk7cfqxj3vfrsydbmse5jztl7lzhj3d6st6q",
+      "region": "eu-frankfurt-1",
+      "uuid": "0ad03064d61a442a9fd1ddf3fdd36f66",
+      "uuid_source": "/etc/machine-id"
+    },
+    "gpu_info": {
+      "gpu_count": 8,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "supported_dtypes": [
+        "FP16",
+        "BF16",
+        "FP8"
+      ]
+    },
+    "total_execution_time": 100.96361351013184,
+    "final_result": "pass"
+  },
+  {
+    "all_reduce_perf": [
+      "400.199"
+    ],
+    "all_gather_perf": [
+      "300.827"
+    ],
+    "alltoall_perf": [
+      "50.1035"
+    ]
+  }
+]

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: oci-monitoring
+  labels:
+    name: oci-monitoring
+    app: oci-lens-plugin 

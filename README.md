@@ -1,250 +1,147 @@
-# oci-quickstart-template
+# OCI GPU Scanner Solution
+**Active GPU performance health check and monitoring tool for OCI GPU compute resources.**
+
+OCI GPU Scanner is a cloud-native, Prometheus- and Grafana-based solution for monitoring OCI GPU cluster resources and RDMA cluster health. It is deployed directly within your OCI tenancy. This solution provides comprehensive, active performance and passive health checks for both NVIDIA and AMD GPUs on OCI. OCI GPU Scanner executes periodic OCI-authored GPU health checks and pushes the results to a dedicated OCI GPU Scanner Portal, Prometheus, and Grafana Dashboards. Since everything is deployed in your tenancy, you can extend the solution to integrate additional metrics (such as PyTorch or vLLM Serving metrics) into the Grafana boards for a holistic view of application and hardware metrics. This solution is free for any OCI customer to use.
+
+## Features
+- Tenancy-level monitoring solution – no region barriers no compartment restrictions
+- Supports Nvidia A10, A100, H100, B200, H200 and AMD GPU MI300X OCI GPU shapes
+- Supports native OKE integration running as a daemon set as well as system service if running on the single-node -  Bare Metal or virtual machines
+- Full GPU metrics collection through NVIDIA DCGM Exporter and AMD SMI Exporter including custom RDMA cluster and NIC performance metrics collection
+- Active performance health checks (PyTorch-based), benchmarked against a baseline stating if the numbers are within the threshold
+- Passive health data run periodically and results sent to the Prometheus server using the Prometheus schema
+- Grafana dashboards pre-configured giving you the view at cluster level, node level or at GPU node level filters
+- Ability to run on-demand active health checks when performance degradation is observed at the individual node level using REST APIs
+- Data never leaves your tenancy boundary giving you full control and a private experience
+- Integrated with OKE Node Problem Detector and auto tagging nodes to no-schedule when heath check fail
+
+## Getting Started
+To install OCI GPU Scanner, you have the below options. The solution is installed within your OCI tenancy and is currently not a managed service within OCI:
+
+- [Install through Terraform & OCI Resource Manager Template (includes a new OKE cluster install)](./GETTING_STARTED_RM_DEPLOY.md)
+- [Install through OKE Managed Add-On Deployment through OCI Console for existing OKE cluster](./GETTING_STARTED_CONSOLE_DEPLOY.md)
+- [Install through **helm** on existing OKE cluster](./GETTING_STARTED_HELM_DEPLOY.md)
+
+
+## Health Checks
+
+OCI GPU Scanner performs both passive (non-intrusive) and active (GPU-occupying) performance health checks. Results are reported in the Grafana dashboard. 
+
+### Active Performance Checks
+Active health checks run when the OCI GPU Scanner plugin is installed on GPU nodes. These checks can also be initiated on demand through the portal or via REST API endpoints provided by OCI GPU Scanner. All active checks use PyTorch Matmul and Linear Regression to generate performance scores. Multi-node health checks utilize Message Passing Interface (MPI) to stress test HPC cluster configurations.
+
+See samples of health check [for H100 active check runs.](./sampleoutput/nvidia_h100_active_healthcheck_singlenode_sample.json) and [for AMD MI300X active check runs.](./sampleoutput/amd_mi300x_active_healthcheck_singlenode_sample.json).
+
+Below checks are part of GPU Active Health Check Tests
+
+- model_mfu
+- background_computation
+- compute_throughput
+- memory_bandwidth
+- error_detection
+- tensor_core_utilization
+- sustained_workload
+- mixed_precision_testing
+- gpu_power_check
+- gpu_temperature_check
+- gpu_utilization_check
+- gpu_topology
+- gpu_xid_errors_check
+- gpu_xid_errors_check
+- rdma_mpi_multinode_all2all
+- rdma_mpi_multinode_allgather
+- rdma_mpi_multinode_allreduce
+- rdma_mpi_multinode_broadcast
+
+### Passive Health Checks
+Passive checks do not occupy GPUs and run periodically in the background. By default, these run every minute, but you can adjust the frequency during installation. These scripts are maintained by the OCI GPU Core Compute team and released as part of Dr.HPC V2 binaries. The following checks are currently performed for both Nvidia and AMD GPU compute nodes:
+
+Below are the checks currently run for both Nvidia and AMD based GPU compute nodes. 
+
+- GPU count check: Checks GPU count using nvidia-smi and amd-smi
+- PCIe error check: Checks for PCIe errors in system logs
+- PCIe speed check: Verifies PCIe speed matches the expected threshold
+- PCIe width missing lanes check: Checks PCIe link width for missing lanes
+- RDMA NIC count: Checks the number of RDMA NICs
+- RX discards check: Checks the network interface for RX discards
+- GID index check: Verifies device GID index is within the correct range
+- Link check: Checks RDMA link state and parameters
+- Ethernet link check: Checks Ethernet link state and parameters for 100GbE RoCE interfaces
+- Auth check: Checks authentication status of RDMA interfaces using wpa_cli
+- SRAM error check: Checks for both correctable and uncorrectable SRAM errors
+- GPU driver check: Checks GPU driver version compatibility
+- GPU clock check: Ensures GPU clock speeds are within the acceptable range
+eth0 presence check: Checks if the eth0 network interface is present
+- HCA error check: Checks for MLX5 HCA fatal errors in system logs
+- Missing interface check: Checks for missing PCIe interfaces (revision ff)
+- Thermal throttling check: Monitors GPU for thermal throttling events
+- Source-based routing check: Verifies source-based routing configuration for - RDMA network communication
+- Oracle Cloud Agent version check: Confirms Oracle Cloud Agent version meets minimum requirements
+- RDMA link flap check: Identifies RDMA link flap events in system logs
+- PCIe walk check: Validates PCIe hierarchy for GPU and RDMA devices, including link speeds and widths
+- Max ACC check: Checks MAX_ACC_OUT_READ and ADVANCED_PCI_SETTINGS configuration
+- Row remap error check: Uses nvidia-smi to check for GPU row remap errors
+- RTTCC status check: Checks Real Time Telemetry Congestion Control (RTTCC) status for H100 GPU hosts
+- Model MFU, background computation, compute throughput, memory bandwidth, error detection, tensor core utilization, sustained workload, mixed precision testing, - GPU power check, GPU temperature check, GPU utilization check, GPU topology, GPU XID errors check, RDMA MPI multinode all2all/allgather/allreduce/broadcast, etc.
+
+Additional checks are performed based on GPU type (AMD or NVIDIA), such as XGMI, NVLINK, and fabric manager monitoring.
+
+
+## Dashboards & Monitoring
+After deployment, you will have access to Grafana, Prometheus, and Portal endpoints for data interaction. See example screenshots below:
+
+<img src="./media/scanner_portal_fetch_gpu_nodes.png" alt="OCI GPU Scanner Monitoring Portal">
+
+<img src="./media/scanner_portal_resource_groups.png" alt="OCI GPU Monitoring Resource Group">
+
+<img src="./media/scanner_grafana_dashboard_summary.png" alt="Grafana Portal With Health Checks">
+
+<img src="./media/scanner_grafana_dashboard_metrics.png" alt="Grafana Portal With GPU Metrics">
+
+## Third Party Software Dependency
 
-The [Oracle Cloud Infrastructure (OCI) Quick Start](https://github.com/oracle-quickstart?q=oci-quickstart) is a collection of examples that allow Oracle Cloud Infrastructure users to get a quick start deploying advanced infrastructure on OCI.
+The below Open-Source solutions are used in this solution:
 
-The oci-quickstart-template repository contains the template that can be used for accelerating the construction of quickstarts that runs from local Terraform CLI, [OCI Resource Manager](https://docs.cloud.oracle.com/en-us/iaas/Content/ResourceManager/Concepts/resourcemanager.htm) and [OCI Cloud Shell](https://docs.cloud.oracle.com/en-us/iaas/Content/API/Concepts/cloudshellintro.htm).
+1. [Grafana](https://github.com/grafana/grafana)
+2. [Prometheus](https://github.com/prometheus/prometheus)
+3. [NGINIX Controller for Kubernetes](https://github.com/kubernetes/ingress-nginx)
+4. [PostgreSQL](https://www.postgresql.org/)
+5. [NVIDIA DCGM Exporter](https://github.com/NVIDIA/dcgm-exporter)
+6. [AMD SMI Exporter](https://github.com/amd/amd_smi_exporter)
+7. [Prometheus Node Exporter](https://github.com/prometheus/node_exporter)
 
-Simple is a sample quickstart terraform template that deploys a virtual machine on a Virtual Cloud Network.
-Simple can be customized to subscribe and launch Marketplace images, Platform images or Custom images.
+## Roadmap
+The below list of features are being prioritized. If you would like a new feature please open a issue or email the contacts listed below. 
+### Health Checks
+- Multi-Node NCCL/RCCL
+- PyTorch FSDP Multi-Node Training Testing RDMA Backend
+- Low priority Kubernetes jobs auto scheduling of active-checks
+- B200 NVLink & Infiniband MPI validations
 
-This repo is under active development.  Building open source software is a community effort.  We're excited to engage with the community building this.
+### Onboarding
+- Public and private domain access deployments of ingress controller for control plane access
+- Narrowed down OCI tenancy policy options
 
-## Resource Manager Deployment
+### Portal & Experiences
 
-This Quick Start uses [OCI Resource Manager](https://docs.cloud.oracle.com/iaas/Content/ResourceManager/Concepts/resourcemanager.htm) to make deployment easy, sign up for an [OCI account](https://cloud.oracle.com/en_US/tryit) if you don't have one, and just click the button below:
+- Advanced Grafana boards with K8s job filtering
+- Deployment through OCI Console
 
-[![Deploy to Oracle Cloud](https://oci-resourcemanager-plugin.plugins.oci.oraclecloud.com/latest/deploy-to-oracle-cloud.svg)](https://cloud.oracle.com/resourcemanager/stacks/create?region=home&zipUrl=https://github.com/oracle-quickstart/oci-quickstart-template/archive/master.zip)
+## Remediation
 
-After logging into the console you'll be taken through the same steps described
-in the [Deploy](#deploy) section below.
+- OKE Node problem detector integration for taints
+- Auto-remediation controller for self healing
 
+### GPU’s Support
 
-Note, if you use this template to create another repo you'll need to change the link for the button to point at your repo.
+- GB200 & ARM64 Runtime Support
+- AMD MI355X
 
-## Local Development
+## Limitations
 
-First off we'll need to do some pre deploy setup.  That's all detailed [here](https://github.com/oracle/oci-quickstart-prerequisites).
+1. Only Ubuntu Linux OS based GPU node monitoring is supported.
+2. Control plane components only work with x86 CPU nodes  
 
-Note, the instructions below build a `.zip` file from you local copy for use in ORM.
-If you want to not use ORM and deploy with the terraform CLI you need to rename
-`provider.tf.cli -> provider.tf`. This is because authentication works slightly
-differently in ORM vs the CLI. This file is ignored by the build process below.
+## Support & Contact
 
-Make sure you have terraform v0.14+ cli installed and accessible from your terminal.
-
-### Build
-
-Simply `build` your package and follow the [Resource Manager instructions](https://docs.cloud.oracle.com/en-us/iaas/Content/ResourceManager/Tasks/managingstacksandjobs.htm#console) for how to create a stack.  Prior to building the Stack, you may want to modify some parts of the deployment detailed below.
-
-In order to `build` the zip file with the latest changes you made to this code, you can simply go to [build-orm](./build-orm) folder and use terraform to generate a new zip file:
-
-At first time, you are required to initialize the terraform modules used by the template with  `terraform init` command:
-
-```bash
-$ terraform init
-
-Initializing the backend...
-
-Initializing provider plugins...
-- Finding latest version of hashicorp/archive...
-- Installing hashicorp/archive v2.1.0...
-- Installed hashicorp/archive v2.1.0 (signed by HashiCorp)
-
-Terraform has created a lock file .terraform.lock.hcl to record the provider
-selections it made above. Include this file in your version control repository
-so that Terraform can guarantee to make the same selections by default when
-you run "terraform init" in the future.
-
-Terraform has been successfully initialized!
-
-You may now begin working with Terraform. Try running "terraform plan" to see
-any changes that are required for your infrastructure. All Terraform commands
-should now work.
-
-If you ever set or change modules or backend configuration for Terraform,
-rerun this command to reinitialize your working directory. If you forget, other
-commands will detect it and remind you to do so if necessary.
-```
-
-Once terraform is initialized, just run `terraform apply` to generate ORM zip file.
-
-```bash
-$ terraform apply
-
-data.archive_file.generate_zip: Refreshing state...
-
-Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
-```
-
-This command will package the content of `simple` folder into a zip and will store it in the `build-orm\dist` folder. You can check the content of the file by running `unzip -l dist/orm.zip`:
-
-```bash
-$ unzip -l dist/orm.zip
-Archive:  dist/orm.zip
-  Length      Date    Time    Name
----------  ---------- -----   ----
-     1140  01-01-2049 00:00   compute.tf
-      680  01-01-2049 00:00   data_sources.tf
-     1632  01-01-2049 00:00   image_subscription.tf
-     1359  01-01-2049 00:00   locals.tf
-    13548  01-01-2049 00:00   schema.yaml
-     2001  01-01-2049 00:00   network.tf
-     2478  01-01-2049 00:00   nsg.tf
-      830  01-01-2049 00:00   oci_images.tf
-     1092  01-01-2049 00:00   outputs.tf
-       44  01-01-2049 00:00   scripts/example.sh
-     4848  01-01-2049 00:00   variables.tf
-      311  01-01-2049 00:00   versions.tf
----------                     -------
-    29963                     12 files
-```
-
-### Deploy
-
-1. [Login](https://console.us-ashburn-1.oraclecloud.com/resourcemanager/stacks/create) to Oracle Cloud Infrastructure to import the stack
-    > `Home > Solutions & Platform > Resource Manager > Stacks > Create Stack`
-
-2. Upload the `orm.zip` and provide a name and description for the stack
-![Create Stack](./images/create_orm_stack.png)
-
-3. Configure the Stack. The UI will present the variables to the user dynamically, based on their selections. These are the configuration options:
-
-> Compute Configuration
-
-|          VARIABLE          |           DESCRIPTION                                                 |
-|----------------------------|-----------------------------------------------------------------------|
-|COMPUTE COMPARTMENT         | Compartment for Compute resources, including Marketplace subscription |
-|INSTANCE NAME               | Compute instance name|
-|DNS HOSTNAME LABEL          | DNS Hostname|
-|COMPUTE SHAPE               | Compatible Compute shape|
-|FLEX SHAPE OCPUS            | Number of OCPUs, only available for VM.Standard.E3.Flex compute shape|
-|AVAILABILITY DOMAIN         | Availability Domain|
-|PUBLIC SSH KEY STRING       | RSA PUBLIC SSH key string used for sign in to the OS|
-
-> Virtual Cloud Network
-
-|          VARIABLE          |           DESCRIPTION                                                 |
-|----------------------------|-----------------------------------------------------------------------|
-|NETWORK COMPARTMENT         | Compartment for all Virtual Cloud Network resources|
-|NETWORK STRATEGY            | `Create New VCN and Subnet`: Create new network resources during apply. <br> `Use Existing VCN and Subnet`: Let user select pre-existent network resources.|
-|CONFIGURATION STRATEGY      | `Use Recommended Configuration`: Use default configuration defined by the Terraform template. <br> `Customize Network Configuration`: Allow user to customize network configuration such as name, dns label, cidr block for VCN and Subnet.|
-
-> Virtual Cloud Network - Customize Network Configuration
-
-|          VARIABLE          |           DESCRIPTION                                                 |
-|----------------------------|-----------------------------------------------------------------------|
-|NAME                        | VCN Display Name|
-|DNS LABEL                   | VCN DNS LABEL|
-|CIDR BLOCK                  | The CIDR of the new Virtual Cloud Network (VCN). If you plan to peer this VCN with another VCN, the VCNs must not have overlapping CIDRs.|
-
-> Simple Subnet (visible only when `Customize Network Configuration` is selected)
-
-|          VARIABLE          |           DESCRIPTION                                                 |
-|----------------------------|-----------------------------------------------------------------------|
-|SUBNET TYPE                 | `Public Subnet` or `Private Subnet`|
-|NAME                        | Subnet Display Name|
-|DNS LABEL                   | Subnet DNS LABEL|
-|CIDR BLOCK                  | The CIDR of the Subnet. Should not overlap with any other subnet CIDRs|
-|NETWORK SECURITY GROUP CONFIGURATION| `Use Recommended Configuration`: Use default configuration defined by the Terraform template. <br> `Customize Network Security Group`: Allow user to customize some basic network security group settings.|
-
-> Network Security Group (visible only when `Customize Network Security Group` is selected)
-
-|          VARIABLE          |           DESCRIPTION                                                 |
-|----------------------------|-----------------------------------------------------------------------|
-|NAME                        | NSG Display Name|
-|ALLOWED INGRESS TRAFFIC (CIDR BLOCK)| WHITELISTED CIDR BLOCK for ingress traffic|
-|SSH PORT NUMBER             | Default SSH PORT for ingress traffic|
-|HTTP PORT NUMBER            | Default HTTP PORT for ingress traffic|
-|HTTPS PORT NUMBER           | Default HTTPS PORT for ingress traffic|
-
-> Additional Configuration Options
-
-|          VARIABLE          |           DESCRIPTION                                                 |
-|----------------------------|-----------------------------------------------------------------------|
-|TAG KEY NAME                | Free-form tag key name|
-|TAG VALUE                   | Free-form tag value|
-
-4. Click Next and Review the configuration.
-5. Click Create button to confirm and create your ORM Stack.
-6. On Stack Details page, you can now run `Terraform` commands to manage your infrastructure. You typically start with a plan then run apply to create and make changes to the infrastructure. More details below:
-
-|      TERRAFORM ACTIONS     |           DESCRIPTION                                                 |
-|----------------------------|-----------------------------------------------------------------------|
-|Plan                        | `terraform plan` is used to create an execution plan. This command is a convenient way to check the execution plan prior to make any changes to the infrastructure resources.|
-|Apply                       | `terraform apply` is used to apply the changes required to reach the desired state of the configuration described by the template.|
-|Destroy                     | `terraform destroy` is used to destroy the Terraform-managed infrastructure.|
-
-## Customize for Marketplace
-
-In case you wanted to make changes to this template to use a Marketplace image rather than a platform image or custom image, you need to make the following changes.
-
-1. Configure Marketplace listing variables on [`variables.tf`](./variables.tf).
-
-|      VARIABLES             |           DESCRIPTION                                                 |
-|----------------------------|-----------------------------------------------------------------------|
-|mp_subscription_enabled     | Enable subscription to Marketplace.|
-|mp_listing_id               | Marketplace App Catalog Listing OCID.|
-|mp_listing_resource_id      | Marketplace Listing Image OCID.|
-|mp_listing_resource_version | Marketplace Listing Package/Resource Version (Reference value)|
-
-2. Modify [`compute.tf`](./compute.tf) set `source_details` to refer to `local.compute_image_id` rather than `platform_image_id`. The `local.compute_image_id` holds the logic to either refer to the marketplace image or a custom image, based on the `mp_subscription_enabled` flag.
-
-```hcl
-resource "oci_core_instance" "simple-vm" {
-  availability_domain = local.availability_domain
-  compartment_id      = var.compute_compartment_ocid
-  display_name        = var.vm_display_name
-  shape               = var.vm_compute_shape
-
-  dynamic "shape_config" {
-    for_each = local.is_flex_shape
-      content {
-        ocpus = shape_config.value
-      }
-  }
-
-
-  create_vnic_details {
-    subnet_id              = local.use_existing_network ? var.subnet_id : oci_core_subnet.simple_subnet[0].id
-    display_name           = var.subnet_display_name
-    assign_public_ip       = local.is_public_subnet
-    hostname_label         = var.hostname_label
-    skip_source_dest_check = false
-    nsg_ids                = [oci_core_network_security_group.simple_nsg.id]
-  }
-
-  source_details {
-    source_type = "image"
-    #use a marketplace image or custom image:
-    source_id   = local.compute_image_id
-  }
-
-```
-2. Modify [`oci_images.tf`](./oci_images.tf) set `marketplace_source_images` map variable to refer to the marketplace images your Stack will launch.
-
-```hcl
-
-variable "marketplace_source_images" {
-  type = map(object({
-    ocid = string
-    is_pricing_associated = bool
-    compatible_shapes = list(string)
-  }))
-  default = {
-    main_mktpl_image = {
-      ocid = "ocid1.image.oc1..<unique_id>"
-      is_pricing_associated = true
-      compatible_shapes = []
-    }
-    #Remove comment and add as many marketplace images that your stack references be replicated to other realms
-    #supporting_image = {
-    #  ocid = "ocid1.image.oc1..<unique_id>"
-    #  is_pricing_associated = false
-    #  compatible_shapes = ["VM.Standard2.2", "VM.Standard.E2.1.Micro"]
-    #}
-  }
-}
-
-```
-
-2. Run your tests using the Terraform CLI or build a new package and deploy on ORM.
+This solution is provided with no Service Level Objectives (SLOs) or Service Level Agreements (SLAs) from Oracle. However, a dedicated team product manages the solution and will do their best to support any issues you may encounter. We also have a dedicated OCI Compute engineering team that support active and passive health check scripts. For questions, issues, or feedback, please contact amar.gowda@oracle.com.

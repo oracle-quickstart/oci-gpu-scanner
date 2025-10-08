@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: oci-lens-dr-hpc
+  namespace: monitoring
+  labels:
+    app: amd-gpu-healthcheck
+    component: gpu-monitoring
+spec:
+  selector:
+    matchLabels:
+      app: oci-lens-dr-hpc
+  template:
+    metadata:
+      labels:
+        app: oci-lens-dr-hpc
+    spec:
+      # Only run on nodes with AMD GPUs
+      nodeSelector:
+        kubernetes.io/arch: amd64  
+      
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: amd.com/gpu
+                operator: In
+                values: ["true", "present"]
+      
+      # Tolerations for AMD GPU nodes
+      tolerations:
+      - key: amd.com/gpu
+        operator: Exists
+        effect: NoSchedule
+
+      priorityClassName: system-node-critical
+      terminationGracePeriodSeconds: 0
+      volumes: 
+      - name: root
+        hostPath:
+          path: "/"
+      hostPID: true
+      hostIPC: true
+      hostNetwork: true
+      containers:
+        - name: oke-dr-hpc-prod
+          image: iad.ocir.io/iduyx1qnmway/lens-metric-collector/oci_lens_drhpc_amd:v0.0.1
+          imagePullPolicy: Always
+          securityContext:
+            privileged: true
+            capabilities:
+              add: [SYS_ADMIN]
+          volumeMounts: 
+          - name: root
+            mountPath: /host
+          resources: {}
+          env:
+          - name: PUSH_GATEWAY
+            value: "<your-pushgateway-url>"
+          - name: JOB_NAME
+            value: "oci_lens_drhpc_metrics"

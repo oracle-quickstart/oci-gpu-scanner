@@ -1,41 +1,41 @@
-# Local .terraform directories
-**/.terraform/*
+.vscode
+_site
+.DS_Store
+.sw[a-z]
+.idea/ 
+*.iml
+venv/
+archive/
+test_data/
+HOLD*
+*.base64
+variables.json
+*pyc
+*.env
+util_setup_local_env.sh
 
-# .tfstate files
+# Terraform files
+terraform.tfvars
+**/*.tfvars
+.terraform/
+**/.terraform/
+.terraform.lock.hcl
+**/.terraform.lock.hcl
+
+# Terraform state files - exclude ALL state files
+terraform.tfstate
+terraform.tfstate.backup
+terraform.tfstate.*
 *.tfstate
 *.tfstate.*
-*.zip*
-*.tfvars
+**/terraform.tfstate
+**/terraform.tfstate.*
+**/*.tfstate
+**/*.tfstate.*
 
-# Local .terraform lock files
-*.lock.*
-
-# modified env var example
-packer/env_vars.sh
-
-# General
-.DS_Store
-.AppleDouble
-.LSOverride
-
-# Icon must end with two \r
-Icon
-
-# Thumbnails
-._*
-
-# Files that might appear in the root of a volume
-.DocumentRevisions-V100
-.fseventsd
-.Spotlight-V100
-.TemporaryItems
-.Trashes
-.VolumeIcon.icns
-.com.apple.timemachine.donotpresent
-
-# Directories potentially created on remote AFP share
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
+# Generated files
+generated/
+**/generated/
+test*json
+**/*.zip
+*.zip

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pushgateway-config
+  namespace: oci-monitoring
+  labels:
+    app: pushgateway-config
+    component: monitoring
+data:
+  # Replace with your actual Prometheus Push Gateway URL
+  url: "http://pushgateway-dev:9091/metrics""
+  # Example URLs for different environments:
+  # Development: "http://pushgateway-dev:9091/metrics"
+  # Production: "http://pushgateway-prod:9091/metrics"
+  # External: "https://your-pushgateway.example.com:9091/metrics"
