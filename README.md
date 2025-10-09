@@ -86,6 +86,33 @@ eth0 presence check: Checks if the eth0 network interface is present
 
 Additional checks are performed based on GPU type (AMD or NVIDIA), such as XGMI, NVLINK, and fabric manager monitoring.
 
+## Architecture
+
+The Helm chart deploys the following components:
+
+1. **Frontend (Portal)**
+   - React/Node.js application
+   - Served on port 3000
+   - Service for internal/external access
+
+2. **Backend (Control Plane)**
+   - Django application
+   - Served on port 5000 (container), 80 (service)
+   - External access via LoadBalancer service
+   - Connects to Postgres
+   - Configured with Prometheus Push gateway and Grafana URLs
+
+3. **Postgres Database**
+   - Managed via StatefulSet/Deployment
+   - Persistent storage via PVC
+   - Service for backend connectivity
+
+4. **ConfigMaps and Secrets**
+   - All environment variables and sensitive data are managed via ConfigMaps and Kubernetes Secrets
+
+Sample deployment stamp.
+
+![deployment architecture](/media/scanner_architecture.png "architecture snapshot")
 
 ## Dashboards & Monitoring
 After deployment, you will have access to Grafana, Prometheus, and Portal endpoints for data interaction. See example screenshots below:
@@ -140,7 +167,8 @@ The below list of features are being prioritized. If you would like a new featur
 ## Limitations
 
 1. Only Ubuntu Linux OS based GPU node monitoring is supported.
-2. Control plane components only work with x86 CPU nodes  
+2. Control plane components only work with x86 CPU nodes.
+3. Active health checks do not run as low priority jobs hence running a active health check will disrupt any existing GPU workloads active on that node.   
 
 ## Support & Contact
 

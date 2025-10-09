@@ -124,6 +124,7 @@ helm install lens oci-ai-incubations/lens -n lens --create-namespace \
   --set grafana.adminPassword="access password for grafana portal. User name is admin by default" \
  
 ```
+
 ## Verify for successful install
 
 Once the installation is complete you should see the following pods in the "lens" namespace. If you don't please uninstall and reinstall or check the helm install events/logs. 
@@ -226,15 +227,9 @@ helm install lens ./helm -n lens \
   --set backend.image.tag=stable
 ```
 
-### Uninstall the control plane components 
-```bash
-helm uninstall lens -n lens
-```
-
-
 ## Step 2: OCI GPU Data Plane Plugin installation on GPU Nodes
 
-1. **Navigate to Dashboards**: Go to the dashboard section
+1. **Navigate to Dashboards**: Go to the dashboard section of the OCI GPU Scanner Portal
 2. **Go to Tab - OCI GPU Scanner Install Script**:
    - You can use the script there and deploy the oci-scanner plugin on to your gpus nodes manually. 
    - Embed them into a slurm script if you run a slurm cluster.
@@ -242,7 +237,7 @@ helm uninstall lens -n lens
    - use the same scripts to be added as part of your new GPU compute deployments through cloud-init scripts.
 ---
 
-## Step 4: Explore Monitoring Dashboards
+## Step 3: Explore Monitoring Dashboards
 
 1. **Navigate to Dashboards**: Go to the dashboard section
 2. **View Available Dashboards**:
@@ -255,46 +250,31 @@ helm uninstall lens -n lens
 6. **Access Additional Features**:
    - **Custom Queries**: Use Prometheus queries to create custom visualizations
    - **Alerting**: Set up alerts for critical GPU or cluster issues
-
 ---
-
-## Architecture
-
-The Helm chart deploys the following components:
-
-1. **Frontend (Portal)**
-   - React/Node.js application
-   - Served on port 3000
-   - Service for internal/external access
-
-2. **Backend (Control Plane)**
-   - Django application
-   - Served on port 5000 (container), 80 (service)
-   - External access via LoadBalancer service
-   - Connects to Postgres
-   - Configured with Prometheus Pushgateway and Grafana URLs
-
-3. **Postgres Database**
-   - Managed via StatefulSet/Deployment
-   - Persistent storage via PVC
-   - Service for backend connectivity
-
-4. **ConfigMaps and Secrets**
-   - All environment variables and sensitive data are managed via ConfigMaps and Kubernetes Secrets
 
 ## Cleanup
 
 You can remove all control plane resources in **one step**:
 
-1. **Destroy the Control Plane Components**
-   - Go to **Resource Manager → Stacks** in the OCI Console.
-   - Select your **OCI GPU Scanner stack**.
-   - Click **Destroy**, confirm, and wait until the job succeeds.
+### Uninstall the control plane components 
+```bash
+helm uninstall lens -n lens
+```
+### Uninstall the data plane components if installed as OKE daemon set
 
-This will remove:
-- The OKE cluster and all nodes
-- The VCN and networking components
-- All OCI GPU Scanner application components
-- Associated storage and IAM policies (if created)
+```bash
+helm uninstall lens -n lens
+```
+### Uninstall the data plane components if it was installed as system services (per GPU node)
 
-Once the stack is destroyed, your tenancy will be free of any OCI GPU Scanner-related resources.
+```bash
+cd /home/ubuntu/$(hostname)/oci-lens-plugin/
+./uninstall 
+cd ..
+rm -rf *
+cd ..
+rmdir  $(hostname)
+
+```
+
+Once the stack is destroyed, your OKE cluster will be free of any OCI GPU Scanner-related resources.

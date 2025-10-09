@@ -1,4 +1,4 @@
-# Getting Started with OCI GPU Scanner Quickstart
+# Getting started with OCI GPU Scanner quickstart using resource manager
 
 **❗❗Important: The instructions below are for creating a new standalone deployment. To install OCI GPU Scanner on an existing OKE cluster, please refer to the [Install OCI GPU Scanner to an Existing OKE Cluster](GETTING_STARTED_HELM_DEPLOY.md)**
 
