@@ -231,10 +231,26 @@ helm install lens ./helm -n lens \
 
 1. **Navigate to Dashboards**: Go to the dashboard section of the OCI GPU Scanner Portal
 2. **Go to Tab - OCI GPU Scanner Install Script**:
-   - You can use the script there and deploy the oci-scanner plugin on to your gpus nodes manually. 
+   - You can use the script there and deploy the oci-scanner plugin on to your gpus nodes manually (works on Ubuntu OS based GPU nodes). 
    - Embed them into a slurm script if you run a slurm cluster.
-   - Use the kubernetes objects for the plugin under the `oci_scanner_plugin` folder for a Kubernetes cluster. Refer to [Readme](oci_scanner_plugin/README.md).
-   - use the same scripts to be added as part of your new GPU compute deployments through cloud-init scripts.
+   - Use the same scripts to be added as part of your new GPU compute deployments through cloud-init scripts.
+
+  Example script:
+
+  ```bash
+  chdir /home/ubuntu/
+mkdir "$(hostname)"
+cd "$(hostname)"
+curl -X GET https://objectstorage.us-ashburn-1.oraclecloud.com/p/N6955_gYqc8g04xQLQkWyxHumraL_hy6qIxHR6Hd4H69ZOf8mQJFxN7-M-TNQOlJ/n/iduyx1qnmway/b/bucket-corrino-lens-dev/o/oci_plugin.tar.gz --output oci_plugin.tar.gz
+tar -xzvf oci_plugin.tar.gz
+cd oci_lens_plugin
+export PUSH_GATEWAY="https://pushgateway.132.226.100.100.nip.io/"
+export OCI_PAR_R="https://objectstorage.us-ashburn-1.oraclecloud.com/p/YmY6NBiA5VSkxVAoymx8FhZNfiFGDq9Gdqt0Q5G7e-CQsjDjnVWslylOSsIRuO2b/n/iduyx1qnmway/b/bucket-corrino-lens-dev/o/oci_lens_plugin"
+export OCI_LENS_CP="http://api.100.100.100.nip.io"
+export CP_AUTH_TOKEN="ad37cf7d9bcdd520d27c4va06eae5a3bc15a06e911bc0"
+chmod -R +x *
+./run.sh
+  ```
 ---
 
 ## Step 3: Explore Monitoring Dashboards
@@ -256,16 +272,13 @@ helm install lens ./helm -n lens \
 
 You can remove all control plane resources in **one step**:
 
-### Uninstall the control plane components 
-```bash
-helm uninstall lens -n lens
-```
-### Uninstall the data plane components if installed as OKE daemon set
+### Uninstall the control plane components from OKE cluster 
 
 ```bash
 helm uninstall lens -n lens
 ```
-### Uninstall the data plane components if it was installed as system services (per GPU node)
+
+### Uninstall the data plane components installed as system services (per GPU node)
 
 ```bash
 cd /home/ubuntu/$(hostname)/oci-lens-plugin/
@@ -277,4 +290,4 @@ rmdir  $(hostname)
 
 ```
 
-Once the stack is destroyed, your OKE cluster will be free of any OCI GPU Scanner-related resources.
+Once the stack is destroyed, your OKE cluster will be free of any OCI GPU Scanner-related resources including the GPU monitored nodes.

@@ -43,7 +43,7 @@ The deployment automatically installs **ingress-nginx** and **cert-manager** for
 
 1. Click the **Deploy to Oracle Cloud** button below:
 
-[![Deploy to Oracle Cloud](https://oci-resourcemanager-plugin.plugins.oci.oraclecloud.com/latest/deploy-to-oracle-cloud.svg)](https://cloud.oracle.com/resourcemanager/stacks/create?zipUrl=/oci-lens-quickstart.zip)
+[![Deploy to Oracle Cloud](https://oci-resourcemanager-plugin.plugins.oci.oraclecloud.com/latest/deploy-to-oracle-cloud.svg)](https://cloud.oracle.com/resourcemanager/stacks/create?zipUrl=https://github.com/oracle-quickstart/oci-gpu-scanner/blob/main/oci-gpu-scanner-deploy.zip)
 
 1. In **Create Stack:**
 
