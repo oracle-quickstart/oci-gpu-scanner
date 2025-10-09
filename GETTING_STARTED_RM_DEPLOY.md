@@ -33,6 +33,8 @@ The below policies are created
 "Allow any-user to read compute-management-family in tenancy where all { request.principal.type = 'workload', request.principal.namespace = 'lens', request.principal.service_account = 'corrino-lens-backend-sa', request.principal.cluster_id = '${var.cluster_ocid}' }"
 ```
 
+**NOTE**: OKE Node Problem Detector is not installed as part of the resource manager deployment. You can follow [these instructions](/OKE_NPD_DEPLOY.md) to deploy this feature on existing OKE clusters. 
+
 ## Ingress and TLS Setup
 
 The deployment automatically installs **ingress-nginx** and **cert-manager** for routing and TLS certificate management. After deployment completes, refer to the [Ingress and TLS Setup Prerequisites](INGRESS_AND_TLS_SETUP.md) for:
