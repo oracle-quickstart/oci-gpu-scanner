@@ -23,7 +23,7 @@ resource "oci_identity_policy" "workload_identity_policy" {
 resource "helm_release" "app" {
   name      = "lens"
   namespace = kubernetes_namespace.ns.metadata[0].name
-  chart = "https://iduyx1qnmway.objectstorage.us-ashburn-1.oci.customer-oci.com/p/zu9OPIyRJUIm8lBr7yEoi7XHVw38bX51ZxXKISnXO1oePlAr7Usn1dTj5Edn9aHE/n/iduyx1qnmway/b/helm-charts/o/lens-0.1.9-22edc81.tgz"
+  chart = "https://iduyx1qnmway.objectstorage.us-ashburn-1.oci.customer-oci.com/p/4834mZPL2J2HD0RBB82K4eyqWnEwmiCxjEX9IuTlGeDNv3eRdSuyaIrRlxhaM3lG/n/iduyx1qnmway/b/helm-charts/o/lens-0.1.9-c58cfa9.tgz"
   wait            = true
   timeout         = 1800
   atomic          = false
