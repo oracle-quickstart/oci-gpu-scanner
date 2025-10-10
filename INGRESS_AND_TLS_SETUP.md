@@ -1,215 +1,232 @@
-# Ingress and TLS Setup Prerequisites
+# Ingress and TLS Setup Guide
 
-This guide covers the ingress and TLS prerequisites for the Corrino Lens Helm chart installation. The chart automatically installs **ingress-nginx**, **cert-manager**, and configures **Let's Encrypt** for TLS certificates.
+This guide covers ingress and TLS prerequisites for Corrino Lens Helm chart installation.
 
 ## Overview
 
-The Corrino Lens Helm chart automatically installs and configures:
+The Helm chart automatically installs as dependencies:
+- **ingress-nginx** (v4.13.2) - Kubernetes Ingress Controller in `lens` namespace
+- **cert-manager** (v1.13.2) - TLS certificate management in `lens` namespace  
+- **Let's Encrypt ClusterIssuer** - Production ACME certificates (cluster-wide)
+- **IngressClass** `lens-nginx` (cluster-wide)
 
-1. **ingress-nginx** (v4.13.2) - Kubernetes Ingress Controller
-2. **cert-manager** (v1.13.2) - Automated TLS certificate management
-3. **Let's Encrypt ClusterIssuer** - Production ACME certificates
-
-**Important:** These components are **always installed** as Helm subchart dependencies and cannot currently be disabled. Customizable options are coming soon in the future release!
-
-### Architecture
-
+**Architecture:**
 ```
-Internet → [LoadBalancer Service] → [ingress-nginx Controller] → [Ingress Resources] → [Application Services]
+Internet → [LoadBalancer] → [ingress-nginx] → [Ingress] → [Apps]
 ```
 
-### Components Created
-
-| Component | Namespace | Purpose |
-|-----------|-----------|---------|
-| ingress-nginx controller | `ingress-nginx` | Routes traffic based on hostnames |
-| cert-manager | `cert-manager` | Manages TLS certificates |
-| Let's Encrypt ClusterIssuer | cluster-wide | Issues production TLS certificates |
-| Application Ingresses | `lens` | Backend, Frontend, Grafana, Prometheus |
+**Important:** Deleting the `lens` namespace is safe and removes all namespace-scoped resources. Only delete cluster-wide resources (IngressClass, ClusterIssuer, CRDs) if certain no other applications use them.
 
 ---
 
-## Pre-Installation: Check and Clean Up Existing Infrastructure
+## Pre-Install Check
 
-**Before installing**, check if ingress-nginx or cert-manager already exist in your cluster. Conflicts will cause installation failures.
-
-### Step 1: Check for Existing Infrastructure
+Check for existing resources before installation:
 
 ```bash
-# Check for existing namespaces
-kubectl get namespace ingress-nginx cert-manager
+# Check if lens namespace exists
+kubectl get ns lens 2>&1
 
-# Check for existing IngressClass
-kubectl get ingressclass nginx
+# Check for existing pods in lens namespace
+kubectl get pods -n lens 2>&1
 
-# Check for existing cert-manager CRDs
+# Check cluster-wide resources
+kubectl get ingressclass lens-nginx 2>&1
+kubectl get clusterissuer letsencrypt-prod 2>&1
 kubectl get crd | grep cert-manager
-
-# Check for existing ClusterIssuer
-kubectl get clusterissuer letsencrypt-prod
-
-# Check for any running ingress controllers
-kubectl get pods -A | grep ingress
-kubectl get pods -n cert-manager
 ```
 
-### Step 2: Clean Up if Infrastructure Exists
+**If any resources exist from a previous installation, proceed to cleanup.**
 
-If any of the above commands return existing resources, **you must clean them up**:
+---
+
+## Clean Up if Exists
+
+### Option 1: Safe Cleanup (Recommended)
+
+Removes only the `lens` namespace, preserving cluster-wide resources:
 
 ```bash
-# 1. Find and uninstall existing Helm releases
-helm ls -A  # Find any ingress-nginx or cert-manager releases
-helm uninstall <release-name> -n <namespace>
+# Uninstall Helm release
+helm uninstall lens -n lens
 
-# 2. Delete infrastructure namespaces
-kubectl delete namespace ingress-nginx cert-manager
+# Delete namespace (removes all namespace-scoped resources)
+kubectl delete namespace lens
 
-# 3. Delete cert-manager CRDs (not automatically removed by Helm)
-kubectl get crd | grep cert-manager | awk '{print $1}' | xargs kubectl delete crd
+# Wait for deletion to complete
+kubectl wait --for=delete namespace/lens --timeout=120s 2>/dev/null || echo "Namespace deleted"
+```
 
-# 4. Delete cluster-wide resources
-kubectl delete clusterissuer letsencrypt-prod --ignore-not-found=true
-kubectl delete ingressclass nginx --ignore-not-found=true
+**Verification:**
+```bash
+kubectl get namespace lens 2>&1 | grep "NotFound" && echo "✅ Ready for install" || echo "❌ Namespace still exists"
+```
+
+### Option 2: Complete Cleanup (Fresh Cluster Only)
+
+⚠️ **Use only if no other applications use cert-manager or ingress-nginx**
+
+```bash
+# 1. Uninstall Helm release and namespace
+helm uninstall lens -n lens
+kubectl delete namespace lens
+kubectl wait --for=delete namespace/lens --timeout=120s 2>/dev/null
+
+# 2. Verify no other apps are using these resources
+kubectl get certificate --all-namespaces
+kubectl get ingress --all-namespaces
+
+# 3. Delete cluster-wide resources (if safe)
+kubectl delete clusterissuer letsencrypt-prod --ignore-not-found
+kubectl delete ingressclass lens-nginx --ignore-not-found
+
+# 4. Delete cert-manager CRDs (affects entire cluster!)
+kubectl get crd | grep cert-manager | awk '{print $1}' | xargs kubectl delete crd --ignore-not-found
 
 # 5. Delete webhook configurations
-kubectl delete validatingwebhookconfiguration -l app.kubernetes.io/instance=cert-manager --ignore-not-found=true
-kubectl delete mutatingwebhookconfiguration -l app.kubernetes.io/instance=cert-manager --ignore-not-found=true
-
+kubectl delete validatingwebhookconfiguration -l app.kubernetes.io/instance=lens --ignore-not-found
+kubectl delete mutatingwebhookconfiguration -l app.kubernetes.io/instance=lens --ignore-not-found
 ```
 
-### Step 3: Verify Clean State
-
-Before proceeding with installation, verify everything is cleaned up:
-
+**Verification:**
 ```bash
-# All of these should return "NotFound" or no results:
-kubectl get namespace ingress-nginx cert-manager 2>&1 | grep "NotFound"
-kubectl get ingressclass nginx 2>&1 | grep "NotFound"
-kubectl get crd | grep cert-manager  # Should return nothing
-kubectl get clusterissuer letsencrypt-prod 2>&1 | grep "NotFound"
+kubectl get namespace lens 2>&1 | grep "NotFound"
+kubectl get ingressclass lens-nginx 2>&1 | grep "NotFound"
+kubectl get crd | grep cert-manager || echo "No cert-manager CRDs"
 ```
-
-✅ If verification passes, you're ready to proceed with the Helm installation!
 
 ---
 
-## Post-Installation: Verification
+## Post-Install Check
 
-After installing the Helm chart, verify all components are running correctly:
-
-### Check Infrastructure Components
+After helm installation, verify all components are running:
 
 ```bash
-# Verify all namespaces exist
-kubectl get namespace lens ingress-nginx cert-manager
+# 1. Verify namespace and pods
+kubectl get namespace lens
+kubectl get pods -n lens
 
-# Verify controllers are running
-kubectl get pods -n ingress-nginx
-kubectl get pods -n cert-manager
+# 2. Check ingress-nginx and cert-manager are running
+kubectl get pods -n lens | grep -E 'ingress|cert-manager'
 
-# Check IngressClass
-kubectl get ingressclass nginx
+# 3. Get LoadBalancer external IP (may take 1-2 minutes)
+kubectl get svc -n lens -l app.kubernetes.io/component=controller
 
-# Check ClusterIssuer is ready
+# 4. Check cluster-wide resources
+kubectl get ingressclass lens-nginx
 kubectl get clusterissuer letsencrypt-prod
-```
 
-### Check LoadBalancer
-
-```bash
-# Get external IP (wait if showing <pending>)
-kubectl get svc -n ingress-nginx -l app.kubernetes.io/component=controller
-
-# Save external IP for later use
-EXTERNAL_IP=$(kubectl get svc -n ingress-nginx -l app.kubernetes.io/component=controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-echo "External IP: $EXTERNAL_IP"
-```
-
-### Check Ingress Resources
-
-```bash
-# View all ingress resources
+# 5. View all ingress endpoints
 kubectl get ingress -n lens
 
-# Check specific ingress details
-kubectl describe ingress lens-backend-ingress -n lens
-kubectl describe ingress lens-frontend-ingress -n lens
-```
-
-### Check TLS Certificates
-
-```bash
-# View certificate status (should show READY=True)
+# 6. Check TLS certificates (should show READY=True after 2-5 minutes)
 kubectl get certificate -n lens
+```
 
-# Check certificate details
-kubectl describe certificate lens-backend-tls -n lens
-kubectl describe certificate lens-frontend-tls -n lens
+**Expected output:**
+- All pods in `Running` state
+- LoadBalancer service has an `EXTERNAL-IP`
+- Certificates show `READY=True`
+- Ingress resources show correct hosts
 
-# If certificates not ready, check requests and challenges
-kubectl get certificaterequest -n lens
+**If certificates not ready:**
+```bash
+# Check certificate details and challenges
+kubectl describe certificate -n lens
 kubectl get challenge -n lens
-```
-
-## Quick Reference
-
-### View All Resources
-```bash
-kubectl get namespace ingress-nginx cert-manager lens
-kubectl get ingressclass
-kubectl get clusterissuer
-kubectl get pods -n ingress-nginx
-kubectl get pods -n cert-manager
-kubectl get certificate,certificaterequest,ingress -n lens
-```
-
-### Get External IP
-```bash
-kubectl get svc -n ingress-nginx -l app.kubernetes.io/component=controller
-```
-
-### View Logs
-```bash
-kubectl logs -n ingress-nginx -l app.kubernetes.io/component=controller --tail=100
-kubectl logs -n cert-manager -l app=cert-manager --tail=100
-kubectl logs -n cert-manager -l app=webhook --tail=100
-```
-
-### Force Certificate Renewal
-```bash
-kubectl delete certificate <cert-name> -n lens
-# cert-manager will automatically recreate it
+kubectl logs -n lens -l app=cert-manager --tail=50
 ```
 
 ---
 
-## Complete Cleanup
+## Complete Uninstall
 
-To completely remove ingress and TLS infrastructure:
+### Standard Uninstall (Preserves Cluster-Wide Resources)
+
+```bash
+helm uninstall lens -n lens
+kubectl delete namespace lens
+```
+
+### Full Uninstall (Removes Everything)
+
+⚠️ **Only use on dedicated test clusters**
 
 ```bash
 # 1. Uninstall Helm release
 helm uninstall lens -n lens
 
-# 2. Delete all namespaces
-kubectl delete namespace lens ingress-nginx cert-manager
+# 2. Delete namespace
+kubectl delete namespace lens
 
-# 3. Delete cert-manager CRDs
-kubectl get crd | grep cert-manager | awk '{print $1}' | xargs kubectl delete crd
+# 3. Wait for namespace deletion
+kubectl wait --for=delete namespace/lens --timeout=120s 2>/dev/null
 
 # 4. Delete cluster-wide resources
-kubectl delete clusterissuer letsencrypt-prod --ignore-not-found=true
-kubectl delete ingressclass nginx --ignore-not-found=true
+kubectl delete clusterissuer letsencrypt-prod --ignore-not-found
+kubectl delete ingressclass lens-nginx --ignore-not-found
 
-# 5. Delete webhooks
-kubectl delete validatingwebhookconfiguration -l app.kubernetes.io/instance=lens --ignore-not-found=true
-kubectl delete mutatingwebhookconfiguration -l app.kubernetes.io/instance=lens --ignore-not-found=true
+# 5. Delete cert-manager CRDs
+kubectl get crd | grep cert-manager | awk '{print $1}' | xargs kubectl delete crd --ignore-not-found
 
-# 6. If namespaces stuck in Terminating state
-kubectl patch namespace cert-manager -p '{"metadata":{"finalizers":[]}}' --type=merge
-kubectl patch namespace ingress-nginx -p '{"metadata":{"finalizers":[]}}' --type=merge
+# 6. Delete webhook configurations  
+kubectl delete validatingwebhookconfiguration -l app.kubernetes.io/instance=lens --ignore-not-found
+kubectl delete mutatingwebhookconfiguration -l app.kubernetes.io/instance=lens --ignore-not-found
 ```
+
+**Verify complete removal:**
+```bash
+kubectl get all -n lens 2>&1 | grep "NotFound" && echo "✅ Complete uninstall successful"
+```
+
+---
+
+## Troubleshooting
+
+### Namespace Stuck in "Terminating"
+```bash
+# Check what's blocking deletion
+kubectl get all -n lens
+kubectl get certificate -n lens
+
+# Force remove finalizers (use with caution)
+kubectl get namespace lens -o json | jq '.spec.finalizers = []' | kubectl replace --raw /api/v1/namespaces/lens/finalize -f -
+```
+
+### Certificates Not Getting Issued
+```bash
+# Check status and challenges
+kubectl describe certificate -n lens
+kubectl get challenge -n lens
+
+# Check cert-manager logs
+kubectl logs -n lens -l app=cert-manager -f
+
+# Common causes:
+# - DNS not pointing to LoadBalancer IP
+# - Firewall blocking port 80/443 from internet
+# - Let's Encrypt rate limits exceeded
+```
+
+### IngressClass or ClusterIssuer Already Exists
+```bash
+# Check if from previous lens installation
+kubectl get ingressclass lens-nginx -o yaml | grep app.kubernetes.io/instance
+
+# Delete if from previous lens install
+kubectl delete ingressclass lens-nginx
+kubectl delete clusterissuer letsencrypt-prod
+```
+
+### Check if Other Apps Use Resources
+```bash
+# List all ingress and certificates across cluster
+kubectl get ingress --all-namespaces
+kubectl get certificate --all-namespaces
+
+# If only lens namespace appears, safe to delete cluster-wide resources
+```
+
 ---
 
 ## Additional Resources
@@ -217,7 +234,4 @@ kubectl patch namespace ingress-nginx -p '{"metadata":{"finalizers":[]}}' --type
 - **ingress-nginx**: https://kubernetes.github.io/ingress-nginx/
 - **cert-manager**: https://cert-manager.io/docs/
 - **Let's Encrypt**: https://letsencrypt.org/docs/
-
-**Report Issues:**
-- GitHub: https://github.com/oci-ai-incubations/corrino-lens-devops
-
+- **Report Issues**: https://github.com/oci-ai-incubations/corrino-lens-devops

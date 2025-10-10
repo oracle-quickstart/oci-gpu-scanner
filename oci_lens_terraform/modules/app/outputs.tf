@@ -61,3 +61,13 @@ output "prometheus_ingress_host" {
   description = "The ingress host for Prometheus"
   value       = try(data.kubernetes_ingress_v1.prometheus_ingress.spec[0].rule[0].host, "")
 }
+
+output "ingress_nginx_loadbalancer_ip" {
+  description = "The external LoadBalancer IP for the ingress-nginx controller"
+  value       = try(data.kubernetes_service_v1.ingress_nginx_controller.status[0].load_balancer[0].ingress[0].ip, "")
+}
+
+output "ingress_nginx_loadbalancer_hostname" {
+  description = "The external LoadBalancer hostname for the ingress-nginx controller"
+  value       = try(data.kubernetes_service_v1.ingress_nginx_controller.status[0].load_balancer[0].ingress[0].hostname, "")
+}

@@ -96,7 +96,7 @@ data "kubernetes_ingress_v1" "prometheus_ingress" {
 data "kubernetes_service_v1" "ingress_nginx_controller" {
   metadata {
     name      = "ingress-nginx-controller"
-    namespace = "ingress-nginx"
+    namespace = kubernetes_namespace.ns.metadata[0].name
   }
   depends_on = [helm_release.app]
 }
