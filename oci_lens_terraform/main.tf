@@ -2,16 +2,14 @@
 # oci_lens_terraform/main.tf — Root wrapper (ORM)
 #############################################
 
-# --- Determine the actual region to use ---
+# --- Determine the actual cluster ID to use ---
 locals {
-  # If using existing cluster, extract region from cluster OCID
-  cluster_region = var.create_new_cluster ? var.region : split(".", var.cluster_ocid)[3]
   cluster_id = var.create_new_cluster ? module.cluster[0].oke_cluster_id : var.cluster_ocid
 }
 
-# --- User-selected or auto-detected region provider (default) ---
+# --- User-selected region provider (default) ---
 provider "oci" {
-  region = local.cluster_region
+  region = var.region
 }
 
 # --- Discover true home region & configure alias ---
@@ -36,7 +34,7 @@ provider "oci" {
 
 provider "oci" {
   alias  = "current_region"
-  region = local.cluster_region
+  region = var.region
 }
 
 # --- Create OKE + networking (only when create_new_cluster is true) ---
@@ -80,7 +78,7 @@ provider "kubernetes" {
   cluster_ca_certificate = base64decode(local.kube_ca_b64)
   exec {
     api_version = "client.authentication.k8s.io/v1beta1"
-    args        = ["ce", "cluster", "generate-token", "--cluster-id", local.cluster_id, "--region", local.cluster_region]
+    args        = ["ce", "cluster", "generate-token", "--cluster-id", local.cluster_id, "--region", var.region]
     command     = "oci"
   }
 }
@@ -91,7 +89,7 @@ provider "helm" {
     cluster_ca_certificate = base64decode(local.kube_ca_b64)
     exec {
       api_version = "client.authentication.k8s.io/v1beta1"
-      args        = ["ce", "cluster", "generate-token", "--cluster-id", local.cluster_id, "--region", local.cluster_region]
+      args        = ["ce", "cluster", "generate-token", "--cluster-id", local.cluster_id, "--region", var.region]
       command     = "oci"
     }
   }
@@ -124,7 +122,7 @@ module "app" {
 
   namespace         = var.namespace
   compartment_ocid  = var.compartment_ocid
-  region            = local.cluster_region
+  region            = var.region
   cluster_ocid      = local.cluster_id
   tenancy_ocid      = var.tenancy_ocid
   create_iam_policy = var.create_iam_policy
