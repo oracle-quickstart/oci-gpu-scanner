@@ -124,7 +124,7 @@ module "app" {
 
   namespace         = var.namespace
   compartment_ocid  = var.compartment_ocid
-  region            = var.region
+  region            = local.cluster_region
   cluster_ocid      = local.cluster_id
   tenancy_ocid      = var.tenancy_ocid
   create_iam_policy = var.create_iam_policy

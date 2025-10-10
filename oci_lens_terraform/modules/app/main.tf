@@ -30,6 +30,16 @@ resource "helm_release" "app" {
   cleanup_on_fail = false
 
   set {
+    name = "backend.regionName"
+    value = var.region
+  }
+
+  set {
+    name = "backend.tenancyId"
+    value = var.tenancy_ocid
+  }
+
+  set {
     name = "backend.superuser.username"
     value = var.superuser_username
   }
