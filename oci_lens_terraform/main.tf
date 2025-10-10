@@ -2,6 +2,11 @@
 # oci_lens_terraform/main.tf — Root wrapper (ORM)
 #############################################
 
+# --- Initial provider setup for data sources (uses var.region or a default) ---
+provider "oci" {
+  region = var.create_new_cluster ? var.region : "us-ashburn-1"  # temporary region for data source queries
+}
+
 # --- Fetch all regions data (needed for region name mapping) ---
 data "oci_identity_regions" "all" {}
 
@@ -13,17 +18,12 @@ locals {
   # Map short region key to full region name (e.g., "phx" -> "us-phoenix-1")
   cluster_region_from_ocid = var.create_new_cluster ? null : one(
     [for r in data.oci_identity_regions.all.regions : r.name
-      if r.key == local.cluster_region_key]
+      if lower(r.key) == lower(local.cluster_region_key)]
   )
   
   # Use selected region for new cluster, or mapped region name for existing cluster
   cluster_region = var.create_new_cluster ? var.region : local.cluster_region_from_ocid
   cluster_id = var.create_new_cluster ? module.cluster[0].oke_cluster_id : var.cluster_ocid
-}
-
-# --- User-selected or auto-detected region provider (default) ---
-provider "oci" {
-  region = local.cluster_region
 }
 
 # --- Discover true home region & configure alias ---
@@ -35,7 +35,7 @@ data "oci_identity_tenancy" "this" {
 locals {
   home_region_name = one(
     [for r in data.oci_identity_regions.all.regions : r.name
-      if r.key == data.oci_identity_tenancy.this.home_region_key]
+      if lower(r.key) == lower(data.oci_identity_tenancy.this.home_region_key)]
   )
 }
 
