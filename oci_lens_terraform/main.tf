@@ -2,10 +2,22 @@
 # oci_lens_terraform/main.tf — Root wrapper (ORM)
 #############################################
 
+# --- Fetch all regions data (needed for region name mapping) ---
+data "oci_identity_regions" "all" {}
+
 # --- Determine the actual region to use ---
 locals {
-  # If using existing cluster, extract region from cluster OCID
-  cluster_region = var.create_new_cluster ? var.region : split(".", var.cluster_ocid)[3]
+  # Extract short region key from cluster OCID (e.g., "phx" from "ocid1.cluster.oc1.phx.xxx")
+  cluster_region_key = var.create_new_cluster ? null : split(".", var.cluster_ocid)[3]
+  
+  # Map short region key to full region name (e.g., "phx" -> "us-phoenix-1")
+  cluster_region_from_ocid = var.create_new_cluster ? null : one(
+    [for r in data.oci_identity_regions.all.regions : r.name
+      if r.key == local.cluster_region_key]
+  )
+  
+  # Use selected region for new cluster, or mapped region name for existing cluster
+  cluster_region = var.create_new_cluster ? var.region : local.cluster_region_from_ocid
   cluster_id = var.create_new_cluster ? module.cluster[0].oke_cluster_id : var.cluster_ocid
 }
 
@@ -18,8 +30,6 @@ provider "oci" {
 data "oci_identity_tenancy" "this" {
   tenancy_id = var.tenancy_ocid
 }
-
-data "oci_identity_regions" "all" {}
 
 # Map home region key -> name
 locals {
