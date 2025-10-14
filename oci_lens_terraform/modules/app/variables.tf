@@ -60,3 +60,9 @@ variable "grafana_admin_password" {
   type = string
   sensitive = true
 }
+
+variable "skip_regions" {
+  description = "Comma-separated list of OCI regions to skip during GPU scanning"
+  type = string
+  default = ""
+}

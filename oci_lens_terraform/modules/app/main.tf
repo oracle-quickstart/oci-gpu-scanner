@@ -64,6 +64,14 @@ resource "helm_release" "app" {
     value = var.grafana_admin_password
   }
 
+  values = [
+    yamlencode({
+      backend = {
+        skipRegions = var.skip_regions
+      }
+    })
+  ]
+
   depends_on = [
     kubernetes_namespace.ns,
   ]

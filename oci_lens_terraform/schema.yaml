@@ -23,6 +23,7 @@ variableGroups:
       - namespace
       - create_iam_policy
       - policy_name
+      - skip_regions
 
 variables:
   tenancy_ocid:
@@ -102,6 +103,12 @@ variables:
     description: "Password for logging into Grafana. (default: admin123)"
     sensitive: true
     default: "admin123"
+
+  skip_regions:
+    type: string
+    title: "Skip Regions"
+    description: "Comma-separated list of OCI regions to skip during GPU scanning (e.g., us-phoenix-1,eu-frankfurt-1. Leave empty to scan all regions."
+    default: ""
 
 outputs:
   # OCI GPU Scanner Portal
