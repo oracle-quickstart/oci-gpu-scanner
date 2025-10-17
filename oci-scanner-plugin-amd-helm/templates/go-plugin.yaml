@@ -1,0 +1,195 @@
+{{- if .Values.goPlugin.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oci-lens-config
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    app: oci-lens-plugin
+data:
+  push_gateway: {{ .Values.global.pushGatewayUrl | quote }}
+  gpu_type: {{ .Values.goPlugin.config.gpuType | quote }}
+  push_frequency: {{ .Values.goPlugin.config.pushFrequency | quote }}
+  job_name: {{ .Values.goPlugin.config.jobName | quote }}
+  max_passes: {{ .Values.goPlugin.config.maxPasses | quote }}
+  sleep_secs: {{ .Values.goPlugin.config.sleepSecs | quote }}
+  log_level: {{ .Values.goPlugin.config.logLevel | quote }}
+  log_format: {{ .Values.goPlugin.config.logFormat | quote }}
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: oci-lens-plugin
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    app: oci-lens-plugin
+    component: gpu-monitoring
+spec:
+  selector:
+    matchLabels:
+      app: oci-lens-plugin
+  template:
+    metadata:
+      labels:
+        app: oci-lens-plugin
+        component: gpu-monitoring
+    spec:
+      serviceAccountName: oci-lens-plugin
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: amd.com/gpu
+                operator: In
+                values: ["true", "present"]
+      
+      tolerations:
+      - key: amd.com/gpu
+        operator: Exists
+        effect: NoSchedule
+      
+      hostNetwork: true
+      hostPID: true
+      
+      volumes:
+      - name: dev
+        hostPath:
+          path: /dev
+      - name: sys
+        hostPath:
+          path: /sys
+      - name: proc
+        hostPath:
+          path: /proc
+      - name: var-lib-dpkg
+        hostPath:
+          path: /var/lib/dpkg
+      
+      containers:
+      - name: oci-lens-plugin
+        image: "{{ .Values.global.imageRegistry }}/{{ .Values.goPlugin.image.repository }}:{{ .Values.goPlugin.image.tag }}"
+        imagePullPolicy: {{ .Values.goPlugin.image.pullPolicy }}
+        
+        env:
+        - name: PUSH_GATEWAY
+          valueFrom:
+            configMapKeyRef:
+              name: oci-lens-config
+              key: push_gateway
+        - name: GPU_TYPE
+          valueFrom:
+            configMapKeyRef:
+              name: oci-lens-config
+              key: gpu_type
+        - name: PUSH_FREQUENCY
+          valueFrom:
+            configMapKeyRef:
+              name: oci-lens-config
+              key: push_frequency
+        - name: JOB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: oci-lens-config
+              key: job_name
+        - name: MAX_PASSES
+          valueFrom:
+            configMapKeyRef:
+              name: oci-lens-config
+              key: max_passes
+        - name: SLEEP_SECS
+          valueFrom:
+            configMapKeyRef:
+              name: oci-lens-config
+              key: sleep_secs
+        
+        ports:
+        - name: metrics
+          containerPort: 8080
+          protocol: TCP
+        
+        volumeMounts:
+        - name: dev
+          mountPath: /dev
+        - name: sys
+          mountPath: /sys
+        - name: proc
+          mountPath: /proc
+        - name: var-lib-dpkg
+          mountPath: /var/lib/dpkg
+          readOnly: true
+        
+        securityContext:
+          runAsUser: 0
+          runAsGroup: 0
+          runAsNonRoot: false
+          privileged: true
+          readOnlyRootFilesystem: false
+          allowPrivilegeEscalation: true
+          capabilities:
+            add:
+            - SYS_ADMIN
+            - NET_ADMIN
+            - SYS_PTRACE
+            - SYS_RAWIO
+        
+        resources:
+          {{- toYaml .Values.goPlugin.resources | nindent 10 }}
+        
+        livenessProbe:
+          exec:
+            command:
+            - pgrep
+            - -f
+            - oci_lens_plugin
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        
+        readinessProbe:
+          exec:
+            command:
+            - pgrep
+            - -f
+            - oci_lens_plugin
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        command: ["./oci_lens_plugin"]
+        args:
+        - "--gateway=$(PUSH_GATEWAY)"
+        - "--job=$(JOB_NAME)"
+        - "--gpu-type=$(GPU_TYPE)"
+        - "--sleep-secs=$(SLEEP_SECS)"
+        - "--max-passes=$(MAX_PASSES)"
+      
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oci-lens-plugin
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    app: oci-lens-plugin
+    component: gpu-monitoring
+spec:
+  selector:
+    app: oci-lens-plugin
+  ports:
+  - name: metrics
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  type: ClusterIP
+{{- end }}

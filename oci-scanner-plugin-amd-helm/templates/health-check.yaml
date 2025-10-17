@@ -1,0 +1,116 @@
+{{- if .Values.healthCheck.enabled }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: amd-gpu-healthcheck-all-nodes
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    app: amd-gpu-healthcheck
+    component: gpu-monitoring
+spec:
+  parallelism: 1
+  completions: 1
+  activeDeadlineSeconds: 7200
+  backoffLimit: 0
+  
+  template:
+    metadata:
+      labels:
+        app: amd-gpu-healthcheck
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      
+      tolerations:
+      - key: amd.com/gpu
+        operator: Exists
+        effect: NoSchedule
+      
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+        fsGroup: 0
+      
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - amd-gpu-healthcheck
+            topologyKey: kubernetes.io/hostname
+      
+      containers:
+      - name: amd-gpu-healthcheck
+        image: "{{ .Values.global.imageRegistry }}/{{ .Values.healthCheck.image.repository }}:{{ .Values.healthCheck.image.tag }}"
+        imagePullPolicy: {{ .Values.healthCheck.image.pullPolicy }}
+        
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+            - SYS_PTRACE
+            - SYS_ADMIN
+          seccompProfile:
+            type: Unconfined
+        
+        resources:
+          {{- toYaml .Values.healthCheck.resources | nindent 10 }}
+        
+        env:
+        - name: HIP_PLATFORM
+          value: "amd"
+        - name: HSA_OVERRIDE_GFX_VERSION
+          value: "10.3.0"
+        - name: HIP_VISIBLE_DEVICES
+          value: "all"
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        
+        command: ["python3"]
+        args:
+        - "amd_functional_test.py"
+        - "--dtype"
+        - "float32"
+        - "--expected_gpus"
+        - "MI300:8"
+        - "--matrix_size_mi300"
+        - "16384"
+        - "--functions"
+        - "all"
+        - "--output_dir"
+        - "/app/testing_results"
+        
+        volumeMounts:
+        - name: testing-results
+          mountPath: /app/testing_results
+        - name: dev-kfd
+          mountPath: /dev/kfd
+        - name: dev-dri
+          mountPath: /dev/dri
+      
+      volumes:
+      - name: testing-results
+        hostPath:
+          path: /var/log/amd-gpu-healthcheck
+          type: DirectoryOrCreate
+      - name: dev-kfd
+        hostPath:
+          path: /dev/kfd
+          type: CharDevice
+      - name: dev-dri
+        hostPath:
+          path: /dev/dri
+          type: Directory
+      
+      restartPolicy: Never
+      terminationGracePeriodSeconds: 30
+{{- end }}

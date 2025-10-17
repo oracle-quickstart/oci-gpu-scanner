@@ -1,0 +1,108 @@
+# Global configuration
+global:
+  namespace: oci-monitoring
+  imageRegistry: iad.ocir.io/iduyx1qnmway/lens-metric-collector
+  pushGatewayUrl: "http://prometheus-pushgateway:9091/"
+
+# Namespace configuration
+namespace:
+  create: true
+  name: oci-monitoring
+
+# Go Plugin configuration
+goPlugin:
+  enabled: true
+  image:
+    repository: oci_lens_metric_collector
+    tag: v0.0.8
+    pullPolicy: Always
+  
+  config:
+    gpuType: "amd"
+    pushFrequency: "10"
+    jobName: "oci_lens_node_metrics"
+    maxPasses: "0"
+    sleepSecs: "10"
+    logLevel: "info"
+    logFormat: "json"
+  
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+# AMD GPU Exporter
+amdGpuExporter:
+  enabled: true
+  image:
+    repository: rocm/device-metrics-exporter
+    tag: v1.3.1
+    pullPolicy: IfNotPresent
+  
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+
+# Metrics Push Job
+metricsPushJob:
+  enabled: true
+  schedule: "* * * * *"
+  
+  resources:
+    requests:
+      memory: "32Mi"
+      cpu: "50m"
+    limits:
+      memory: "64Mi"
+      cpu: "100m"
+
+# Active Health Check
+healthCheck:
+  enabled: false
+  image:
+    repository: oci_lens_healthcheck_amd
+    tag: v0.0.2
+    pullPolicy: Always
+  
+  resources:
+    requests:
+      memory: "8Gi"
+      cpu: "2"
+    limits:
+      memory: "16Gi"
+      cpu: "4"
+
+# DRHPC
+drhpc:
+  enabled: true
+  image:
+    repository: oci_lens_drhpc_amd
+    tag: v0.0.1
+    pullPolicy: Always
+
+# RBAC
+rbac:
+  create: true
+
+# Node Exporter
+nodeExporter:
+  enabled: true
+  image:
+    repository: quay.io/prometheus/node-exporter
+    tag: latest
+    pullPolicy: IfNotPresent
+  
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "50m"
+    limits:
+      memory: "128Mi"
+      cpu: "100m"
