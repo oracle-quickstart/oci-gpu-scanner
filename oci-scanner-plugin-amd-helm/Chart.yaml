@@ -1,0 +1,16 @@
+apiVersion: v2
+name: oci-scanner-plugin
+description: OCI Scanner Plugin for AMD GPU monitoring and health checks
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - oci
+  - amd
+  - gpu
+  - monitoring
+  - prometheus
+home: https://github.com/oracle/oci-lens-quickstart
+maintainers:
+  - name: OCI Lens Team
+    email: amar.gowda@oracle.com
