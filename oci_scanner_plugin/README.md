@@ -11,7 +11,7 @@ Deploy all components with a single command:
 kubectl apply -f oci_scanner_plugin/
 ```
 
-## �� Components
+## Components
 
 ### 1. **NVlink RDMA exporter** (`go-plugin/`)
 **Custom OCI Lens metric collector with GPU and system monitoring**
@@ -100,7 +100,7 @@ kubectl apply -f oci_scanner_plugin/active-health-check/
 - GPU temperature and power monitoring
 - Error detection and reporting
 
-## 🔧 Configuration
+## Configuration
 
 ### Prerequisites
 - Kubernetes cluster with GPU nodes
@@ -119,7 +119,7 @@ kubectl create namespace oci-monitoring
 - NVIDIA GPU nodes should have `nvidia.com/gpu` taint
 - Nodes must have appropriate GPU drivers installed
 
-## �� Monitoring
+## Monitoring
 
 ### Access Metrics
 - **Node Exporter**: `http://node-ip:9100/metrics`
@@ -136,7 +136,7 @@ kubectl logs -l app=metrics-push-job -n oci-monitoring --tail=50
 kubectl logs -l app=amd-gpu-healthcheck -n monitoring
 ```
 
-## 🧹 Cleanup
+## Cleanup
 
 Remove all components:
 
@@ -187,7 +187,7 @@ kubectl run test-pod --image=curlimages/curl --rm -it --restart=Never -- curl ht
 3. **Push Gateway Unreachable**: Check network connectivity and URL configuration
 4. **Metrics Not Appearing**: Verify Prometheus scraping configuration
 
-## 📚 Advanced Usage
+## Advanced Usage
 
 ### Custom GPU Types
 Modify the `GPU_TYPE` environment variable in the Go Plugin DaemonSet to support specific GPU architectures.
