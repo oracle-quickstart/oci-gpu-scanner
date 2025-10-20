@@ -30,9 +30,9 @@ kubectl apply -f oci_scanner_plugin/go-plugin/
 ```
 
 **Configuration:**
-- Update `PUSH_GATEWAY` URL in `daemonset.yaml` (line 70) and `configmap.yaml` (line 10)
-- Modify `GPU_TYPE` environment variable for specific GPU types
-- Adjust `PUSH_FREQUENCY` for metrics collection interval
+- Update `<GPU_MANUFACTURER>/go-plugin/daemonset_<GPU_MANUFACTURER>.yaml` (~line 65) and `<GPU_MANUFACTURER>/go-plugin/configmap.yaml` (~line 10):
+   - `PUSH_GATEWAY` URL  
+- Adjust `PUSH_FREQUENCY` for metrics collection interval in https://github.com/oracle-quickstart/oci-gpu-scanner/blob/main/oci-scanner-plugin-amd-helm/values.yaml
 
 ### 2. **Node and GPU Exporters** (`node-and-gpu-exporters/`)
 **System and GPU metrics collection using industry-standard exporters**
