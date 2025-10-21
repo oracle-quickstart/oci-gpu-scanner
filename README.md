@@ -30,7 +30,6 @@ To install OCI GPU Scanner, you have the below options. The solution is installe
 - [Install through OKE Managed Add-On Deployment through OCI Console for existing OKE cluster](./GETTING_STARTED_CONSOLE_DEPLOY.md)
 - [Install through **helm** on existing OKE cluster](./GETTING_STARTED_HELM_DEPLOY.md)
 
-
 ## Health Checks
 
 OCI GPU Scanner performs both passive (non-intrusive) and active (GPU-occupying) performance health checks. Results are reported in the Grafana dashboard. 
