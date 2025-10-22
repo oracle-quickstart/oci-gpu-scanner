@@ -25,16 +25,19 @@ spec:
       nodeSelector:
         kubernetes.io/arch: amd64
       
-      hostNetwork: true
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: amd.com/gpu
+                operator: In
+                values: ["true", "present"]
       
       volumes:
       - name: dri
         hostPath:
           path: /dev/dri
-          type: Directory
-      - name: kfd
-        hostPath:
-          path: /dev/kfd
           type: Directory
       - name: sys
         hostPath:
@@ -61,8 +64,6 @@ spec:
         volumeMounts:
         - name: dri
           mountPath: /dev/dri
-        - name: kfd
-          mountPath: /dev/kfd
         - name: sys
           mountPath: /sys
           readOnly: true
@@ -111,8 +112,7 @@ spec:
       
       tolerations:
       - key: amd.com/gpu
-        operator: Equal
-        value: "present"
+        operator: Exists
         effect: NoSchedule
       
       restartPolicy: Always

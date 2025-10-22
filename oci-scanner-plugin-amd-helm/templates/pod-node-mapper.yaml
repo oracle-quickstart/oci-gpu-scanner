@@ -1,0 +1,82 @@
+{{- if .Values.podNodeMapper.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pod-node-mapper
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    app: pod-node-mapper
+    component: monitoring
+spec:
+  replicas: {{ .Values.podNodeMapper.replicas }}
+  selector:
+    matchLabels:
+      app: pod-node-mapper
+  template:
+    metadata:
+      labels:
+        app: pod-node-mapper
+        component: monitoring
+    spec:
+      serviceAccountName: pod-node-mapper-sa
+      
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: nvidia.com/gpu
+                operator: DoesNotExist
+              - key: amd.com/gpu
+                operator: DoesNotExist
+      
+      tolerations:
+      - key: "node-role.kubernetes.io/control-plane"
+        operator: "Exists"
+        effect: "NoSchedule"
+      - key: "node-role.kubernetes.io/master"
+        operator: "Exists"
+        effect: "NoSchedule"
+      
+      containers:
+      - name: pod-node-mapper
+        image: "{{ .Values.global.ociImageRegistry }}/{{ .Values.podNodeMapper.image.repository }}:{{ .Values.podNodeMapper.image.tag }}"
+        imagePullPolicy: {{ .Values.podNodeMapper.image.pullPolicy }}
+        
+        env:
+        - name: PUSH_GATEWAY
+          value: {{ .Values.global.pushGatewayUrl | quote }}
+        - name: JOB_NAME
+          value: {{ .Values.podNodeMapper.jobName | quote }}
+        - name: CLUSTER_NAME
+          value: {{ .Values.podNodeMapper.clusterName | quote }}
+        
+        resources:
+          {{- toYaml .Values.podNodeMapper.resources | nindent 10 }}
+        
+        livenessProbe:
+          exec:
+            command:
+            - pgrep
+            - -f
+            - python3
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          exec:
+            command:
+            - pgrep
+            - -f
+            - python3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+{{- end }}

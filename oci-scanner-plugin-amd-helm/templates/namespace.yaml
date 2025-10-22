@@ -1,9 +1,0 @@
-{{- if .Values.namespace.create }}
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: {{ .Values.namespace.name }}
-  labels:
-    name: {{ .Values.namespace.name }}
-    app: oci-scanner-plugin
-{{- end }}
