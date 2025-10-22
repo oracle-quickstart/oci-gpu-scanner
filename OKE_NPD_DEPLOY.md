@@ -19,7 +19,7 @@ kubectl label node <nodeIP e.g 10.0.65.72> oci.oraclecloud.com/oke-node-problem-
 Install the NPD DaemonSet.
 
 ```bash
-kubectl apply -f https://github.com/oracle-quickstart/oci-gpu-scanner/blob/main/existing_cluster_deploy/oke-node-problem-detector.yaml
+kubectl apply -f [https://raw.githubusercontent.com/oracle-quickstart/oci-gpu-scanner/main/existing_cluster_deploy/oke-node-problem-detector.yaml]
 ```
 
 Verify that NPD DaemonSet has been installed successfully and running.
