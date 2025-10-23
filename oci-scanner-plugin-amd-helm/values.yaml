@@ -1,20 +1,20 @@
 # Global configuration
 global:
-  namespace: oci-monitoring
-  imageRegistry: iad.ocir.io/iduyx1qnmway/lens-metric-collector
+  namespace: oci-gpu-scanner-plugin
   pushGatewayUrl: "http://prometheus-pushgateway:9091/"
+  ociImageRegistry: iad.ocir.io/iduyx1qnmway/lens-metric-collector
 
 # Namespace configuration
 namespace:
-  create: true
-  name: oci-monitoring
+  create: false
+  name: oci-gpu-scanner-plugin
 
 # Go Plugin configuration
 goPlugin:
   enabled: true
   image:
     repository: oci_lens_metric_collector
-    tag: v0.0.8
+    tag: v0.0.9
     pullPolicy: Always
   
   config:
@@ -37,8 +37,10 @@ goPlugin:
 # AMD GPU Exporter
 amdGpuExporter:
   enabled: true
+  global:
+    imageRegistry: ""
   image:
-    repository: rocm/device-metrics-exporter
+    repository: docker.io/rocm/device-metrics-exporter
     tag: v1.3.1
     pullPolicy: IfNotPresent
   
@@ -94,11 +96,23 @@ rbac:
 # Node Exporter
 nodeExporter:
   enabled: true
-  image:
-    repository: quay.io/prometheus/node-exporter
-    tag: latest
-    pullPolicy: IfNotPresent
   
+# Override default values for the official chart
+prometheus-node-exporter:
+  image:
+    registry: "quay.io"
+    repository: prometheus/node-exporter
+    tag: v1.8.2
+    pullPolicy: IfNotPresent
+  hostRootFsMount:
+    enabled: true
+  hostNetwork: true
+  hostPID: true
+  extraArgs:
+    - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)
+    - --collector.filesystem.fs-types-exclude=^(sys|proc|auto)fs$$
+    - --web.max-requests=40
+    - --no-collector.systemd
   resources:
     requests:
       memory: "64Mi"
@@ -106,3 +120,24 @@ nodeExporter:
     limits:
       memory: "128Mi"
       cpu: "100m"
+
+# Pod Node Mapper
+podNodeMapper:
+  enabled: true
+  replicas: 1
+  image:
+    repository: oci_lens_pod_node_info
+    tag: latest
+    pullPolicy: Always
+  
+  # Configuration
+  jobName: "oci_lens_pod_metrics"
+  clusterName: "oci-lens-cluster"  # Update this per cluster
+  
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "50m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"

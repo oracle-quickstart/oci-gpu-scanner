@@ -73,7 +73,7 @@ spec:
       
       containers:
       - name: oci-lens-plugin
-        image: "{{ .Values.global.imageRegistry }}/{{ .Values.goPlugin.image.repository }}:{{ .Values.goPlugin.image.tag }}"
+        image: "{{ .Values.global.ociImageRegistry }}/{{ .Values.goPlugin.image.repository }}:{{ .Values.goPlugin.image.tag }}"
         imagePullPolicy: {{ .Values.goPlugin.image.pullPolicy }}
         
         env:

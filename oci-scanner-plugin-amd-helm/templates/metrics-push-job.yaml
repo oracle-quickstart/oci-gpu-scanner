@@ -74,7 +74,7 @@ spec:
                   return 1
                 fi
                 
-                local push_url="${PUSHGATEWAY_URL}/job/${job_name}/instance/${instance_name}"
+                local push_url="${PUSHGATEWAY_URL%/}/metrics/job/${job_name}/instance/${instance_name}"
                 log "Pushing $job_name metrics to: $push_url"
                 
                 if echo "$metrics" | curl -k --connect-timeout 10 --max-time 30 --data-binary @- "$push_url" 2>/dev/null; then

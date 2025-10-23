@@ -48,7 +48,7 @@ spec:
       
       containers:
       - name: amd-gpu-healthcheck
-        image: "{{ .Values.global.imageRegistry }}/{{ .Values.healthCheck.image.repository }}:{{ .Values.healthCheck.image.tag }}"
+        image: "{{ .Values.global.ociImageRegistry }}/{{ .Values.healthCheck.image.repository }}:{{ .Values.healthCheck.image.tag }}"
         imagePullPolicy: {{ .Values.healthCheck.image.pullPolicy }}
         
         securityContext:

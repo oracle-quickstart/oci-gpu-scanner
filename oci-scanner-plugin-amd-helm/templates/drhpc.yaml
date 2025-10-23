@@ -48,7 +48,7 @@ spec:
       
       containers:
       - name: oke-dr-hpc-prod
-        image: "{{ .Values.global.imageRegistry }}/{{ .Values.drhpc.image.repository }}:{{ .Values.drhpc.image.tag }}"
+        image: "{{ .Values.global.ociImageRegistry }}/{{ .Values.drhpc.image.repository }}:{{ .Values.drhpc.image.tag }}"
         imagePullPolicy: {{ .Values.drhpc.image.pullPolicy }}
         
         securityContext:
