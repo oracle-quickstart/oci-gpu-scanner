@@ -1,15 +1,17 @@
 # OCI Scanner Plugin Helm Chart
 
-AMD GPU monitoring and health check solution for OCI compute instances.
+Multi-vendor GPU monitoring and health check solution for OCI compute instances with AMD and NVIDIA GPUs.
 
 ## Components
 
 - **Go Plugin**: Main metric collector
-- **Node Exporter**: System metrics
-- **AMD GPU Exporter**: GPU metrics
-- **Metrics Push Job**: Automated metrics forwarding
+- **Node Exporter**: System metrics (via subchart)
+- **AMD GPU Exporter**: AMD GPU metrics via ROCm Device Metrics Exporter
+- **NVIDIA DCGM Exporter**: NVIDIA GPU metrics (via subchart)
+- **Metrics Push Daemon**: Automated metrics forwarding to Pushgateway
+- **Pod Node Mapper**: Pod-to-node relationship tracking
 - **Health Check**: GPU performance testing (optional)
-- **DRHPC**: DRHPC monitoring (optional)
+- **DRHPC**: Distributed diagnostic monitoring for both AMD and NVIDIA
 
 ## Configuration
 
@@ -31,6 +33,7 @@ helm uninstall oci-gpu-scanner-plugin -n oci-gpu-scanner-plugin
 
 ## Requirements
 
-- Kubernetes cluster with AMD GPU nodes
+- Kubernetes cluster with AMD / Nvidia GPU nodes
 - Prometheus Push Gateway accessible from cluster
 - AMD GPU drivers installed on nodes
+- Nvidia GPU Drivers installed on the nodes
