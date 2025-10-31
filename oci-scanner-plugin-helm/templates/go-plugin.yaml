@@ -44,13 +44,22 @@ spec:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
+            # Match nodes with AMD GPUs
             - matchExpressions:
               - key: amd.com/gpu
+                operator: In
+                values: ["true", "present"]
+            # OR match nodes with NVIDIA GPUs
+            - matchExpressions:
+              - key: nvidia.com/gpu
                 operator: In
                 values: ["true", "present"]
       
       tolerations:
       - key: amd.com/gpu
+        operator: Exists
+        effect: NoSchedule
+      - key: nvidia.com/gpu
         operator: Exists
         effect: NoSchedule
       

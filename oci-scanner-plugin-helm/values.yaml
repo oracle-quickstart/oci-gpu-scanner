@@ -37,13 +37,48 @@ goPlugin:
 # AMD GPU Exporter
 amdGpuExporter:
   enabled: true
+
+device-metrics-exporter-charts:
   global:
     imageRegistry: ""
+  platform: k8s
+  nodeSelector:
+    amd.com/gpu: "true"
+  kubelet:
+    podResourceAPISocketPath: /var/lib/kubelet/pod-resources
   image:
     repository: docker.io/rocm/device-metrics-exporter
-    tag: v1.3.1
+    tag: v1.4.0
     pullPolicy: IfNotPresent
-  
+  service:
+    type: ClusterIP
+    ClusterIP:
+      port: 5000
+  tolerations:
+    - key: amd.com/gpu
+      operator: Exists
+      effect: NoSchedule
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+# NVIDIA GPU Exporter
+nvidiaGpuExporter:
+  enabled: true
+
+# Configuration for DCGM Exporter subchart
+dcgm-exporter:
+  namespaceOverride: ""
+  nodeSelector:
+    nvidia.com/gpu: "true"
+  tolerations:
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
   resources:
     requests:
       memory: "128Mi"
@@ -51,11 +86,15 @@ amdGpuExporter:
     limits:
       memory: "256Mi"
       cpu: "200m"
+      nvidia.com/gpu: 1 
+  serviceMonitor:
+    enabled: false
 
 # Metrics Push Job
 metricsPushJob:
   enabled: true
-  schedule: "* * * * *"
+  pushIntervalSeconds: 60 
+  enableServiceDiscovery: false
   
   resources:
     requests:
@@ -81,13 +120,42 @@ healthCheck:
       memory: "16Gi"
       cpu: "4"
 
-# DRHPC
 drhpc:
   enabled: true
-  image:
-    repository: oci_lens_drhpc_amd
-    tag: v0.0.1
-    pullPolicy: Always
+  gpuTypes:
+    - type: amd
+      enabled: true
+      image:
+        repository: oci-dr-hpc-v2       
+        rocmVersion: rocm                 # ROCm version prefix
+        tag: latest                       # Tag comes after rocm version
+        pullPolicy: Always
+      resultsHostPath: "/var/lib/oci-dr-hpc-v2"
+      nodeSelector:
+        amd.com/gpu: "true"
+      tolerations:
+        - key: amd.com/gpu
+          operator: Exists
+          effect: NoSchedule
+      resources: {}
+      extraEnv: []
+    
+    - type: nvidia
+      enabled: true
+      image:
+        repository: oci-dr-hpc-v2        
+        cudaVersion: cuda-12.9.0          # CUDA version prefix
+        tag: latest                       # Tag comes after cuda version
+        pullPolicy: Always
+      resultsHostPath: "/var/lib/oci-dr-hpc-v2"                        
+      nodeSelector:
+        nvidia.com/gpu: "true"
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+      resources: {}
+      extraEnv: []
 
 # RBAC
 rbac:
@@ -99,6 +167,7 @@ nodeExporter:
   
 # Override default values for the official chart
 prometheus-node-exporter:
+  namespaceOverride: "" 
   image:
     registry: "quay.io"
     repository: prometheus/node-exporter
