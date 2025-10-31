@@ -1,0 +1,181 @@
+{{- if .Values.metricsPushJob.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pushgateway-config
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    app: pushgateway-config
+    component: monitoring
+data:
+  url: {{ .Values.global.pushGatewayUrl | quote }}
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: metrics-push-daemon
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    app: metrics-push-daemon
+    component: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: metrics-push-daemon
+  template:
+    metadata:
+      labels:
+        app: metrics-push-daemon
+        component: monitoring
+    spec:
+      serviceAccountName: metrics-push-sa
+      restartPolicy: Always
+      containers:
+      - name: metrics-pusher
+        image: curlimages/curl:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          #!/bin/sh
+          set -e
+          
+          log() {
+            echo "$(date '+%Y-%m-%d %H:%M:%S') [$$] $*"
+          }
+          
+          handle_error() {
+            log "ERROR: $1"
+            exit 1
+          }
+          
+          if [ -z "$PUSHGATEWAY_URL" ]; then
+            handle_error "PUSHGATEWAY_URL environment variable is not set"
+          fi
+          
+          log "Starting metrics push daemon..."
+          log "Push Gateway URL: $PUSHGATEWAY_URL"
+          log "Push Interval: ${PUSH_INTERVAL_SECONDS}s"
+          
+          NODE_NAME=${NODE_NAME:-unknown}
+          log "Node Name: $NODE_NAME"
+          
+          push_metrics() {
+            local job_name="$1"
+            local metrics="$2"
+            local instance_name="$3"
+            
+            if [ -z "$metrics" ]; then
+              log "Warning: No metrics data for $job_name"
+              return 1
+            fi
+            
+            local push_url="${PUSHGATEWAY_URL%/}/metrics/job/${job_name}/instance/${instance_name}"
+            
+            if echo "$metrics" | curl -k --connect-timeout 10 --max-time 30 --data-binary @- "$push_url" 2>/dev/null; then
+              log "$job_name metrics pushed successfully"
+              return 0
+            else
+              log "ERROR: Failed to push $job_name metrics"
+              return 1
+            fi
+          }
+          
+          # Main loop - push metrics at regular intervals
+          while true; do
+            log "=== Starting metrics collection cycle ==="
+            
+            # Detect GPU type by checking which exporter is available
+            GPU_TYPE="none"
+            
+            # Check for AMD GPU exporter (port 5000)
+            log "Checking for AMD GPU exporter on port 5000..."
+            if curl -s --connect-timeout 5 --max-time 10 "http://localhost:5000/metrics" > /dev/null 2>&1; then
+              log "AMD GPU exporter detected"
+              GPU_TYPE="amd"
+              AMD_METRICS=$(curl -s --connect-timeout 5 --max-time 10 "http://localhost:5000/metrics" 2>/dev/null || echo "")
+              push_metrics "amd-gpu-exporter" "$AMD_METRICS" "$NODE_NAME"
+            else
+              log "AMD GPU exporter not available (port 5000 not responding)"
+            fi
+            
+            # Check for NVIDIA DCGM exporter (port 9400)
+            log "Checking for NVIDIA DCGM exporter on port 9400..."
+            if curl -s --connect-timeout 5 --max-time 10 "http://localhost:9400/metrics" > /dev/null 2>&1; then
+              log "NVIDIA DCGM exporter detected"
+              GPU_TYPE="nvidia"
+              DCGM_METRICS=$(curl -s --connect-timeout 5 --max-time 10 "http://localhost:9400/metrics" 2>/dev/null || echo "")
+              push_metrics "dcgm-exporter" "$DCGM_METRICS" "$NODE_NAME"
+            else
+              log "NVIDIA DCGM exporter not available (port 9400 not responding)"
+            fi
+            
+            # Collect Node Exporter metrics (should be on all nodes)
+            log "Checking for Node Exporter on port 9100..."
+            if curl -s --connect-timeout 5 --max-time 10 "http://localhost:9100/metrics" > /dev/null 2>&1; then
+              log "Node Exporter found, collecting metrics..."
+              NODE_METRICS=$(curl -s --connect-timeout 5 --max-time 10 "http://localhost:9100/metrics" 2>/dev/null || echo "")
+              push_metrics "node-exporter" "$NODE_METRICS" "$NODE_NAME"
+            else
+              log "Node Exporter not available (port 9100 not responding)"
+            fi
+            
+            if [ "$GPU_TYPE" = "none" ]; then
+              log "WARNING: No GPU exporter detected on this node"
+            else
+              log "GPU Type detected: $GPU_TYPE"
+            fi
+            
+            log "=== Metrics collection cycle completed ==="
+            log "Sleeping for ${PUSH_INTERVAL_SECONDS} seconds..."
+            sleep ${PUSH_INTERVAL_SECONDS}
+          done
+        env:
+        - name: PUSHGATEWAY_URL
+          valueFrom:
+            configMapKeyRef:
+              name: pushgateway-config
+              key: url
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: PUSH_INTERVAL_SECONDS
+          value: {{ .Values.metricsPushJob.pushIntervalSeconds | default "60" | quote }}
+        resources:
+          {{- toYaml .Values.metricsPushJob.resources | nindent 10 }}
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+      hostNetwork: true
+      nodeSelector:
+        kubernetes.io/arch: amd64
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            # Match nodes with AMD GPUs
+            - matchExpressions:
+              - key: amd.com/gpu
+                operator: In
+                values: ["true", "present"]
+            # OR match nodes with NVIDIA GPUs
+            - matchExpressions:
+              - key: nvidia.com/gpu
+                operator: In
+                values: ["true", "present"]
+      tolerations:
+      - key: amd.com/gpu
+        operator: Exists
+        effect: NoSchedule
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+{{- end }}

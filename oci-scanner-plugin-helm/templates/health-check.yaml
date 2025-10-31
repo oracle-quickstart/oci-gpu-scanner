@@ -1,5 +1,18 @@
 {{- if .Values.healthCheck.enabled }}
 ---
+# PriorityClass for low-priority preemptible workloads
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: gpu-healthcheck-low-priority
+  labels:
+    app: amd-gpu-healthcheck
+    component: gpu-monitoring
+value: -10  # Negative value = lower than default (0)
+preemptionPolicy: PreemptLowerPriority
+globalDefault: false
+description: "Low priority class for GPU health checks that can be preempted by production workloads"
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -8,17 +21,30 @@ metadata:
   labels:
     app: amd-gpu-healthcheck
     component: gpu-monitoring
+    priority: low
 spec:
   parallelism: 1
   completions: 1
   activeDeadlineSeconds: 7200
   backoffLimit: 0
+  ttlSecondsAfterFinished: {{ .Values.healthCheck.ttlSecondsAfterFinished | default 86400 }}  # Clean up after 24h
+  
   
   template:
     metadata:
       labels:
         app: amd-gpu-healthcheck
+         priority: low
+      annotations:
+        # Mark as preemptible
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
     spec:
+      # Low priority - can be preempted
+      priorityClassName: gpu-healthcheck-low-priority
+      
+      # Allow preemption
+      preemptionPolicy: PreemptLowerPriority
+
       nodeSelector:
         kubernetes.io/arch: amd64
       
@@ -36,6 +62,15 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       
       affinity:
+        # Prefer nodes with low utilization
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+              - key: node.kubernetes.io/instance-type
+                operator: Exists
+                
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:
