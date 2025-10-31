@@ -130,6 +130,7 @@ drhpc:
         rocmVersion: rocm                 # ROCm version prefix
         tag: latest                       # Tag comes after rocm version
         pullPolicy: Always
+      resultsHostPath: "/var/lib/oci-dr-hpc-v2"
       nodeSelector:
         amd.com/gpu: "true"
       tolerations:
@@ -146,7 +147,7 @@ drhpc:
         cudaVersion: cuda-12.9.0          # CUDA version prefix
         tag: latest                       # Tag comes after cuda version
         pullPolicy: Always
-      gpuCount: 8                         # Request all GPUs
+      resultsHostPath: "/var/lib/oci-dr-hpc-v2"                        
       nodeSelector:
         nvidia.com/gpu: "true"
       tolerations:

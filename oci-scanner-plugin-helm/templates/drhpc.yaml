@@ -33,6 +33,10 @@ spec:
       - name: root
         hostPath:
           path: "/"
+      - name: drhpc-results
+        hostPath:
+          path: {{ .resultsHostPath | default "/var/lib/oci-dr-hpc-v2" | quote }}
+          type: DirectoryOrCreate
       
       hostPID: true
       hostIPC: true
@@ -58,22 +62,12 @@ spec:
         volumeMounts: 
         - name: root
           mountPath: /host
+        - name: drhpc-results
+          mountPath: /opt/oci-hpc/oci-dr-hpc
         
-        {{- if eq .type "nvidia" }}
-        # NVIDIA: Request GPU resources (equivalent to --gpus all)
+        # Same resource config for both AMD and NVIDIA
         resources:
-          limits:
-            nvidia.com/gpu: {{ .gpuCount | default 8 }}
-          {{- with .resources }}
-          {{- toYaml . | nindent 10 }}
-          {{- end }}
-        {{- else }}
-        # AMD: No GPU resource requests needed
-        resources:
-          {{- with .resources }}
-          {{- toYaml . | nindent 10 }}
-          {{- end }}
-        {{- end }}
+          {{- toYaml .resources | nindent 10 }}
         
         env:
         - name: PUSH_GATEWAY
