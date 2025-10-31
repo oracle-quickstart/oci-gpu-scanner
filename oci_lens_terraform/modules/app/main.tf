@@ -24,7 +24,7 @@ resource "oci_identity_policy" "workload_identity_policy" {
 resource "helm_release" "app" {
   name      = "lens"
   namespace = kubernetes_namespace.ns.metadata[0].name
-  chart = "https://oci-ai-incubations.github.io/corrino-lens-devops/lens-0.1.9-20251024-2059.tgz"
+  chart = "https://oci-ai-incubations.github.io/corrino-lens-devops/lens-0.1.10-20251031-2247.tgz"
   wait            = true
   timeout         = 1800
   atomic          = false
