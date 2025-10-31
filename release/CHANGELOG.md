@@ -15,7 +15,7 @@ Oct 31, 2025
 ----
 ## Changelog
 ### Feature
-#### Control Plane
+#### Portal
 - Add autoremediation functionality to UpdateMonitoringRing component ([corrino-lens-portal #30](https://github.com/oci-ai-incubations/corrino-lens-portal/pull/30), [@jolettacheungoracle](https://github.com/jolettacheungoracle))
 
 #### Plugin
