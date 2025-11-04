@@ -44,9 +44,12 @@ helm uninstall oci-gpu-scanner-plugin -n oci-gpu-scanner-plugin
 - AMD GPU drivers installed on nodes
 - Nvidia GPU Drivers installed on the nodes
 
-## Node Problem Detector Setup
+# Installing and Using OKE Node Problem Detector (NPD) DaemonSet with OCI GPU Scanner Service
 
-**IMPORTANT**: The Node Problem Detector will only work on GPU nodes that are labeled with `oci.oraclecloud.com/oke-node-problem-detector-enabled="true"`. And it reads these metrics from drhpc, so ensure that is enabled while deploying.
+OKE NPD is an extension of https://github.com/kubernetes/node-problem-detector that processes GPU health check failures reported by GPU Scanner service and sets conditions on the affected nodes. This feature enables proactive monitoring of GPU node health and early detection of issues. 
+
+
+**IMPORTANT**: The Node Problem Detector will only work on GPU nodes that are labeled with `oci.oraclecloud.com/oke-node-problem-detector-enabled="true"`. NPD will only start processing GPU health check events when drhpc is running on the nodes, so ensure that it is enabled when you install the helm chart.
 
 Before enabling NPD, label your GPU nodes:
 
@@ -73,3 +76,11 @@ helm upgrade oci-gpu-scanner-plugin . \
 ```
 
 **Note**: NPD requires DRHPC to be enabled and running to provide GPU health check data.
+
+Verify that NPD DaemonSet has been installed successfully and running.
+
+```bash
+kubectl get pods -l app=oke-node-problem-detector -o wide -n kube-system
+```
+
+Results should show ```oke-node-problem-detector``` in running state for all targeted GPU nodes.
