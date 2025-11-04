@@ -232,7 +232,7 @@ helm install lens ./helm -n lens \
 
 ## Step 2: OCI GPU Data Plane Plugin installation on GPU Nodes
 
-**NOTE** : Running data control plane plugin as a Kubernetes native plugin running daemon sets for [AMD MI300X nodes can be found here](./oci-scanner-plugin-amd-helm/README.md). Nvidia offering as a daemon is coming soon. Issue#22
+**NOTE** : Running data control plane plugin as a Kubernetes native plugin running daemon sets for [AMD and Nvidia  nodes can be found here](./oci-scanner-plugin-helm/README.md). Supported GPUs are: MI300x, MI355x, A10, H100 and B200.
 
 1. **Navigate to Dashboards**: Go to the dashboard section of the OCI GPU Scanner Portal
 2. **Go to Tab - OCI GPU Scanner Install Script**:

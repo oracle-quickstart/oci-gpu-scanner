@@ -1,10 +1,16 @@
+{{- if .Values.nodeProblemDetector.enabled }}
+---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: oke-node-problem-detector
-  namespace: kube-system
+  namespace: {{ .Values.nodeProblemDetector.namespace | default "kube-system" }}
   labels:
     app: oke-node-problem-detector
+    component: gpu-monitoring
+    {{- with .Values.global.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   selector:
     matchLabels:
@@ -13,9 +19,14 @@ spec:
     metadata:
       labels:
         app: oke-node-problem-detector
+        component: gpu-monitoring
     spec:
       nodeSelector:
+        {{- if .Values.nodeProblemDetector.nodeSelector }}
+        {{- toYaml .Values.nodeProblemDetector.nodeSelector | nindent 8 }}
+        {{- else }}
         oci.oraclecloud.com/oke-node-problem-detector-enabled: "true"
+        {{- end }}
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -30,7 +41,9 @@ spec:
             - /node-problem-detector --logtostderr --prometheus-port=${PROMETHEUS_PORT}
               --prometheus-address 0.0.0.0 --config.system-log-monitor=/config/kernel-monitor.json,/config/readonly-monitor.json
               --config.custom-plugin-monitor=/node-problem-detector-custom-check/imds_reachability.json
+              {{- if .Values.nodeProblemDetector.enableGpuChecks }}
               --config.custom-plugin-monitor=/node-problem-detector-gpu-check/dr-hpc.json
+              {{- end }}
               --enable-k8s-exporter=true
           command:
             - /bin/sh
@@ -42,21 +55,16 @@ spec:
                   apiVersion: v1
                   fieldPath: spec.nodeName
             - name: PROMETHEUS_PORT
-              value: "20257"
-          image: phx.ocir.io/idnlixcmffxd/oke-public-node-problem-detector:v0.8.20.7@sha256:399b506dbfa5c33e60a247d0d3199f025d242b7a7480c956446e70eaa090c599
-          imagePullPolicy: Always
+              value: {{ .Values.nodeProblemDetector.prometheusPort | default "20257" | quote }}
+          image: {{ .Values.nodeProblemDetector.image.repository }}:{{ .Values.nodeProblemDetector.image.tag }}@{{ .Values.nodeProblemDetector.image.sha256 }}
+          imagePullPolicy: {{ .Values.nodeProblemDetector.image.pullPolicy | default "Always" }}
           name: oke-node-problem-detector
           ports:
-            - containerPort: 20257
+            - containerPort: {{ .Values.nodeProblemDetector.prometheusPort | default 20257 }}
               name: metrics
               protocol: TCP
           resources:
-            limits:
-              cpu: 10m
-              memory: 80Mi
-            requests:
-              cpu: 10m
-              memory: 80Mi
+            {{- toYaml .Values.nodeProblemDetector.resources | nindent 12 }}
           securityContext:
             privileged: true
           volumeMounts:
@@ -74,27 +82,17 @@ spec:
             - mountPath: /node-problem-detector-custom-check
               name: node-problem-detector-custom-check
               readOnly: true
+            {{- if .Values.nodeProblemDetector.enableGpuChecks }}
             - mountPath: /node-problem-detector-gpu-check
               name: node-problem-detector-gpu-check
               readOnly: true
+            {{- end }}
       serviceAccountName: oke-node-problem-detector-sa
       tolerations:
-        - key: CriticalAddonsOnly
-          operator: Exists
-        - key: oci.oraclecloud.com/oke-is-preemptible
-          operator: Exists
-        - effect: NoSchedule
-          key: nvidia.com/gpu
-          operator: Exists
-        - effect: NoSchedule
-          key: amd.com/gpu
-          operator: Exists
-        - effect: NoSchedule
-          key: oci.oraclecloud.com/node-auto-repair-scheduled
-          operator: Exists
+        {{- toYaml .Values.nodeProblemDetector.tolerations | nindent 8 }}
       volumes:
         - hostPath:
-            path: /home/ubuntu/oci-dr-hpc-v2/
+            path: {{ .Values.nodeProblemDetector.drhpcResultsPath | default "/var/lib/oci-dr-hpc-v2" }}
           name: log
         - hostPath:
             path: /dev/kmsg
@@ -109,17 +107,19 @@ spec:
             defaultMode: 493
             name: node-problem-detector-custom-check
           name: node-problem-detector-custom-check
+        {{- if .Values.nodeProblemDetector.enableGpuChecks }}
         - configMap:
             defaultMode: 493
             name: node-problem-detector-gpu-check
           name: node-problem-detector-gpu-check
+        {{- end }}
 
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: node-problem-detector-custom-check
-  namespace: kube-system
+  namespace: {{ .Values.nodeProblemDetector.namespace | default "kube-system" }}
 data:
   imds_reachability.sh: |
     #!/bin/bash   
@@ -146,7 +146,6 @@ data:
       echo "IMDS is unreachable"
       exit 1
     fi
-
 
   imds_reachability.json: |
     {
@@ -177,12 +176,13 @@ data:
       ]
     }
 
+{{- if .Values.nodeProblemDetector.enableGpuChecks }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: node-problem-detector-gpu-check
-  namespace: kube-system
+  namespace: {{ .Values.nodeProblemDetector.namespace | default "kube-system" }}
 data:
   dr_hpc_check.sh: |
     #!/bin/bash
@@ -579,13 +579,14 @@ data:
         }
       ]
     }
+{{- end }}
 
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: oke-node-problem-detector-sa
-  namespace: kube-system
+  namespace: {{ .Values.nodeProblemDetector.namespace | default "kube-system" }}
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -599,4 +600,5 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: oke-node-problem-detector-sa
-    namespace: kube-system
+    namespace: {{ .Values.nodeProblemDetector.namespace | default "kube-system" }}
+{{- end }}
