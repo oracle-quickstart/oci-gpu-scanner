@@ -1,0 +1,3892 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "$$hashKey": "object:192",
+        "builtIn": 1,
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "GPU health monitoring dashboard for Demo Pool H100 & MI300X monitoring ring. OCI lens checks the readiness of GPUs, RDMA network and invokes active performance checks while enabling continuous monitoring.",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 7,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 162,
+      "panels": [],
+      "title": "Health Summary",
+      "type": "row"
+    },
+    {
+      "description": "",
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
+      "id": 163,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "# OCI Lens - GPU Host Health Monitoring\nPer node health data with node health, GPU health, RDMA health",
+        "mode": "markdown"
+      },
+      "pluginVersion": "12.1.1",
+      "title": "",
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "{{DATASOURCE_PROMETHEUS}}"
+      },
+      "description": "All details of the host",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "instance"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 411
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "id": 47,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "enablePagination": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 3,
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "12.1.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_host_metadata{instance=~\"$hostname\", instance=~\"$hostname\"}",
+          "format": "table",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Host Node Metadata",
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {
+            "keepLabels": [
+              "host_state",
+              "hostname",
+              "instance",
+              "job",
+              "oci_shape",
+              "region_name",
+              "serial_number"
+            ],
+            "mode": "columns"
+          }
+        },
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "Time": {
+                "aggregations": [
+                  "lastNotNull"
+                ]
+              },
+              "__name__": {
+                "aggregations": [],
+                "operation": "aggregate"
+              },
+              "compartment_id": {
+                "aggregations": [
+                  "lastNotNull"
+                ],
+                "operation": "aggregate"
+              },
+              "gpu_driver_version": {
+                "aggregations": [
+                  "lastNotNull"
+                ],
+                "operation": "aggregate"
+              },
+              "host_state": {
+                "aggregations": [
+                  "lastNotNull"
+                ],
+                "operation": "aggregate"
+              },
+              "hostname": {
+                "aggregations": [
+                  "lastNotNull"
+                ],
+                "operation": "aggregate"
+              },
+              "instance": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "job": {
+                "aggregations": [
+                  "lastNotNull"
+                ]
+              },
+              "oci_shape": {
+                "aggregations": [
+                  "lastNotNull"
+                ],
+                "operation": "aggregate"
+              },
+              "os_kernel_version": {
+                "aggregations": [
+                  "lastNotNull"
+                ],
+                "operation": "aggregate"
+              },
+              "os_version": {
+                "aggregations": [
+                  "lastNotNull"
+                ],
+                "operation": "aggregate"
+              },
+              "region_name": {
+                "aggregations": [
+                  "lastNotNull"
+                ],
+                "operation": "aggregate"
+              },
+              "serial_number": {
+                "aggregations": [
+                  "lastNotNull"
+                ],
+                "operation": "aggregate"
+              }
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "{{DATASOURCE_PROMETHEUS}}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": false,
+            "inspect": false
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 0,
+                  "text": "Fail"
+                },
+                "1": {
+                  "color": "green",
+                  "index": 1,
+                  "text": "Pass"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 8,
+                "result": {
+                  "color": "green",
+                  "index": 2
+                },
+                "to": 16
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 24,
+                "result": {
+                  "color": "green",
+                  "index": 3
+                },
+                "to": 24
+              },
+              "type": "range"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": ""
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Overall Status"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "0": {
+                        "color": "red",
+                        "index": 0,
+                        "text": "Fail"
+                      },
+                      "1": {
+                        "color": "green",
+                        "index": 1,
+                        "text": "Pass"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "GPU Count Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "GPU Mode Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "SRAM Error Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "GPU Clock Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "GPU Driver Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "GPU Width Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "GPU Speed Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PCIE Error Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PCIE Speed Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "PCIE Width Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "RDMA Link Flap Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Link Down State Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Auth Status Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Eth0 Presence Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "HPC Info Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "RX Discard Status"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Missing Inference Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Thermal Throttle Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Source Based Routing Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "OCA Version Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "HCA Error Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "id": 164,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 0,
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "12.1.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"final_status\", instance=~\"$hostname\"}",
+          "format": "table",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "final_status",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"gpu_count\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "gpu_count"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"gpu_mode_check\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "gpu_mode_check"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"gpu_clk_check\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "gpu_clk_check"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"gpu_xid_check\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "gpu_driver_check"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"gpu_width_count\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "gpu_width_count"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"gpu_speed_count\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "gpu_speed_count"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"pcie_error_check\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "pcie_error_check"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"pcie_speed\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "pcie_speed"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"pcie_width\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "pcie_width"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"max_acc_out\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "max_acc_out"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"max_acc_adv_settings\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "max_acc_adv_settings"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"gid_index_check\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "gid_index_check"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"sram_error_check\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "sram_error_check"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"row_remap_error_check\", instance=~\"$hostname\"}",
+          "format": "table",
+          "fullMetaSearch": false,
+          "hide": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "row_remap_error_check",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"nvlink_speed_check\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "nvlink_speed_check"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"nvlink_inactive_check\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "nvlink_inactive_check"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"rdma_link_flap_check\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "rdma_link_flap_check"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"rdma_nic_count\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "rdma_nic_count"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"rdma_width_count\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "rdma_width_count"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"rdma_speed_count\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "rdma_speed_count"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"hca_error_check\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "hca_error_check"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"link_down_state\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "link_down_state"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"rx_discards_status\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "rx_discards_status"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"auth_status\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "auth_status"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"eth0_presence_check\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "eth0_presence_check"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"hpc_info_check\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "hpc_info_check"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"missing_interface_check\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "missing_interface_check"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"peermem_module_check\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "peermem_module_check"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"cdfp_cable_check\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "cdfp_cable_check"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"fabricmanager_check\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "fabricmanager_check"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"thermal_throttling_check\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "thermal_throttling_check"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"source_based_routing_check\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "source_based_routing_check"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"oca_version_check\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "oca_version_check"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"drhpc_rttcc_status\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "drhpc_rttcc_status"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_drhpc_node_summary{test=\"drhpc_failure_recommendation\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "drhpc_failure_recommendation"
+        }
+      ],
+      "title": "OCI Dr.HPC Health Check Status",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "instance",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time 1": false,
+              "Time 10": true,
+              "Time 11": true,
+              "Time 12": true,
+              "Time 13": true,
+              "Time 14": true,
+              "Time 15": true,
+              "Time 16": true,
+              "Time 17": true,
+              "Time 18": true,
+              "Time 19": true,
+              "Time 2": true,
+              "Time 20": true,
+              "Time 21": true,
+              "Time 22": true,
+              "Time 23": true,
+              "Time 24": true,
+              "Time 25": true,
+              "Time 26": true,
+              "Time 27": true,
+              "Time 28": true,
+              "Time 29": true,
+              "Time 3": true,
+              "Time 30": true,
+              "Time 31": true,
+              "Time 32": true,
+              "Time 4": true,
+              "Time 5": true,
+              "Time 6": true,
+              "Time 7": true,
+              "Time 8": true,
+              "Time 9": true,
+              "Value #A": false,
+              "Value #gpu_count": false,
+              "Value #thermal_throttling_check": false,
+              "__name__ 1": true,
+              "__name__ 10": true,
+              "__name__ 11": true,
+              "__name__ 12": true,
+              "__name__ 13": true,
+              "__name__ 14": true,
+              "__name__ 15": true,
+              "__name__ 16": true,
+              "__name__ 17": true,
+              "__name__ 18": true,
+              "__name__ 19": true,
+              "__name__ 2": true,
+              "__name__ 20": true,
+              "__name__ 21": true,
+              "__name__ 22": true,
+              "__name__ 23": true,
+              "__name__ 24": true,
+              "__name__ 25": true,
+              "__name__ 26": true,
+              "__name__ 27": true,
+              "__name__ 28": true,
+              "__name__ 29": true,
+              "__name__ 3": true,
+              "__name__ 30": true,
+              "__name__ 31": true,
+              "__name__ 32": true,
+              "__name__ 4": true,
+              "__name__ 5": true,
+              "__name__ 6": true,
+              "__name__ 7": true,
+              "__name__ 8": true,
+              "__name__ 9": true,
+              "actual_routes": true,
+              "current_version": true,
+              "device 1": true,
+              "device 2": true,
+              "expected_routes": true,
+              "expected_version": true,
+              "gpu 1": true,
+              "gpu 10": true,
+              "gpu 11": true,
+              "gpu 12": true,
+              "gpu 13": true,
+              "gpu 14": true,
+              "gpu 2": true,
+              "gpu 3": true,
+              "gpu 4": true,
+              "gpu 5": true,
+              "gpu 6": true,
+              "gpu 7": true,
+              "gpu 8": true,
+              "gpu 9": true,
+              "hostGPU 10": true,
+              "hostGPU 11": true,
+              "hostGPU 12": true,
+              "hostGPU 13": true,
+              "hostGPU 14": true,
+              "hostGPU 2": true,
+              "hostGPU 3": true,
+              "hostGPU 4": true,
+              "hostGPU 5": true,
+              "hostGPU 6": true,
+              "hostGPU 7": true,
+              "hostGPU 8": true,
+              "hostGPU 9": true,
+              "hostIP 10": true,
+              "hostIP 11": true,
+              "hostIP 12": true,
+              "hostIP 13": true,
+              "hostIP 14": true,
+              "hostIP 2": true,
+              "hostIP 3": true,
+              "hostIP 4": true,
+              "hostIP 5": true,
+              "hostIP 6": true,
+              "hostIP 7": true,
+              "hostIP 8": true,
+              "hostIP 9": true,
+              "hostRegion 10": true,
+              "hostRegion 11": true,
+              "hostRegion 12": true,
+              "hostRegion 13": true,
+              "hostRegion 14": true,
+              "hostRegion 2": true,
+              "hostRegion 3": true,
+              "hostRegion 4": true,
+              "hostRegion 5": true,
+              "hostRegion 6": true,
+              "hostRegion 7": true,
+              "hostRegion 8": true,
+              "hostRegion 9": true,
+              "hostShape 1": true,
+              "hostShape 10": true,
+              "hostShape 11": true,
+              "hostShape 12": true,
+              "hostShape 13": true,
+              "hostShape 14": true,
+              "hostShape 2": true,
+              "hostShape 3": true,
+              "hostShape 4": true,
+              "hostShape 5": true,
+              "hostShape 6": true,
+              "hostShape 7": true,
+              "hostShape 8": true,
+              "hostShape 9": true,
+              "host_OCID 1": true,
+              "host_OCID 10": true,
+              "host_OCID 11": true,
+              "host_OCID 12": true,
+              "host_OCID 13": true,
+              "host_OCID 14": true,
+              "host_OCID 2": true,
+              "host_OCID 3": true,
+              "host_OCID 4": true,
+              "host_OCID 5": true,
+              "host_OCID 6": true,
+              "host_OCID 7": true,
+              "host_OCID 8": true,
+              "host_OCID 9": true,
+              "hostname 1": true,
+              "hostname 10": true,
+              "hostname 11": true,
+              "hostname 12": true,
+              "hostname 13": true,
+              "hostname 14": true,
+              "hostname 2": true,
+              "hostname 3": true,
+              "hostname 4": true,
+              "hostname 5": true,
+              "hostname 6": true,
+              "hostname 7": true,
+              "hostname 8": true,
+              "hostname 9": true,
+              "instance": false,
+              "interfaces": true,
+              "is_running": true,
+              "job 1": true,
+              "job 10": true,
+              "job 11": true,
+              "job 12": true,
+              "job 13": true,
+              "job 14": true,
+              "job 15": true,
+              "job 16": true,
+              "job 17": true,
+              "job 18": true,
+              "job 19": true,
+              "job 2": true,
+              "job 20": true,
+              "job 21": true,
+              "job 22": true,
+              "job 23": true,
+              "job 24": true,
+              "job 25": true,
+              "job 26": true,
+              "job 27": true,
+              "job 28": true,
+              "job 29": true,
+              "job 3": true,
+              "job 30": true,
+              "job 31": true,
+              "job 32": true,
+              "job 4": true,
+              "job 5": true,
+              "job 6": true,
+              "job 7": true,
+              "job 8": true,
+              "job 9": true,
+              "pci_busid 1": true,
+              "pci_busid 2": true,
+              "pci_busid 3": true,
+              "pci_busid 4": true,
+              "run_id 1": true,
+              "run_id 10": true,
+              "run_id 11": true,
+              "run_id 12": true,
+              "run_id 13": true,
+              "run_id 14": true,
+              "run_id 15": true,
+              "run_id 16": true,
+              "run_id 17": true,
+              "run_id 18": true,
+              "run_id 19": true,
+              "run_id 2": true,
+              "run_id 20": true,
+              "run_id 21": true,
+              "run_id 22": true,
+              "run_id 23": true,
+              "run_id 24": true,
+              "run_id 25": true,
+              "run_id 26": true,
+              "run_id 27": true,
+              "run_id 28": true,
+              "run_id 29": true,
+              "run_id 3": true,
+              "run_id 30": true,
+              "run_id 31": true,
+              "run_id 32": true,
+              "run_id 4": true,
+              "run_id 5": true,
+              "run_id 6": true,
+              "run_id 7": true,
+              "run_id 8": true,
+              "run_id 9": true,
+              "speed 1": true,
+              "speed 2": true,
+              "status": true,
+              "test 1": true,
+              "test 10": true,
+              "test 11": true,
+              "test 12": true,
+              "test 13": true,
+              "test 14": true,
+              "test 15": true,
+              "test 16": true,
+              "test 17": true,
+              "test 18": true,
+              "test 19": true,
+              "test 2": true,
+              "test 20": true,
+              "test 21": true,
+              "test 22": true,
+              "test 23": true,
+              "test 24": true,
+              "test 25": true,
+              "test 26": true,
+              "test 27": true,
+              "test 28": true,
+              "test 29": true,
+              "test 3": true,
+              "test 30": true,
+              "test 31": true,
+              "test 32": true,
+              "test 4": true,
+              "test 5": true,
+              "test 6": true,
+              "test 7": true,
+              "test 8": true,
+              "test 9": true,
+              "total_gpu_count": true,
+              "width 1": true,
+              "width 2": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "Time 1": "Time Last Run",
+              "Value #A": "Final Status",
+              "Value #B": "Memory Bandwidth",
+              "Value #C": "Error Detection",
+              "Value #D": "Tensor Core Utilization",
+              "Value #E": "Sustained Workload",
+              "Value #F": "Mixed Precision Test",
+              "Value #G": "Background Computation",
+              "Value #H": "Model MFU",
+              "Value #I": "GPU Temperature Check",
+              "Value #J": "GPU Power Check",
+              "Value #K": "GPU Utilization Check",
+              "Value #L": "",
+              "Value #auth_status": "Auth Status Check",
+              "Value #eth0_presence_check": "Eth0 Presence Check",
+              "Value #fabricmanager_check": "Fabric Manager Check",
+              "Value #final_status": "Overall Status",
+              "Value #gid_index_check": "GPU Index Check",
+              "Value #gpu_clk_check": "GPU Clock Check",
+              "Value #gpu_count": "GPU Count Check",
+              "Value #gpu_driver_check": "GPU Driver Check",
+              "Value #gpu_mode_check": "GPU Mode Check",
+              "Value #gpu_speed_count": "GPU Speed Check",
+              "Value #gpu_width_count": "GPU Width Check",
+              "Value #hca_error_check": "HCA Error Check",
+              "Value #hpc_info_check": "HPC Info Check",
+              "Value #link_down_state": "Link Down State Check",
+              "Value #max_acc_adv_settings": "Max Acc Adv Check",
+              "Value #max_acc_out": "Max Acc Check",
+              "Value #missing_interface_check": "Missing Inference Check",
+              "Value #nvlink_inactive_check": "NVLink Inactive Check",
+              "Value #nvlink_speed_check": "NV Link Speed Check",
+              "Value #oca_version_check": "OCA Version Check",
+              "Value #pcie_error_check": "PCIE Error Check",
+              "Value #pcie_speed": "PCIE Speed Check",
+              "Value #pcie_width": "PCIE Width Check",
+              "Value #peermem_module_check": "Peer Mem Module Check",
+              "Value #rdma_link_flap_check": "RDMA Link Flap Check",
+              "Value #rdma_nic_count": "RDMA NIC Count Check",
+              "Value #rdma_speed_count": "RDMA Speed Count",
+              "Value #rdma_width_count": "RDMA Width Count",
+              "Value #rx_discards_status": "RX Discard Status",
+              "Value #source_based_routing_check": "Source Based Routing Check",
+              "Value #sram_error_check": "SRAM Error Check",
+              "Value #thermal_throttling_check": "Thermal Throttle Check",
+              "__name__ 1": "",
+              "expected_version": "",
+              "gpu 1": "GPU",
+              "hostGPU 1": "GPU Shape",
+              "hostIP 1": "Host IP ",
+              "hostRegion 1": "Host Region ",
+              "instance": "Instance",
+              "test 1": "",
+              "test 2": "",
+              "test 3": "",
+              "test 6": "",
+              "test 8": "",
+              "test 9": ""
+            }
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "{{DATASOURCE_PROMETHEUS}}"
+      },
+      "description": "GPU & Host Performance Summary",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 0,
+                  "text": "Fail"
+                },
+                "1": {
+                  "color": "green",
+                  "index": 1,
+                  "text": "Pass"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": ""
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Compute Throughput"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "0": {
+                        "color": "red",
+                        "index": 0,
+                        "text": "Fail"
+                      },
+                      "1": {
+                        "color": "green",
+                        "index": 1,
+                        "text": "Pass"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Memory Bandwidth"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Error Detection"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Tensor Core Utilization"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Sustained Workload"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Mixed Precision Test"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Background Computation"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Model MFU"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "GPU Temperature Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "GPU Power Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "GPU Utilization Check"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 15
+      },
+      "id": 50,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 0,
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "12.1.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "disableTextWrap": false,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_healthcheck_node_summary{test=\"compute_throughput\", instance=~\"$hostname\"}",
+          "format": "table",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "A",
+          "useBackend": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_healthcheck_node_summary{test=\"memory_bandwidth\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_healthcheck_node_summary{test=\"error_detection\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_healthcheck_node_summary{test=\"tensor_core_utilization\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_healthcheck_node_summary{test=\"sustained_workload\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "E"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_healthcheck_node_summary{test=\"mixed_precision_testing\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "F"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_healthcheck_node_summary{test=\"background_computation\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "G"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_healthcheck_node_summary{test=\"model_mfu\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "H"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_healthcheck_node_summary{test=\"gpu_temperature_check\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "I"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_healthcheck_node_summary{test=\"gpu_power_check\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "J"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "oci_lens_healthcheck_node_summary{test=\"gpu_utilization_check\", instance=~\"$hostname\"}",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "K"
+        }
+      ],
+      "title": "OCI Active Performance Checks",
+      "transformations": [
+        {
+          "id": "joinByField",
+          "options": {
+            "byField": "instance",
+            "mode": "outer"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time 10": true,
+              "Time 11": true,
+              "Time 12": true,
+              "Time 13": true,
+              "Time 14": true,
+              "Time 2": true,
+              "Time 3": true,
+              "Time 4": true,
+              "Time 5": true,
+              "Time 6": true,
+              "Time 7": true,
+              "Time 8": true,
+              "Time 9": true,
+              "Value #A": false,
+              "__name__ 1": true,
+              "__name__ 10": true,
+              "__name__ 11": true,
+              "__name__ 12": true,
+              "__name__ 13": true,
+              "__name__ 14": true,
+              "__name__ 2": true,
+              "__name__ 3": true,
+              "__name__ 4": true,
+              "__name__ 5": true,
+              "__name__ 6": true,
+              "__name__ 7": true,
+              "__name__ 8": true,
+              "__name__ 9": true,
+              "gpu 1": true,
+              "gpu 10": true,
+              "gpu 11": true,
+              "gpu 12": true,
+              "gpu 13": true,
+              "gpu 14": true,
+              "gpu 2": true,
+              "gpu 3": true,
+              "gpu 4": true,
+              "gpu 5": true,
+              "gpu 6": true,
+              "gpu 7": true,
+              "gpu 8": true,
+              "gpu 9": true,
+              "hostGPU 10": true,
+              "hostGPU 11": true,
+              "hostGPU 12": true,
+              "hostGPU 13": true,
+              "hostGPU 14": true,
+              "hostGPU 2": true,
+              "hostGPU 3": true,
+              "hostGPU 4": true,
+              "hostGPU 5": true,
+              "hostGPU 6": true,
+              "hostGPU 7": true,
+              "hostGPU 8": true,
+              "hostGPU 9": true,
+              "hostIP 10": true,
+              "hostIP 11": true,
+              "hostIP 12": true,
+              "hostIP 13": true,
+              "hostIP 14": true,
+              "hostIP 2": true,
+              "hostIP 3": true,
+              "hostIP 4": true,
+              "hostIP 5": true,
+              "hostIP 6": true,
+              "hostIP 7": true,
+              "hostIP 8": true,
+              "hostIP 9": true,
+              "hostRegion 10": true,
+              "hostRegion 11": true,
+              "hostRegion 12": true,
+              "hostRegion 13": true,
+              "hostRegion 14": true,
+              "hostRegion 2": true,
+              "hostRegion 3": true,
+              "hostRegion 4": true,
+              "hostRegion 5": true,
+              "hostRegion 6": true,
+              "hostRegion 7": true,
+              "hostRegion 8": true,
+              "hostRegion 9": true,
+              "hostShape 1": true,
+              "hostShape 10": true,
+              "hostShape 11": true,
+              "hostShape 12": true,
+              "hostShape 13": true,
+              "hostShape 14": true,
+              "hostShape 2": true,
+              "hostShape 3": true,
+              "hostShape 4": true,
+              "hostShape 5": true,
+              "hostShape 6": true,
+              "hostShape 7": true,
+              "hostShape 8": true,
+              "hostShape 9": true,
+              "host_OCID 1": true,
+              "host_OCID 10": true,
+              "host_OCID 11": true,
+              "host_OCID 12": true,
+              "host_OCID 13": true,
+              "host_OCID 14": true,
+              "host_OCID 2": true,
+              "host_OCID 3": true,
+              "host_OCID 4": true,
+              "host_OCID 5": true,
+              "host_OCID 6": true,
+              "host_OCID 7": true,
+              "host_OCID 8": true,
+              "host_OCID 9": true,
+              "hostname 1": true,
+              "hostname 10": true,
+              "hostname 11": true,
+              "hostname 12": true,
+              "hostname 13": true,
+              "hostname 14": true,
+              "hostname 2": true,
+              "hostname 3": true,
+              "hostname 4": true,
+              "hostname 5": true,
+              "hostname 6": true,
+              "hostname 7": true,
+              "hostname 8": true,
+              "hostname 9": true,
+              "job 1": true,
+              "job 10": true,
+              "job 11": true,
+              "job 12": true,
+              "job 13": true,
+              "job 14": true,
+              "job 2": true,
+              "job 3": true,
+              "job 4": true,
+              "job 5": true,
+              "job 6": true,
+              "job 7": true,
+              "job 8": true,
+              "job 9": true,
+              "test 1": true,
+              "test 10": true,
+              "test 11": true,
+              "test 14": false,
+              "test 2": true,
+              "test 3": true,
+              "test 4": true,
+              "test 5": true,
+              "test 6": true,
+              "test 7": true,
+              "test 8": true,
+              "test 9": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "Time 1": "Time Last Run",
+              "Value #A": "Compute Throughput",
+              "Value #B": "Memory Bandwidth",
+              "Value #C": "Error Detection",
+              "Value #D": "Tensor Core Utilization",
+              "Value #E": "Sustained Workload",
+              "Value #F": "Mixed Precision Test",
+              "Value #G": "Background Computation",
+              "Value #H": "Model MFU",
+              "Value #I": "GPU Temperature Check",
+              "Value #J": "GPU Power Check",
+              "Value #K": "GPU Utilization Check",
+              "Value #L": "",
+              "__name__ 1": "",
+              "gpu 1": "GPU",
+              "hostGPU 1": "GPU Shape",
+              "hostIP 1": "Host IP ",
+              "hostRegion 1": "Host Region ",
+              "instance": "Instance",
+              "test 1": "",
+              "test 2": "",
+              "test 3": "",
+              "test 6": "",
+              "test 8": "",
+              "test 9": ""
+            }
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "table"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      },
+      "id": 36,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "description": "HBM BW",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 5,
+            "x": 0,
+            "y": 22
+          },
+          "id": 42,
+          "options": {
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "sizing": "auto"
+          },
+          "pluginVersion": "12.1.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "{{DATASOURCE_PROMETHEUS}}"
+              },
+              "disableTextWrap": false,
+              "editorMode": "builder",
+              "exemplar": false,
+              "expr": "oci_lens_compute_throughput_total_bandwidth_gbps{hostname=~\"$hostname\"}",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "{{HostName}}",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Last node HBM throughput b/w ",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "description": "Flops utilizations by GPU and by Node",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 5,
+            "x": 5,
+            "y": 22
+          },
+          "id": 44,
+          "options": {
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "sizing": "auto"
+          },
+          "pluginVersion": "12.1.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "{{DATASOURCE_PROMETHEUS}}"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "expr": "avg(oci_lens_model_mfu_achieved_tflops{hostname=~\"$hostname\"}) by (HostName)",
+              "format": "time_series",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": false,
+              "legendFormat": "{{HostName}}",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Avg model flops achieved by node",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "description": "RDMA Bandwidth by node",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 13,
+            "x": 10,
+            "y": 22
+          },
+          "id": 46,
+          "options": {
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "sizing": "auto"
+          },
+          "pluginVersion": "12.1.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "{{DATASOURCE_PROMETHEUS}}"
+              },
+              "editorMode": "builder",
+              "expr": "avg(oci_lens_rdma_np_cnp_sent{hostname=~\"$hostname\"}) by (hostname)",
+              "legendFormat": "{{hostname}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Avg RDMA Packets Sent B/W",
+          "type": "gauge"
+        }
+      ],
+      "title": "ACTIVE HEALTH PERFORMANCE DATA",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "id": 34,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "links": [],
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "celsius"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 13,
+            "x": 0,
+            "y": 23
+          },
+          "id": 12,
+          "options": {
+            "alertThreshold": true,
+            "legend": {
+              "calcs": [
+                "mean",
+                "lastNotNull",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.1.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "{{DATASOURCE_PROMETHEUS}}"
+              },
+              "editorMode": "code",
+              "expr": "DCGM_FI_DEV_GPU_TEMP{Hostname=~\"$hostname\"} OR gpu_junction_temperature{hostname=~\"$hostname\"}",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "legendFormat": "GPU {{gpu}}{{gpu_id}} - {{Hostname}}{{hostname}}",
+              "refId": "A"
+            }
+          ],
+          "title": "GPU Temperature",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "max": 2400,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 1800
+                  },
+                  {
+                    "color": "red",
+                    "value": 2200
+                  }
+                ]
+              },
+              "unit": "watt"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 6,
+            "x": 13,
+            "y": 23
+          },
+          "id": 16,
+          "options": {
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "sum"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "sizing": "auto"
+          },
+          "pluginVersion": "12.1.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "{{DATASOURCE_PROMETHEUS}}"
+              },
+              "editorMode": "code",
+              "expr": "avg(DCGM_FI_DEV_POWER_USAGE{Hostname=~\"$hostname\"} OR gpu_power_usage{hostname=~\"$hostname\"})",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "GPU Power Total Consumed",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 83
+                  },
+                  {
+                    "color": "red",
+                    "value": 87
+                  }
+                ]
+              },
+              "unit": "celsius"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 5,
+            "x": 19,
+            "y": 23
+          },
+          "id": 14,
+          "options": {
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "sizing": "auto"
+          },
+          "pluginVersion": "12.1.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "{{DATASOURCE_PROMETHEUS}}"
+              },
+              "editorMode": "code",
+              "expr": "avg(DCGM_FI_DEV_GPU_TEMP{Hostname=~\"$hostname\"} OR gpu_junction_temperature{hostname=~\"$hostname\"}) ",
+              "interval": "",
+              "legendFormat": "Avg GPU Temperature",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "GPU Avg. Temp",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "links": [],
+              "mappings": [],
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 13,
+            "x": 0,
+            "y": 31
+          },
+          "id": 6,
+          "options": {
+            "alertThreshold": true,
+            "legend": {
+              "calcs": [
+                "mean",
+                "lastNotNull",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.1.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "{{DATASOURCE_PROMETHEUS}}"
+              },
+              "editorMode": "code",
+              "expr": "avg(DCGM_FI_DEV_GPU_UTIL{Hostname=~\"$hostname\"} OR gpu_gfx_activity{hostname=~\"$hostname\"})",
+              "interval": "",
+              "legendFormat": "{{Hostname}}{{hostname}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "GPU Utilization",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "links": [],
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "watt"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 11,
+            "x": 13,
+            "y": 31
+          },
+          "id": 10,
+          "options": {
+            "alertThreshold": true,
+            "legend": {
+              "calcs": [
+                "mean",
+                "lastNotNull",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.1.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "{{DATASOURCE_PROMETHEUS}}"
+              },
+              "editorMode": "code",
+              "expr": "DCGM_FI_DEV_POWER_USAGE{Hostname=~\"$hostname\"} OR gpu_power_usage{hostname=~\"$hostname\"}",
+              "interval": "",
+              "legendFormat": "GPU {{gpu}}{{gpu_id}} - {{Hostname}}{{hostname}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "GPU Power Usage",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "links": [],
+              "mappings": [],
+              "max": 1,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 13,
+            "x": 0,
+            "y": 39
+          },
+          "id": 4,
+          "options": {
+            "alertThreshold": true,
+            "legend": {
+              "calcs": [
+                "mean",
+                "lastNotNull",
+                "max"
+              ],
+              "displayMode": "table",
+              "placement": "right",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.1.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "{{DATASOURCE_PROMETHEUS}}"
+              },
+              "editorMode": "code",
+              "expr": "DCGM_FI_PROF_PIPE_TENSOR_ACTIVE{Hostname=~\"$hostname\"} OR gpu_prof_tensor_active_percent{hostname=~\"$hostname\"}",
+              "interval": "",
+              "legendFormat": "GPU {{gpu}}{{gpu_id}} - {{Hostname}}{{hostname}} ",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Tensor Core Utilization",
+          "type": "timeseries"
+        }
+      ],
+      "title": "GPU & RDMA",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 23
+      },
+      "id": 28,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 2,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 24
+          },
+          "id": 159,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.1.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "{{DATASOURCE_PROMETHEUS}}"
+              },
+              "editorMode": "code",
+              "expr": "((node_filesystem_size_bytes{device!~\"rootfs\",instance=~\"${hostname:regex}\"} - node_filesystem_avail_bytes{device!~\"rootfs\",instance=~\"${hostname:regex}\"}) / node_filesystem_size_bytes{ device!~\"rootfs\",instance=~\"${hostname:regex}\"}) * 100",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Disk Space Used",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 24
+          },
+          "id": 24,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.1.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "{{DATASOURCE_PROMETHEUS}}"
+              },
+              "disableTextWrap": false,
+              "editorMode": "builder",
+              "expr": "irate(node_disk_io_time_seconds_total{instance=~\"${hostname:regex}\"}[2m])",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "legendFormat": "{{instance}} {{device}}",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Disk IO",
+          "transformations": [
+            {
+              "id": "concatenate",
+              "options": {}
+            }
+          ],
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "description": "Monitors hardware sensor temperatures and critical thresholds as exposed by Linux hwmon. Includes CPU, GPU, and motherboard sensors where available",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 20,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "links": [],
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "celsius"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "/.*Critical*./"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "#E24D42",
+                      "mode": "fixed"
+                    }
+                  },
+                  {
+                    "id": "custom.fillOpacity",
+                    "value": 0
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 50,
+            "w": 24,
+            "x": 0,
+            "y": 32
+          },
+          "id": 158,
+          "options": {
+            "legend": {
+              "calcs": [
+                "min",
+                "mean",
+                "max",
+                "lastNotNull"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "multi",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.1.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "{{DATASOURCE_PROMETHEUS}}"
+              },
+              "editorMode": "code",
+              "expr": "node_hwmon_temp_celsius * on(chip, instance) group_left(chip_name) node_hwmon_chip_names{instance=~\"${hostname:regex}\"}",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }}  {{ chip_name }} {{ sensor }}",
+              "range": true,
+              "refId": "A",
+              "step": 240
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "{{DATASOURCE_PROMETHEUS}}"
+              },
+              "editorMode": "code",
+              "expr": "node_hwmon_temp_crit_alarm_celsius{job=\"$job\"} * on(chip,  instance) group_left(chip_name) node_hwmon_chip_names{job=\"$job\"}",
+              "format": "time_series",
+              "hide": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }} {{ chip_name }} {{ sensor }} Critical Alarm",
+              "range": true,
+              "refId": "B",
+              "step": 240
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "{{DATASOURCE_PROMETHEUS}}"
+              },
+              "editorMode": "code",
+              "expr": "node_hwmon_temp_crit_celsius * on(chip, instance) group_left(chip_name) node_hwmon_chip_names",
+              "format": "time_series",
+              "hide": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }} {{ chip_name }} {{ sensor }} Critical",
+              "range": true,
+              "refId": "C",
+              "step": 240
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "{{DATASOURCE_PROMETHEUS}}"
+              },
+              "editorMode": "code",
+              "expr": "node_hwmon_temp_crit_hyst_celsius{job=\"$job\"} * on(chip, instance) group_left(chip_name) node_hwmon_chip_names{job=\"$job\"}",
+              "format": "time_series",
+              "hide": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }} {{ chip_name }} {{ sensor }} Critical Historical",
+              "range": true,
+              "refId": "D",
+              "step": 240
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "{{DATASOURCE_PROMETHEUS}}"
+              },
+              "editorMode": "code",
+              "expr": "node_hwmon_temp_max_celsius{job=\"$job\"} * on(chip, instance) group_left(chip_name) node_hwmon_chip_names{job=\"$job\"}",
+              "format": "time_series",
+              "hide": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{ instance }} {{ chip_name }} {{ sensor }} Max",
+              "range": true,
+              "refId": "E",
+              "step": 240
+            }
+          ],
+          "title": "Hardware Temperature Monitor",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "__systemRef": "hideSeriesFrom",
+                "matcher": {
+                  "id": "byNames",
+                  "options": {
+                    "mode": "exclude",
+                    "names": [
+                      "{instance=\"GPU-279\", job=\"oci_lens_node_exporter\"}"
+                    ],
+                    "prefix": "All except:",
+                    "readOnly": true
+                  }
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 82
+          },
+          "id": 160,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.1.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "{{DATASOURCE_PROMETHEUS}}"
+              },
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "rate(node_pressure_memory_waiting_seconds_total{job=\"oci_lens_node_exporter\",instance=~\"${hostname:regex}\"}[2m])",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "CPU Pressure",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 82
+          },
+          "id": 161,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.1.1",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "{{DATASOURCE_PROMETHEUS}}"
+              },
+              "editorMode": "code",
+              "expr": "sum(irate(node_cpu_seconds_total{ mode=\"system\",instance=~\"${hostname:regex}\"}[2m])) / scalar(count(count(node_cpu_seconds_total{instance=~\"${hostname:regex}\"}) by (cpu)))",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "CPU Usage",
+          "type": "timeseries"
+        }
+      ],
+      "title": "NODE HEALTH METRICS",
+      "type": "row"
+    }
+  ],
+  "preload": false,
+  "refresh": "5s",
+  "schemaVersion": 41,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "{{DATASOURCE_INFINITY}}"
+        },
+        "definition": "",
+        "description": "Monitor resources by OCI Region.",
+        "includeAll": true,
+        "label": "OCI Region",
+        "multi": true,
+        "name": "ociregion",
+        "options": [],
+        "query": {
+          "infinityQuery": {
+            "columns": [],
+            "filters": [],
+            "format": "table",
+            "parser": "backend",
+            "refId": "variable",
+            "root_selector": "",
+            "source": "url",
+            "type": "json",
+            "url": "{{INFINITY_DATASOURCE_BASE_URL}}/monitoring-rings/{{MONITORING_RING_ID}}/instances/",
+            "url_options": {
+              "data": "",
+              "headers": [
+                {
+                  "key": "Authorization",
+                  "value": "Token {{INFINITY_DATASOURCE_AUTH_TOKEN}}"
+                }
+              ],
+              "method": "GET",
+              "params": [
+                {
+                  "key": "field",
+                  "value": "region"
+                },
+                {
+                  "key": "output",
+                  "value": "grafana"
+                }
+              ]
+            }
+          },
+          "query": "",
+          "queryType": "infinity"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "{{DATASOURCE_INFINITY}}"
+        },
+        "definition": "",
+        "description": "Filter by GPU Types",
+        "includeAll": true,
+        "label": "GPU Type",
+        "multi": true,
+        "name": "hostshape",
+        "options": [],
+        "query": {
+          "infinityQuery": {
+            "columns": [],
+            "filters": [],
+            "format": "table",
+            "parser": "backend",
+            "refId": "variable",
+            "root_selector": "",
+            "source": "url",
+            "type": "json",
+            "url": "{{INFINITY_DATASOURCE_BASE_URL}}/monitoring-rings/{{MONITORING_RING_ID}}/instances/",
+            "url_options": {
+              "data": "",
+              "headers": [
+                {
+                  "key": "Authorization",
+                  "value": "Token {{INFINITY_DATASOURCE_AUTH_TOKEN}}"
+                }
+              ],
+              "method": "GET",
+              "params": [
+                {
+                  "key": "field",
+                  "value": "shape"
+                },
+                {
+                  "key": "output",
+                  "value": "grafana"
+                },
+                {
+                  "key": "regions",
+                  "value": "${ociregion:csv}"
+                }
+              ]
+            }
+          },
+          "query": "",
+          "queryType": "infinity"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "{{DATASOURCE_INFINITY}}"
+        },
+        "definition": "",
+        "description": "OCI Host Names",
+        "includeAll": true,
+        "label": "Host Name",
+        "multi": true,
+        "name": "hostname",
+        "options": [],
+        "query": {
+          "infinityQuery": {
+            "columns": [],
+            "filters": [],
+            "format": "table",
+            "parser": "backend",
+            "refId": "variable",
+            "root_selector": "",
+            "source": "url",
+            "type": "json",
+            "url": "{{INFINITY_DATASOURCE_BASE_URL}}/monitoring-rings/{{MONITORING_RING_ID}}/instances/",
+            "url_options": {
+              "data": "",
+              "headers": [
+                {
+                  "key": "Authorization",
+                  "value": "Token {{INFINITY_DATASOURCE_AUTH_TOKEN}}"
+                }
+              ],
+              "method": "GET",
+              "params": [
+                {
+                  "key": "field",
+                  "value": "name"
+                },
+                {
+                  "key": "output",
+                  "value": "grafana"
+                },
+                {
+                  "key": "regions",
+                  "value": "${ociregion:csv}"
+                },
+                {
+                  "key": "shapes",
+                  "value": "${hostshape:csv}"
+                }
+              ]
+            }
+          },
+          "query": "",
+          "queryType": "infinity"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allowCustomValue": false,
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "definition": "label_values(oci_lens_pod_node_info{workload_type=\"Deployment\"},workload)",
+        "description": "Choose the Kubernetes deployments/Job ",
+        "includeAll": true,
+        "label": "Kubernetes Worklaod",
+        "multi": true,
+        "name": "k8sworkload",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(oci_lens_pod_node_info{workload_type=\"Deployment\"},workload)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-5m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "OCI Lens - Demo Pool H100 & MI300X Monitoring Ring",
+  "uid": "mr-9de51de81e1587ceffbdeacba0b903a3",
+  "version": 2
+}
