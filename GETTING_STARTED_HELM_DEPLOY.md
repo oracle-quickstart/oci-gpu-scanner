@@ -100,8 +100,14 @@ helm install lens oci-ai-incubations/lens -n lens --create-namespace \
   --set grafana.adminPassword="access password for grafana portal. User name is admin by default"\
   --set monitoring.grafanaAdminPassword="password" \
   --set backend.tenancyId="your-oci-tenancy-id" \
-  --set backend.regionName="your-oke-region-name" 
+  --set backend.regionName="your-oke-region-name"
 ```
+
+**Optional: Custom Domain Configuration**
+
+By default, the deployment uses `nip.io` for ingress (no DNS setup required). To use your own domain, add `--set ingress.domain="your-domain"` to the helm command above.
+
+For detailed instructions on custom domain setup and required DNS records, see [Custom Domain Configuration](INGRESS_AND_TLS_SETUP.md#custom-domain-configuration).
 
 ### OPTION 2: Install control plane with your existing grafana & prometheus to existing OKE cluster
 
@@ -123,9 +129,14 @@ helm install lens oci-ai-incubations/lens -n lens --create-namespace \
   --set backend.superuser.username="username for API & control plane e.g. admin" \
   --set backend.superuser.email="your email" \
   --set backend.superuser.password="access password for API & control plane" \
-  --set grafana.adminPassword="access password for grafana portal. User name is admin by default" \
- 
+  --set grafana.adminPassword="access password for grafana portal. User name is admin by default"
 ```
+
+**Optional: Custom Domain Configuration**
+
+By default, the deployment uses `nip.io` for ingress (no DNS setup required). To use your own domain, add `--set ingress.domain="your-domain"` to the helm command above.
+
+For detailed instructions on custom domain setup and required DNS records, see [Custom Domain Configuration](INGRESS_AND_TLS_SETUP.md#custom-domain-configuration).
 
 ## Verify for successful install
 

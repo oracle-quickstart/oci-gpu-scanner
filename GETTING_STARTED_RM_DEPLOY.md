@@ -59,6 +59,7 @@ The deployment automatically installs **ingress-nginx** and **cert-manager** for
    - Configure parameters:
       - **Create IAM Policy:** Enable if you wish to create the workload identity IAM policy for the backend service account.
       - **IAM Policy Name:** Default is `corrino-lens-backend-workload-policy`
+      - **Ingress Domain:** (Optional) Custom domain for ingress. Leave empty to use `nip.io` wildcard DNS service (recommended for quick start, no DNS setup required). If you provide a custom domain, you must manually create DNS records. See [Custom Domain Configuration](INGRESS_AND_TLS_SETUP.md#custom-domain-configuration) for details.
       - **Superuser Username:** Username for the OCI GPU Scanner Portal (default: `admin`)
       - **Superuser Password:** Password for the OCI GPU Scanner Portal (default: `supersecret`) — **Recommended to change for production**
       - **Superuser Email:** Email address for the superuser account (default: `admin@oracle.com`)
@@ -75,7 +76,9 @@ Access the OKE cluster using the credentials created for the new OKE cluster.
 After connecting with OKE cluster run the below command
 ```kubectl get ingress -n lens```
 
-Copy the HOSTS details for all the applications deployed by lens. e.g. lens.129.80.43.138.nip.io 
+Copy the HOSTS details for all the applications deployed by lens. e.g. lens.129.80.43.138.nip.io
+
+**Note:** If you configured a custom domain during deployment, you need to manually create DNS records. See [Custom Domain Configuration](INGRESS_AND_TLS_SETUP.md#custom-domain-configuration) for detailed instructions.
 
 
 
