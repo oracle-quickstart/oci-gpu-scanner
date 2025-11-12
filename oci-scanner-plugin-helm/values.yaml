@@ -272,3 +272,29 @@ nodeProblemDetector:
     limits:
       cpu: 10m
       memory: 80Mi
+
+opencost:
+  enabled: true
+  prometheus:
+    internal:
+      enabled: true
+      namespaceName: lens
+      serviceName: lens-prometheus-server
+      port: 9090
+  prometheusPushgatewayUrl: "http://lens-prometheus-pushgateway.lens.svc.cluster.local:9091"
+  customPricing:
+    enabled: true
+    createConfigmap: true
+    configmapName: pricing-configs
+    configPath: /tmp/custom-config
+    provider: default
+    costModel:
+      CPU: 0.031611
+      spotCPU: 0.006655
+      RAM: 0.004237
+      spotRAM: 0.000892
+      GPU: 6
+      storage: 0.00005479452
+      zoneNetworkEgress: 0.01
+      regionNetworkEgress: 0.01
+      internetNetworkEgress: 0.143
