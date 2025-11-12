@@ -65,6 +65,11 @@ resource "helm_release" "app" {
     value = var.grafana_admin_password
   }
 
+  set {
+    name = "ingress.domain"
+    value = var.ingress_domain != "" ? var.ingress_domain : "nip.io"
+  }
+
   depends_on = [
     kubernetes_namespace.ns,
   ]

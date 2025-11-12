@@ -21,6 +21,7 @@ variableGroups:
     visible: true
     variables:
       - namespace
+      - ingress_domain
       - create_iam_policy
       - policy_name
 
@@ -61,6 +62,12 @@ variables:
     title: "Kubernetes Namespace"
     description: "Namespace for all Lens resources."
     default: "lens"
+
+  ingress_domain:
+    type: string
+    title: "Ingress Domain"
+    description: "Custom domain for ingress. Leave empty to use nip.io (wildcard DNS service)."
+    default: ""
 
   create_iam_policy:
     type: boolean
