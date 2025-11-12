@@ -13,6 +13,7 @@ Multi-vendor GPU monitoring and health check solution for OCI compute instances 
 - **Health Check**: GPU performance testing (optional)
 - **DRHPC**: Distributed diagnostic monitoring for both AMD and NVIDIA
 - **Node Problem Detector**: GPU health monitoring via DRHPC integration (requires labeling)
+- **OpenCost**: Cost tracking and resource allocation metrics (via subchart)
 
 ## Configuration
 
@@ -33,9 +34,15 @@ helm upgrade oci-gpu-scanner-plugin . \
   --set nodeProblemDetector.enabled=true \
   --set drhpc.enabled=true
 
+# Disable OpenCost (enabled by default)
+helm install oci-gpu-scanner-plugin . -f values.yaml -n oci-gpu-scanner-plugin \
+  --set opencost.enabled=false
+
 # Uninstall
 helm uninstall oci-gpu-scanner-plugin -n oci-gpu-scanner-plugin
 ```
+
+**Cost Tracking**: OpenCost is enabled by default to provide cost visibility for Kubernetes workloads. See [cost_tracking.md](cost_tracking.md) for detailed metrics.
 
 ## Requirements
 

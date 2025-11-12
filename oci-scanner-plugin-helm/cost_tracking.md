@@ -104,8 +104,8 @@ These metrics show actual resource allocations to containers, used for chargebac
 
 ## Additional Resources
 
-- [OCI GPU Scanner OpenCost Fork](https://github.com/gablyu-oci/opencost/tree/custom_pricing) - OCI GPU Scanner specific custom pricing implementation
-- [OCI GPU Scanner OpenCost Helm Chart](https://github.com/gablyu-oci/opencost-helm-chart/tree/pricing-configs) - OCI GPU Scanner specific deployment configuration
+- [OCI GPU Scanner OpenCost Fork](https://github.com/oci-ai-incubations/opencost) - OCI GPU Scanner specific custom pricing implementation
+- [OCI GPU Scanner OpenCost Helm Chart](https://github.com/oci-ai-incubations/opencost-helm-chart) - OCI GPU Scanner specific deployment configuration
 - [OpenCost Documentation](https://www.opencost.io/docs/) - OpenCost Official documentation
 
 
