@@ -60,3 +60,9 @@ variable "grafana_admin_password" {
   type = string
   sensitive = true
 }
+
+variable "ingress_domain" {
+  description = "Domain for ingress. Empty string defaults to nip.io."
+  type = string
+  default = ""
+}

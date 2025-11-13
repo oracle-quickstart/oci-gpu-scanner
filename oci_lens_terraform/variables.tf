@@ -57,3 +57,9 @@ variable "grafana_admin_password" {
   sensitive   = true
   default     = "admin123"
 }
+
+variable "ingress_domain" {
+  description = "Domain for ingress. Leave empty to use nip.io (wildcard DNS service)."
+  type        = string
+  default     = ""
+}

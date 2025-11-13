@@ -131,6 +131,7 @@ module "app" {
   superuser_password = var.superuser_password
   superuser_email    = var.superuser_email
   grafana_admin_password = var.grafana_admin_password
+  ingress_domain    = var.ingress_domain
 
   # wait for cluster (if new cluster was created)
   depends_on = [time_sleep.after_cluster]

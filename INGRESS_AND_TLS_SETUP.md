@@ -97,6 +97,75 @@ kubectl get crd | grep cert-manager || echo "No cert-manager CRDs"
 
 ---
 
+## Custom Domain Configuration
+
+By default, OCI GPU Scanner uses `nip.io` for ingress, which is a wildcard DNS service that requires no manual DNS configuration. All URLs will be in the format `<service>.<LOADBALANCER_IP>.nip.io` (e.g., `lens.129.80.43.138.nip.io`).
+
+### Using nip.io (Default - Recommended for Quick Start)
+
+**No DNS configuration required!** The deployment automatically uses `nip.io`, which provides wildcard DNS resolution based on the LoadBalancer IP address.
+
+**Helm installation:** No additional parameters needed - this is the default behavior.
+
+**Resource Manager:** Leave the "Ingress Domain" field empty.
+
+### Using a Custom Domain
+
+If you prefer to use your own domain instead of `nip.io`, you can configure a custom domain during installation. However, you **must manually create DNS A records** in your DNS provider.
+
+If you prefer to use `.oci-incubations.com` as your domain, contact amar.gowda@oracle.com or gabrielle.lyu@oracle.com for adding DNS A records after deployment.
+
+#### Step 1: Configure Custom Domain During Installation
+
+**For Helm installations:**
+```bash
+helm install lens oci-ai-incubations/lens -n lens --create-namespace \
+  --set ingress.domain="your-domain" \
+  [... other parameters ...]
+```
+
+**For Resource Manager deployments:**
+Enter your domain in the "Ingress Domain" field (e.g., `oci-incubations.com`).
+
+#### Step 2: Get the LoadBalancer IP
+
+After deployment completes, retrieve the ingress LoadBalancer IP:
+
+```bash
+kubectl get svc lens-ingress-nginx-controller -n lens
+```
+
+Look for the `EXTERNAL-IP` value (e.g., `137.131.36.226`).
+
+#### Step 3: Create DNS A Records
+
+In your DNS provider, create the following DNS A records pointing to the LoadBalancer IP:
+
+| DNS Record | Points To |
+|------------|-----------|
+| `*.<LOADBALANCER_IP>.<YOUR_DOMAIN>` | `<LOADBALANCER_IP>` |
+
+
+**Example:** For LoadBalancer IP `137.131.36.226` and domain `oci-incubations.com`:
+- `*.137.131.36.226.oci-incubations.com` → `137.131.36.226`
+
+#### Step 4: Verify DNS Resolution
+
+After creating the DNS records (allow 5-15 minutes for DNS propagation):
+
+```bash
+# Test DNS resolution
+nslookup lens.137.131.36.226.oci-incubations.com
+nslookup api.137.131.36.226.oci-incubations.com
+
+# Test HTTPS access
+curl -I https://lens.137.131.36.226.oci-incubations.com
+```
+
+**Note:** TLS certificates from Let's Encrypt may take 2-5 minutes to be issued after DNS records are properly configured.
+
+---
+
 ## Post-Install Check
 
 After helm installation, verify all components are running:
