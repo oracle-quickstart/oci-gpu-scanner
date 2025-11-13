@@ -112,6 +112,7 @@ By default, OCI GPU Scanner uses `nip.io` for ingress, which is a wildcard DNS s
 ### Using a Custom Domain
 
 If you prefer to use your own domain instead of `nip.io`, you can configure a custom domain during installation. However, you **must manually create DNS A records** in your DNS provider.
+
 If you prefer to use `.oci-incubations.com` as your domain, contact amar.gowda@oracle.com or gabrielle.lyu@oracle.com for adding DNS A records after deployment.
 
 #### Step 1: Configure Custom Domain During Installation
