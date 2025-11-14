@@ -36,5 +36,5 @@ dependencies:
   
   - name: opencost-lens
     version: 1.0.0
-    repository: "https://gablyu-oci.github.io/opencost-helm-chart/"
+    repository: "https://oci-ai-incubations.github.io/opencost-helm-chart"
     condition: opencost.enabled

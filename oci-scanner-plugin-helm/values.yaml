@@ -14,7 +14,7 @@ goPlugin:
   enabled: true
   image:
     repository: oci_lens_metric_collector
-    tag: v0.0.9
+    tag: v0.0.10
     pullPolicy: Always
   
   config:
