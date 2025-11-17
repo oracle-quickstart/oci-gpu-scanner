@@ -55,6 +55,10 @@ Allow any-user to read compute-management-family in tenancy where all { request.
 
 Allow any-user to manage instance-family in tenancy where all { request.principal.type = 'workload', request.principal.namespace = 'lens', request.principal.service_account = 'corrino-lens-backend-sa', request.principal.cluster_id = 'existingOKEclusterID' }
 
+Allow any-user to manage tag-namespaces in tenancy where all { request.principal.type = 'workload', request.principal.namespace = 'lens', request.principal.service_account = 'corrino-lens-backend-sa', request.principal.cluster_id = '<existingOKEclusterID>' }
+
+Allow any-user to manage tags in tenancy where all { request.principal.type = 'workload', request.principal.namespace = 'lens', request.principal.service_account = 'corrino-lens-backend-sa', request.principal.cluster_id = '<existingOKEclusterID>' }
+
 ```
 
 The backend application can now use the OCI SDK with workload identity authentication. The service account token is automatically mounted and the application can authenticate without additional configuration.
