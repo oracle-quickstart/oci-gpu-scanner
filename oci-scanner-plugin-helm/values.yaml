@@ -109,7 +109,7 @@ healthCheck:
   enabled: false
   image:
     repository: oci_lens_healthcheck_amd
-    tag: v0.0.4
+    tag: v0.0.5
     pullPolicy: Always
   
   resources:

@@ -1,0 +1,645 @@
+{
+    "plugin": "custom",
+    "pluginConfig": {
+      "invoke_interval": "30s",
+      "timeout": "30s",
+      "max_output_length": 300,
+      "concurrency": 1,
+      "enable_message_change_based_condition_update": true
+    },
+    "source": "dr-hpc",
+    "conditions": [
+      {
+        "type": "GpuCount",
+        "reason": "GpuCountHealthy",
+        "message": "GPU count check passed"
+      },
+      {
+        "type": "GpuMode",
+        "reason": "GpuModeHealthy",
+        "message": "GPU MIG mode check passed - all GPUs have acceptable mode configuration"
+      },
+      {
+        "type": "GpuClk",
+        "reason": "GpuClkHealthy",
+        "message": "GPU clock speed check passed"
+      },
+      {
+        "type": "Imex",
+        "reason": "ImexHealthy",
+        "message": "IMEX domain state check passed"
+      },
+      {
+        "type": "PcieError",
+        "reason": "PcieErrorHealthy",
+        "message": "PCIe error check passed"
+      },
+      {
+        "type": "PcieWidthMissingLanes",
+        "reason": "PcieWidthMissingLanesHealthy",
+        "message": "PCIe width, speed, and state check passed"
+      },
+      {
+        "type": "RdmaNicCount",
+        "reason": "RdmaNicCountHealthy",
+        "message": "RDMA NIC count check passed"
+      },
+      {
+        "type": "RxDiscards",
+        "reason": "RxDiscardsHealthy",
+        "message": "RX discards check passed"
+      },
+      {
+        "type": "GidIndex",
+        "reason": "GidIndexHealthy",
+        "message": "GID index check passed"
+      },
+      {
+        "type": "Link",
+        "reason": "LinkHealthy",
+        "message": "RDMA link check passed"
+      },
+      {
+        "type": "LinkDown",
+        "reason": "LinkDownHealthy",
+        "message": "All RDMA interfaces are in Active state"
+      },
+      {
+        "type": "EthLink",
+        "reason": "EthLinkHealthy",
+        "message": "Ethernet link check passed"
+      },
+      {
+        "type": "Auth",
+        "reason": "AuthHealthy",
+        "message": "Authentication check passed"
+      },
+      {
+        "type": "SramError",
+        "reason": "SramErrorHealthy",
+        "message": "GPU SRAM error levels are within acceptable limits"
+      },
+      {
+        "type": "GpuDriver",
+        "reason": "GpuDriverHealthy",
+        "message": "GPU driver version check passed - driver is not blacklisted"
+      },
+      {
+        "type": "PeermemModule",
+        "reason": "PeermemModuleHealthy",
+        "message": "NVIDIA Peer Memory module check passed - nvidia_peermem module is loaded"
+      },
+      {
+        "type": "Module",
+        "reason": "ModuleHealthy",
+        "message": "Required kernel modules are properly loaded"
+      },
+      {
+        "type": "Nvlink",
+        "reason": "NvlinkHealthy",
+        "message": "NVLink connections meet expected requirements"
+      },
+      {
+        "type": "NvlinkSpeed",
+        "reason": "NvlinkSpeedHealthy",
+        "message": "NVLink speed and count check passed - all GPU interconnects meet performance requirements"
+      },
+      {
+        "type": "Eth0Presence",
+        "reason": "Eth0PresenceHealthy",
+        "message": "Eth0Presence is healthy"
+      },
+      {
+        "type": "CdfpCable",
+        "reason": "CdfpCableHealthy",
+        "message": "CDFP cable check passed - all GPU connections are properly configured"
+      },
+      {
+        "type": "Fabricmanager",
+        "reason": "FabricmanagerHealthy",
+        "message": "NVIDIA Fabric Manager service is running and properly configured"
+      },
+      {
+        "type": "HcaError",
+        "reason": "HcaErrorHealthy",
+        "message": "HCA error check passed - no MLX5 fatal errors detected"
+      },
+      {
+        "type": "MissingInterface",
+        "reason": "MissingInterfaceHealthy",
+        "message": "Missing interface check passed - no missing PCIe interfaces detected"
+      },
+      {
+        "type": "GpuXid",
+        "reason": "GpuXidHealthy",
+        "message": "No GPU XID errors found in system logs"
+      },
+      {
+        "type": "MaxAcc",
+        "reason": "MaxAccHealthy",
+        "message": "MAX_ACC_OUT_READ and ADVANCED_PCI_SETTINGS are correctly configured for optimal data transfer rates"
+      },
+      {
+        "type": "RowRemapError",
+        "reason": "RowRemapErrorHealthy",
+        "message": "No GPU row remap errors detected - all GPU memory appears healthy"
+      },
+      {
+        "type": "ThermalThrottling",
+        "reason": "ThermalThrottlingHealthy",
+        "message": "No GPU thermal throttling detected - all GPUs operating within normal temperature ranges"
+      },
+      {
+        "type": "NvlinkInactive",
+        "reason": "NvlinkInactiveHealthy",
+        "message": "NVLink inactive check passed - all GPU interconnect links are active and functional"
+      },
+      {
+        "type": "SourceBasedRouting",
+        "reason": "SourceBasedRoutingHealthy",
+        "message": "Source-based routing configuration is correct - routes configured as expected"
+      },
+      {
+        "type": "Ipmi",
+        "reason": "IpmiHealthy",
+        "message": "IPMI interface is properly disabled - security requirement met"
+      },
+      {
+        "type": "OcaVersion",
+        "reason": "OcaVersionHealthy",
+        "message": "Oracle Cloud Agent version meets requirements"
+      },
+      {
+        "type": "RdmaLinkFlap",
+        "reason": "RdmaLinkFlapHealthy",
+        "message": "RDMA link flap check passed - no recent link instability detected"
+      },
+      {
+        "type": "AdvancedLink",
+        "reason": "AdvancedLinkHealthy",
+        "message": "Advanced RDMA link analysis passed - all link quality metrics are within optimal ranges"
+      },
+      {
+        "type": "RttccStatus",
+        "reason": "RttccStatusHealthy",
+        "message": "RTTCC status check passed on {device_count} devices - all RDMA controllers are functioning properly"
+      },
+      {
+        "type": "PcieSpeed",
+        "reason": "PcieSpeedHealthy",
+        "message": "PCIe speed check passed - all RDMA NICs operating at expected PCIe speed and width configuration"
+      },
+      {
+        "type": "Pcie",
+        "reason": "PcieHealthy",
+        "message": "PCIe speed and width check passed for RDMA devices"
+      },
+      {
+        "type": "RdmaNicCount",
+        "reason": "RdmaNicCountHealthy",
+        "message": "RDMA NIC count check passed"
+      },
+      {
+        "type": "GpuRemapPending",
+        "reason": "GpuRemapPendingHealthy",
+        "message": "No GPU memory remap pending detected"
+      },
+      {
+        "type": "Sram",
+        "reason": "SramHealthy",
+        "message": "SRAM error levels are within acceptable limits"
+      },
+      {
+        "type": "WalkPcie",
+        "reason": "WalkPcieHealthy",
+        "message": "PCIe walk check passed - all GPU and RDMA devices operating at expected link speeds and widths ({total_gpu_count} GPUs, {total_rdma_count} RDMA devices checked)"
+      },
+      {
+        "type": "HpcInfo",
+        "reason": "HpcInfoHealthy",
+        "message": "HPC metadata check passed - node is properly configured for HPC workloads"
+      }
+    ],
+    "rules": [
+      {
+        "type": "permanent",
+        "condition": "GpuCount",
+        "reason": "GpuCountMismatchDetected",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "gpu_count_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "GpuMode",
+        "reason": "GpuMigModeConfigurationViolationDetected",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "gpu_mode_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "GpuClk",
+        "reason": "GpuClockSpeedsBelowAcceptableThreshold",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "gpu_clk_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "Imex",
+        "reason": "NvidiaImexDomainNotIn",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "imex_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "PcieError",
+        "reason": "PcieErrorsDetectedInSystemLogs",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "pcie_error_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "PcieWidthMissingLanes",
+        "reason": "PcieLinkWidth,Speed,OrState",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "pcie_width_missing_lanes_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "RdmaNicCount",
+        "reason": "RdmaNicCountMismatch",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "rdma_nic_count"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "RxDiscards",
+        "reason": "RxDiscardsExceededSpecifiedThreshold",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "rx_discards_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "GidIndex",
+        "reason": "GidIndexOnSystem",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "gid_index_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "Link",
+        "reason": "RdmaLinkCheckFailed-Link",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "link_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "LinkDown",
+        "reason": "RdmaInterfaceLinkDownDetected-",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "link_down_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "EthLink",
+        "reason": "EthernetLinkCheckFailed-Link",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "eth_link_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "Auth",
+        "reason": "RdmaInterfaceAuthenticationCheckFailed-",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "auth_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "SramError",
+        "reason": "GpuSramUncorrectableErrorsDetected",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "sram_error_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "GpuDriver",
+        "reason": "GpuDriverVersionValidationFailed-",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "gpu_driver_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "PeermemModule",
+        "reason": "PossibleDriverUnloadedThatCanBe",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "peermem_module_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "Module",
+        "reason": "RequiredKernelModule(e",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "module_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "Nvlink",
+        "reason": "NvlinkConnectionsDoNotMeetExpected",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "nvlink_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "NvlinkSpeed",
+        "reason": "NvlinkConnectionsDoNotMeetExpected",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "nvlink_speed_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "Eth0Presence",
+        "reason": "Eth0NetworkInterfaceMissingOr",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "eth0_presence_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "CdfpCable",
+        "reason": "CdfpCableConnectionMismatchDetected",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "cdfp_cable_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "Fabricmanager",
+        "reason": "NvidiaFabricManagerServiceNot",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "fabricmanager_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "HcaError",
+        "reason": "FatalMlx5ErrorsWereDetectedIn",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "hca_error_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "MissingInterface",
+        "reason": "MissingPcieInterfacesDetected",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "missing_interface_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "GpuXid",
+        "reason": "CriticalGpuXidErrorsDetectedIn",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "gpu_xid_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "MaxAcc",
+        "reason": "Max_acc_out_readAnd/orAdvanced_pci_settingsConfigurationIncorrect",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "max_acc_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "RowRemapError",
+        "reason": "GpuRowRemapErrorsDetected",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "row_remap_error_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "ThermalThrottling",
+        "reason": "GpuThermalThrottlingDetected",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "thermal_throttling_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "NvlinkInactive",
+        "reason": "InactiveNvlinkConnectionsDetectedOnGpus",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "nvlink_inactive_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "SourceBasedRouting",
+        "reason": "Source-basedRoutingMisconfigurationDetected",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "source_based_routing_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "Ipmi",
+        "reason": "IpmiInterfaceAccessible-Security",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "ipmi_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "OcaVersion",
+        "reason": "OracleCloudAgentVersionBelow",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "oca_version_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "RdmaLinkFlap",
+        "reason": "RdmaLinkFlapDetectedWithin",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "rdma_link_flap_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "AdvancedLink",
+        "reason": "AdvancedRdmaLinkAnalysisDetectedIssues",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "advanced_link_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "RttccStatus",
+        "reason": "Rttcc(realTimeTelemetryCongestionControl)",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "rttcc_status_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "PcieSpeed",
+        "reason": "PcieSpeedCheckFailed-Some",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "pcie_speed_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "Pcie",
+        "reason": "PcieSpeedOrWidthCheckFailed",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "pcie_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "RdmaNicCount",
+        "reason": "RdmaNicCountMismatch",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "rdma_nic_count_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "GpuRemapPending",
+        "reason": "GpuMemoryRemapPendingDetected-",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "gpu_remap_pending_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "Sram",
+        "reason": "SramErrorsDetected-UncorrectableOr",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "sram_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "WalkPcie",
+        "reason": "PcieDevicesOperatingAtSuboptimalLink",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "walk_pcie_check"
+        ],
+        "timeout": "30s"
+      },
+      {
+        "type": "permanent",
+        "condition": "HpcInfo",
+        "reason": "HpcMetadataTagNotSetOr",
+        "path": "/node-problem-detector-gpu-check/dr_hpc_check.sh",
+        "args": [
+          "hpc_info_check"
+        ],
+        "timeout": "30s"
+      }
+    ]
+}
