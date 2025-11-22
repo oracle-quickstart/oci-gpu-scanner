@@ -29,12 +29,11 @@ spec:
   backoffLimit: 0
   ttlSecondsAfterFinished: {{ .Values.healthCheck.ttlSecondsAfterFinished | default 86400 }}  # Clean up after 24h
   
-  
   template:
     metadata:
       labels:
         app: amd-gpu-healthcheck
-         priority: low
+        priority: low
       annotations:
         # Mark as preemptible
         cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
@@ -47,7 +46,8 @@ spec:
 
       nodeSelector:
         kubernetes.io/arch: amd64
-      
+        amd.com/gpu: "true"
+
       tolerations:
       - key: amd.com/gpu
         operator: Exists
@@ -85,7 +85,11 @@ spec:
       - name: amd-gpu-healthcheck
         image: "{{ .Values.global.ociImageRegistry }}/{{ .Values.healthCheck.image.repository }}:{{ .Values.healthCheck.image.tag }}"
         imagePullPolicy: {{ .Values.healthCheck.image.pullPolicy }}
-        
+        args: ["--tp", "8"]
+        env:
+          - name: PUSH_GATEWAY
+            value: {{ $.Values.global.pushGatewayUrl | quote }}
+
         securityContext:
           privileged: true
           capabilities:
@@ -94,57 +98,32 @@ spec:
             - SYS_ADMIN
           seccompProfile:
             type: Unconfined
+          allowPrivilegeEscalation: true
         
         resources:
           {{- toYaml .Values.healthCheck.resources | nindent 10 }}
-        
-        env:
-        - name: HIP_PLATFORM
-          value: "amd"
-        - name: HSA_OVERRIDE_GFX_VERSION
-          value: "10.3.0"
-        - name: HIP_VISIBLE_DEVICES
-          value: "all"
-        - name: NODE_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: spec.nodeName
-        
-        command: ["python3"]
-        args:
-        - "amd_functional_test.py"
-        - "--dtype"
-        - "float32"
-        - "--expected_gpus"
-        - "MI300:8"
-        - "--matrix_size_mi300"
-        - "16384"
-        - "--functions"
-        - "all"
-        - "--output_dir"
-        - "/app/testing_results"
-        
+
         volumeMounts:
-        - name: testing-results
-          mountPath: /app/testing_results
-        - name: dev-kfd
-          mountPath: /dev/kfd
-        - name: dev-dri
-          mountPath: /dev/dri
+          - name: dev-kfd
+            mountPath: /dev/kfd
+          - name: dev-dri
+            mountPath: /dev/dri
+          - name: results
+            mountPath: /testing_results
       
       volumes:
-      - name: testing-results
-        hostPath:
-          path: /var/log/amd-gpu-healthcheck
-          type: DirectoryOrCreate
-      - name: dev-kfd
-        hostPath:
-          path: /dev/kfd
-          type: CharDevice
-      - name: dev-dri
-        hostPath:
-          path: /dev/dri
-          type: Directory
+        - name: dev-kfd
+          hostPath:
+            path: /dev/kfd
+            type: CharDevice
+        - name: dev-dri
+          hostPath:
+            path: /dev/dri
+            type: Directory
+        - name: results
+          hostPath:
+            path: /tmp/docker_test_results
+            type: DirectoryOrCreate
       
       restartPolicy: Never
       terminationGracePeriodSeconds: 30

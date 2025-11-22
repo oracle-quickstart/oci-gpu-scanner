@@ -109,16 +109,18 @@ healthCheck:
   enabled: false
   image:
     repository: oci_lens_healthcheck_amd
-    tag: v0.0.2
+    tag: v0.0.5
     pullPolicy: Always
   
   resources:
     requests:
-      memory: "8Gi"
-      cpu: "2"
+      memory: "32Gi"
+      cpu: "16"
+      amd.com/gpu: 8
     limits:
-      memory: "16Gi"
-      cpu: "4"
+      memory: "32Gi"
+      cpu: "16"
+      amd.com/gpu: 8
 
 drhpc:
   enabled: true
@@ -230,7 +232,8 @@ nodeProblemDetector:
   
 # Node Problem Detector
 nodeProblemDetector:
-  enabled: false
+  enabled: true
+  enableGpuChecks: true
   namespace: kube-system
   
   # DRHPC results path - must match the hostPath where DRHPC writes results
