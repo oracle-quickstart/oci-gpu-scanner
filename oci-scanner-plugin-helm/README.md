@@ -26,7 +26,8 @@ helm install oci-gpu-scanner-plugin . -f values.yaml -n oci-gpu-scanner-plugin \
   --create-namespace
 
 # Enable health check
-helm install oci-gpu-scanner-plugin ./oci-scanner-plugin-amd-helm \
+helm upgrade oci-gpu-scanner-plugin ./oci-scanner-plugin-helm \
+  -n oci-gpu-scanner-plugin \
   --set healthCheck.enabled=true
 
 # Enable Node Problem Detector (requires node labeling and drhpc to be enabled- see below)

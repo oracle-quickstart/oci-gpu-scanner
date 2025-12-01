@@ -34,7 +34,7 @@ spec:
       restartPolicy: Always
       containers:
       - name: metrics-pusher
-        image: curlimages/curl:latest
+        image: docker.io/curlimages/curl:latest
         command:
         - /bin/sh
         - -c

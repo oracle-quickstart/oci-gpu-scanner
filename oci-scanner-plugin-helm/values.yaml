@@ -50,6 +50,7 @@ device-metrics-exporter-charts:
     repository: docker.io/rocm/device-metrics-exporter
     tag: v1.4.0
     pullPolicy: IfNotPresent
+    initContainerImage: docker.io/library/busybox:1.36
   service:
     type: ClusterIP
     ClusterIP:
