@@ -40,7 +40,6 @@ spec:
         - args:
             - /node-problem-detector --logtostderr --prometheus-port=${PROMETHEUS_PORT}
               --prometheus-address 0.0.0.0 --config.system-log-monitor=/config/kernel-monitor.json,/config/readonly-monitor.json
-              --config.custom-plugin-monitor=/node-problem-detector-custom-check/imds_reachability.json
               {{- if .Values.nodeProblemDetector.enableGpuChecks }}
               --config.custom-plugin-monitor=/node-problem-detector-gpu-check/dr-hpc.json
               {{- end }}
