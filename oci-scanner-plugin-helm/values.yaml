@@ -42,6 +42,7 @@ device-metrics-exporter-charts:
   global:
     imageRegistry: ""
   platform: k8s
+  hostNetwork: true
   nodeSelector:
     amd.com/gpu: "true"
   kubelet:

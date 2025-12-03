@@ -67,7 +67,7 @@ rules:
   verbs: ["get", "list", "watch"]
 - apiGroups: ["apps"]
   resources: ["daemonsets"]
-  verbs: ["get", "list", "watch", "patch"]
+  verbs: ["get", "list", "watch"]
 {{- if .Values.metricsPushJob.enableServiceDiscovery }}
 - apiGroups: [""]
   resources: ["services", "endpoints"]
