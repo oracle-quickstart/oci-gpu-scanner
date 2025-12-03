@@ -23,8 +23,8 @@ metadata:
     component: gpu-monitoring
     priority: low
 spec:
-  parallelism: 1
-  completions: 1
+  parallelism: 3
+  completions: 3
   activeDeadlineSeconds: 7200
   backoffLimit: 0
   ttlSecondsAfterFinished: {{ .Values.healthCheck.ttlSecondsAfterFinished | default 86400 }}  # Clean up after 24h
