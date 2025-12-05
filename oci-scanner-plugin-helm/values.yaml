@@ -42,6 +42,7 @@ device-metrics-exporter-charts:
   global:
     imageRegistry: ""
   platform: k8s
+  hostNetwork: true
   nodeSelector:
     amd.com/gpu: "true"
   kubelet:
@@ -107,7 +108,7 @@ metricsPushJob:
 
 # Active Health Check
 healthCheck:
-  enabled: false
+  enabled: true
   image:
     repository: oci_lens_healthcheck_amd
     tag: v0.0.5
@@ -166,7 +167,7 @@ rbac:
 
 # Node Exporter
 nodeExporter:
-  enabled: false
+  enabled: true
   
 # Override default values for the official chart
 prometheus-node-exporter:
@@ -216,7 +217,7 @@ podNodeMapper:
 
 # Node Problem Detector
 nodeProblemDetector:
-  enabled: false
+  enabled: true
   enableGpuChecks: true  # Enable GPU health checks via DRHPC
   
   # DRHPC results path - must match the hostPath where DRHPC writes results
