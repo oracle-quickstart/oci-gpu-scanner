@@ -1,0 +1,60 @@
+{{- if .Values.amdGpuExporter.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: patch-amd-exporter-{{ .Release.Revision }}
+  namespace: {{ .Values.namespace.name }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation
+  labels:
+    app: amd-exporter-patch
+    component: monitoring
+spec:
+  ttlSecondsAfterFinished: 60
+  template:
+    metadata:
+      labels:
+        app: amd-exporter-patch
+    spec:
+      serviceAccountName: metrics-push-sa
+      restartPolicy: Never
+      containers:
+      - name: patch
+        image: docker.io/alpine/k8s:1.31.10
+        command:
+        - /bin/bash
+        - -c
+        - |
+          set -e
+          echo "Waiting for AMD GPU exporter DaemonSet to be created..."
+          
+          # Wait for DaemonSet to exist (up to 60 seconds)
+          for i in {1..12}; do
+            if kubectl get daemonset oci-gpu-scanner-plugin-amdgpu-metrics-exporter -n {{ .Values.namespace.name }} &>/dev/null; then
+              echo "DaemonSet found, applying hostNetwork patch..."
+              break
+            fi
+            echo "Waiting for DaemonSet... (attempt $i/12)"
+            sleep 5
+          done
+          
+          # Apply the patch
+          kubectl patch daemonset oci-gpu-scanner-plugin-amdgpu-metrics-exporter \
+            -n {{ .Values.namespace.name }} \
+            -p '{"spec":{"template":{"spec":{"hostNetwork":true}}}}' || {
+              echo "Failed to patch DaemonSet. It may not exist yet."
+              exit 1
+            }
+          
+          echo "Successfully patched AMD GPU exporter DaemonSet with hostNetwork=true"
+          
+          # Verify the patch
+          if kubectl get daemonset oci-gpu-scanner-plugin-amdgpu-metrics-exporter -n {{ .Values.namespace.name }} -o jsonpath='{.spec.template.spec.hostNetwork}' | grep -q "true"; then
+            echo "✓ Verification successful: hostNetwork is enabled"
+          else
+            echo "⚠ Warning: hostNetwork may not be set correctly"
+            exit 1
+          fi
+{{- end }}

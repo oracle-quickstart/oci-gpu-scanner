@@ -2552,7 +2552,7 @@
                 "uid": "{{DATASOURCE_PROMETHEUS}}"
               },
               "editorMode": "code",
-              "expr": "DCGM_FI_DEV_GPU_TEMP{Hostname=~\"$hostname\"} OR gpu_junction_temperature{hostname=~\"$hostname\"}",
+              "expr": "DCGM_FI_DEV_GPU_TEMP{Hostname=~\"$hostname\"} OR (label_replace(amd_gpu_junction_temperature, \"node\", \"$1\", \"instance\", \"([^:]+)\") * on(node) group_left(hostname) (max by(node, hostname) (oci_lens_pod_node_info{hostname=~\"$hostname\"})))",
               "hide": false,
               "instant": false,
               "interval": "",
@@ -2627,7 +2627,7 @@
                 "uid": "{{DATASOURCE_PROMETHEUS}}"
               },
               "editorMode": "code",
-              "expr": "avg(DCGM_FI_DEV_POWER_USAGE{Hostname=~\"$hostname\"} OR gpu_power_usage{hostname=~\"$hostname\"})",
+              "expr": "avg(DCGM_FI_DEV_POWER_USAGE{Hostname=~\"$hostname\"} OR (label_replace(amd_gpu_power_usage, \"node\", \"$1\", \"instance\", \"([^:]+)\") * on(node) group_left(hostname) (max by(node, hostname) (oci_lens_pod_node_info{hostname=~\"$hostname\"}))))",
               "hide": false,
               "instant": false,
               "legendFormat": "__auto",
@@ -2702,7 +2702,7 @@
                 "uid": "{{DATASOURCE_PROMETHEUS}}"
               },
               "editorMode": "code",
-              "expr": "avg(DCGM_FI_DEV_GPU_TEMP{Hostname=~\"$hostname\"} OR gpu_junction_temperature{hostname=~\"$hostname\"}) ",
+              "expr": "avg(DCGM_FI_DEV_GPU_TEMP{Hostname=~\"$hostname\"} OR (label_replace(amd_gpu_junction_temperature, \"node\", \"$1\", \"instance\", \"([^:]+)\") * on(node) group_left(hostname) (max by(node, hostname) (oci_lens_pod_node_info{hostname=~\"$hostname\"})))) ",
               "interval": "",
               "legendFormat": "Avg GPU Temperature",
               "range": true,
@@ -2809,7 +2809,7 @@
                 "uid": "{{DATASOURCE_PROMETHEUS}}"
               },
               "editorMode": "code",
-              "expr": "avg(DCGM_FI_DEV_GPU_UTIL{Hostname=~\"$hostname\"} OR gpu_gfx_activity{hostname=~\"$hostname\"})",
+              "expr": "avg(DCGM_FI_DEV_GPU_UTIL{Hostname=~\"$hostname\"} OR (label_replace(amd_gpu_gfx_activity, \"node\", \"$1\", \"instance\", \"([^:]+)\") * on(node) group_left(hostname) (max by(node, hostname) (oci_lens_pod_node_info{hostname=~\"$hostname\"}))))",
               "interval": "",
               "legendFormat": "{{Hostname}}{{hostname}}",
               "range": true,
@@ -2914,7 +2914,7 @@
                 "uid": "{{DATASOURCE_PROMETHEUS}}"
               },
               "editorMode": "code",
-              "expr": "DCGM_FI_DEV_POWER_USAGE{Hostname=~\"$hostname\"} OR gpu_power_usage{hostname=~\"$hostname\"}",
+              "expr": "DCGM_FI_DEV_POWER_USAGE{Hostname=~\"$hostname\"} OR (label_replace(amd_gpu_power_usage, \"node\", \"$1\", \"instance\", \"([^:]+)\") * on(node) group_left(hostname) (max by(node, hostname) (oci_lens_pod_node_info{hostname=~\"$hostname\"})))",
               "interval": "",
               "legendFormat": "GPU {{gpu}}{{gpu_id}} - {{Hostname}}{{hostname}}",
               "range": true,
