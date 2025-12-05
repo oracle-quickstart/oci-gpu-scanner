@@ -1,6 +1,6 @@
 # v0.1.12
 ## Release Date
-Oct 31, 2025
+Dec 5, 2025
 
 ## Dependency Versions
 
