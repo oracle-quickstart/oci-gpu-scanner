@@ -14,10 +14,6 @@ Oct 31, 2025
 
 ----
 ## Changelog
-### Feature
-
-
-----
 ### Bugfix
 #### Quickstart
 - Fixed Prometheus and Grafana for AMD metrics ([corrino-lens-devops #16](https://github.com/oracle-quickstart/oci-gpu-scanner/pull/61), [@gablyu-oci](https://github.com/gablyu-oci))
