@@ -138,7 +138,7 @@ helm install lens oci-ai-incubations/lens -n lens --create-namespace \
 **Note:** When using your own Grafana:
 - Set `grafana.enabled=false` to prevent installing Grafana as a dependency
 - Provide `backend.grafanaUrl` with the URL to your existing Grafana instance
-- Provide `backend.grafanaApiToken` with a Grafana API token for authentication (create one in Grafana under Configuration > API Keys)
+- Provide `backend.grafanaApiToken` with a Grafana API token for authentication (create one in Grafana under Configuration > API Keys with admin rights)
 
 **Optional: Custom Domain Configuration**
 
