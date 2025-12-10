@@ -14,7 +14,7 @@ goPlugin:
   enabled: true
   image:
     repository: oci_lens_metric_collector
-    tag: v0.0.10
+    tag: v0.0.11
     pullPolicy: Always
   
   config:
@@ -200,7 +200,7 @@ podNodeMapper:
   replicas: 1
   image:
     repository: oci_lens_pod_node_info
-    tag: latest
+    tag: v0.0.1
     pullPolicy: Always
   
   # Configuration

@@ -125,16 +125,20 @@ helm repo update
 helm search repo oci-ai-incubations
 helm install lens oci-ai-incubations/lens -n lens --create-namespace \
   --set backend.prometheusPushgatewayUrl="http://YOUR_PUSHGATEWAY_IP_OR_SERVICE_NAME:9091" \
-  --set backend.grafanaUrl="http://YOUR_GRAFANA_IPIP_OR_SERVICE_NAME:80" \
-  --set monitoring.grafanaAdminPassword="password" \
-  --set grafana.adminPassword="password" \
+  --set backend.grafanaUrl="http://YOUR_GRAFANA_IP_OR_SERVICE_NAME:80" \
+  --set backend.grafanaApiToken="your_grafana_api_token" \
+  --set grafana.enabled=false \
   --set backend.tenancyId="your-oci-tenancy-id" \
   --set backend.regionName="your-oke-region-name" \
   --set backend.superuser.username="username for API & control plane e.g. admin" \
   --set backend.superuser.email="your email" \
-  --set backend.superuser.password="access password for API & control plane" \
-  --set grafana.adminPassword="access password for grafana portal. User name is admin by default"
+  --set backend.superuser.password="access password for API & control plane"
 ```
+
+**Note:** When using your own Grafana:
+- Set `grafana.enabled=false` to prevent installing Grafana as a dependency
+- Provide `backend.grafanaUrl` with the URL to your existing Grafana instance
+- Provide `backend.grafanaApiToken` with a Grafana API token for authentication (create one in Grafana under Administration > Users and Access > Service Accounts with admin rights)
 
 **Optional: Custom Domain Configuration**
 
