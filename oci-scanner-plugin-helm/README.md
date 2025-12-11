@@ -15,7 +15,7 @@ Multi-vendor GPU monitoring and health check solution for OCI compute instances 
 - **Node Problem Detector**: GPU health monitoring via DRHPC integration (requires labeling)
 - **OpenCost**: Cost tracking and resource allocation metrics (via subchart)
 
-## Configuration
+## Installation Configuration
 
 ```bash
 helm dependency build
@@ -24,26 +24,28 @@ helm dependency update
 helm install oci-gpu-scanner-plugin . -f values.yaml -n oci-gpu-scanner-plugin \
   --set global.pushGatewayUrl="<your-push-gateway-url>" \
   --create-namespace
+``` 
 
-# Enable health check
-helm upgrade oci-gpu-scanner-plugin ./oci-scanner-plugin-helm \
-  -n oci-gpu-scanner-plugin \
-  --set healthCheck.enabled=true
+The following plugins are enabled by default; if you want to disable it set the following flags when install/upgrade: 
+```bash
+# health check
+  --set healthCheck.enabled=false
 
-# Enable Node Problem Detector (requires node labeling and drhpc to be enabled- see below)
-helm upgrade oci-gpu-scanner-plugin . \
-  --set nodeProblemDetector.enabled=true \
-  --set drhpc.enabled=true
-
-# Disable OpenCost (enabled by default)
-helm install oci-gpu-scanner-plugin . -f values.yaml -n oci-gpu-scanner-plugin \
+# Node Problem Detector (requires node labeling and drhpc to be disabled
+  --set nodeProblemDetector.enabled=false \
+  --set drhpc.enabled=false
+```
+**Cost Tracking**: OpenCost is enabled by default to provide cost visibility for Kubernetes workloads. See [cost_tracking.md](cost_tracking.md) for detailed metrics.
+```bash
+# Disable OpenCost
   --set opencost.enabled=false
+```
 
-# Uninstall
+**Uninstall**:
+```bash
 helm uninstall oci-gpu-scanner-plugin -n oci-gpu-scanner-plugin
 ```
 
-**Cost Tracking**: OpenCost is enabled by default to provide cost visibility for Kubernetes workloads. See [cost_tracking.md](cost_tracking.md) for detailed metrics.
 
 ## Requirements
 
