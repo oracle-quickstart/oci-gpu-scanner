@@ -89,6 +89,10 @@ spec:
         env:
           - name: PUSH_GATEWAY
             value: {{ $.Values.global.pushGatewayUrl | quote }}
+          - name: CP_AUTH_TOKEN
+            value: {{ $.Values.global.cpAuthToken | quote }}
+          - name: CP_ENDPOINT
+            value: {{ $.Values.global.cpEndpoint | quote }}
 
         securityContext:
           privileged: true

@@ -3,6 +3,8 @@ global:
   namespace: oci-gpu-scanner-plugin
   pushGatewayUrl: "http://prometheus-pushgateway:9091/"
   ociImageRegistry: iad.ocir.io/iduyx1qnmway/lens-metric-collector
+  cpAuthToken: ""
+  cpEndpoint: "https://cp.example.com"
 
 # Namespace configuration
 namespace:
@@ -111,7 +113,7 @@ healthCheck:
   enabled: true
   image:
     repository: oci_lens_healthcheck_amd
-    tag: v0.0.5
+    tag: v0.0.6
     pullPolicy: Always
   
   resources:
@@ -132,7 +134,7 @@ drhpc:
       image:
         repository: oci-dr-hpc-v2       
         rocmVersion: rocm                 # ROCm version prefix
-        tag: latest                       # Tag comes after rocm version
+        tag: 1.0.37                       # Tag comes after rocm version
         pullPolicy: Always
       resultsHostPath: "/var/lib/oci-dr-hpc-v2"
       nodeSelector:
@@ -149,7 +151,7 @@ drhpc:
       image:
         repository: oci-dr-hpc-v2        
         cudaVersion: cuda-12.9.0          # CUDA version prefix
-        tag: latest                       # Tag comes after cuda version
+        tag: 1.0.37                           # Tag comes after cuda version
         pullPolicy: Always
       resultsHostPath: "/var/lib/oci-dr-hpc-v2"                        
       nodeSelector:
