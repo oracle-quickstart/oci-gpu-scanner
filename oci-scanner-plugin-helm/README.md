@@ -31,7 +31,7 @@ The following plugins are enabled by default; if you want to disable it set the 
 # health check
   --set healthCheck.enabled=false
 
-# Node Problem Detector (requires node labeling and drhpc to be disabled
+# Node Problem Detector (requires node labeling and drhpc to be disabled)
   --set nodeProblemDetector.enabled=false \
   --set drhpc.enabled=false
 ```
