@@ -44,6 +44,7 @@ The following plugins are enabled by default; if you want to disable it set the 
 **Uninstall**:
 ```bash
 helm uninstall oci-gpu-scanner-plugin -n oci-gpu-scanner-plugin
+kubectl delete namespace oci-gpu-scanner-plugin
 ```
 
 
