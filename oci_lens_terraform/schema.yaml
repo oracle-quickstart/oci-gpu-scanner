@@ -24,6 +24,20 @@ variableGroups:
       - ingress_domain
       - create_iam_policy
       - policy_name
+  - title: "Grafana Configuration"
+    visible: true
+    variables:
+      - use_external_grafana
+      - grafana_url
+      - grafana_api_token
+  - title: "Ingress and Cert-Manager Configuration"
+    visible: true
+    variables:
+      - use_external_ingress
+      - ingress_cert_manager_cluster_issuer
+      - ingress_class_name
+      - ingress_external_namespace
+      - ingress_external_service_name
 
 variables:
   tenancy_ocid:
@@ -109,6 +123,79 @@ variables:
     description: "Password for logging into Grafana. (default: admin123)"
     sensitive: true
     default: "admin123"
+
+  use_external_grafana:
+    type: boolean
+    title: "Use External Grafana"
+    description: "Use your own Grafana instance instead of deploying one. If enabled, Grafana will not be deployed and you must provide Grafana URL and API token."
+    default: false
+
+  grafana_url:
+    type: string
+    title: "Grafana URL"
+    description: "URL of your existing Grafana instance (e.g., http://grafana-service.namespace.svc.cluster.local:80 or http://your-grafana-domain.com)."
+    default: ""
+    required: true
+    visible:
+      and:
+        - use_external_grafana
+
+  grafana_api_token:
+    type: string
+    title: "Grafana API Token"
+    description: "API token for authenticating with your existing Grafana instance. Create one in Grafana under Administration > Users and Access > Service Accounts with admin rights."
+    sensitive: true
+    default: ""
+    required: true
+    visible:
+      and:
+        - use_external_grafana
+
+  use_external_ingress:
+    type: boolean
+    title: "Use External Ingress and Cert-Manager"
+    description: "Use your own ingress controller and cert-manager instead of deploying them. If enabled, cert-manager and ingress-nginx will not be deployed."
+    default: false
+
+  ingress_cert_manager_cluster_issuer:
+    type: string
+    title: "Cert-Manager Cluster Issuer"
+    description: "Name of your existing cert-manager ClusterIssuer for TLS certificate management."
+    default: ""
+    required: true
+    visible:
+      and:
+        - use_external_ingress
+
+  ingress_class_name:
+    type: string
+    title: "Ingress Class Name"
+    description: "Ingress class name for your existing ingress controller."
+    default: ""
+    required: true
+    visible:
+      and:
+        - use_external_ingress
+
+  ingress_external_namespace:
+    type: string
+    title: "External Ingress Namespace"
+    description: "Namespace where your existing ingress controller service is deployed."
+    default: ""
+    required: true
+    visible:
+      and:
+        - use_external_ingress
+
+  ingress_external_service_name:
+    type: string
+    title: "External Ingress Service Name"
+    description: "Service name of your existing ingress controller."
+    default: ""
+    required: true
+    visible:
+      and:
+        - use_external_ingress
 
 outputs:
   # OCI GPU Scanner Portal

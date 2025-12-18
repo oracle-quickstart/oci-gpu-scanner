@@ -63,3 +63,52 @@ variable "ingress_domain" {
   type        = string
   default     = ""
 }
+
+variable "use_external_grafana" {
+  description = "Use your own Grafana instance instead of deploying one."
+  type        = bool
+  default     = false
+}
+
+variable "grafana_url" {
+  description = "URL of your existing Grafana instance."
+  type        = string
+  default     = ""
+}
+
+variable "grafana_api_token" {
+  description = "API token for authenticating with your existing Grafana instance."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "use_external_ingress" {
+  description = "Use your own ingress controller and cert-manager instead of deploying them."
+  type        = bool
+  default     = false
+}
+
+variable "ingress_cert_manager_cluster_issuer" {
+  description = "Name of your existing cert-manager ClusterIssuer for TLS certificate management."
+  type        = string
+  default     = ""
+}
+
+variable "ingress_class_name" {
+  description = "Ingress class name for your existing ingress controller."
+  type        = string
+  default     = ""
+}
+
+variable "ingress_external_namespace" {
+  description = "Namespace where your existing ingress controller service is deployed."
+  type        = string
+  default     = ""
+}
+
+variable "ingress_external_service_name" {
+  description = "Service name of your existing ingress controller."
+  type        = string
+  default     = ""
+}

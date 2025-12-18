@@ -54,7 +54,7 @@ output "backend_ingress_host" {
 
 output "grafana_ingress_host" {
   description = "The ingress host for Grafana"
-  value       = try(data.kubernetes_ingress_v1.grafana_ingress.spec[0].rule[0].host, "")
+  value       = var.use_external_grafana ? "" : try(data.kubernetes_ingress_v1.grafana_ingress[0].spec[0].rule[0].host, "")
 }
 
 output "prometheus_ingress_host" {
