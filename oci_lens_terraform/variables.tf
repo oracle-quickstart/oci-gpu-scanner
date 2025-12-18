@@ -32,6 +32,12 @@ variable "policy_name" {
   default     = "lens-backend-workload-policy"
 }
 
+variable "authorized_compartments" {
+  description = "Comma-separated list of compartment OCIDs to grant IAM policy access (e.g., ocid1.compartment.oc1..xxx,ocid1.compartment.oc1..yyy). Leave blank to authorize access to the whole tenancy."
+  type        = string
+  default     = ""
+}
+
 variable "superuser_username" {
   description = "Username for OCI GPU Scanner portal and backend API"
   type        = string

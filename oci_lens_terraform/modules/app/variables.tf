@@ -39,6 +39,12 @@ variable "policy_name" {
   default = "lens-backend-workload-policy"
 }
 
+variable "authorized_compartments" {
+  description = "Comma-separated list of compartment OCIDs to grant IAM policy access. Leave blank to authorize access to the whole tenancy."
+  type = string
+  default = ""
+}
+
 variable "superuser_username" {
   description = "Username for the superuser of Lens API Backend"
   type = string

@@ -140,6 +140,7 @@ module "app" {
   ingress_class_name = var.ingress_class_name
   ingress_external_namespace = var.ingress_external_namespace
   ingress_external_service_name = var.ingress_external_service_name
+  authorized_compartments = var.authorized_compartments
 
   # wait for cluster (if new cluster was created)
   depends_on = [time_sleep.after_cluster]

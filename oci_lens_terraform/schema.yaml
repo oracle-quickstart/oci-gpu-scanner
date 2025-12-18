@@ -24,6 +24,7 @@ variableGroups:
       - ingress_domain
       - create_iam_policy
       - policy_name
+      - authorized_compartments
   - title: "Grafana Configuration"
     visible: true
     variables:
@@ -97,6 +98,12 @@ variables:
     visible:
       and:
         - create_iam_policy
+
+  authorized_compartments:
+    type: string
+    title: "Authorized Compartments"
+    description: "Compartment OCID to grant IAM policy access. Leave blank to authorize access to the whole tenancy."
+    default: ""
 
   superuser_username:
     type: string

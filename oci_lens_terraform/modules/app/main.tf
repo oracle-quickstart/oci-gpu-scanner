@@ -43,6 +43,11 @@ resource "helm_release" "app" {
   }
 
   set {
+    name  = "backend.authorizedCompartments"
+    value = var.authorized_compartments
+  }
+
+  set {
     name = "backend.superuser.username"
     value = var.superuser_username
   }
