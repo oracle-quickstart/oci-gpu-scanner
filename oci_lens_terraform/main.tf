@@ -132,6 +132,15 @@ module "app" {
   superuser_email    = var.superuser_email
   grafana_admin_password = var.grafana_admin_password
   ingress_domain    = var.ingress_domain
+  use_external_grafana = var.use_external_grafana
+  grafana_url       = var.grafana_url
+  grafana_api_token = var.grafana_api_token
+  use_external_ingress = var.use_external_ingress
+  ingress_cert_manager_cluster_issuer = var.ingress_cert_manager_cluster_issuer
+  ingress_class_name = var.ingress_class_name
+  ingress_external_namespace = var.ingress_external_namespace
+  ingress_external_service_name = var.ingress_external_service_name
+  authorized_compartments = var.authorized_compartments
 
   # wait for cluster (if new cluster was created)
   depends_on = [time_sleep.after_cluster]
