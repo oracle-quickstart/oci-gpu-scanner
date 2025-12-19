@@ -19,6 +19,9 @@ December 11, 2025
 - Autoremediation ([corrino-lens-devops commit#12e1fd6](https://github.com/oci-ai-incubations/corrino-lens-devops/commit/12e1fd6d5de965f9d3f38beeda0fe66d543ff368), [@jolettacheungoracle](https://github.com/jolettacheungoracle))
 - Helm chart updated to enable custom Grafana, cert-manager, Ingress ([corrino-lens-devops #54](https://github.com/oci-ai-incubations/corrino-lens-devops/pull/54), [@gablyu-oci](https://github.com/gablyu-oci))
 
+#### Portal
+- Address security vulnerabilities ([corrino-lens-portal commit#629c424](https://github.com/oci-ai-incubations/corrino-lens-cp/pull/50](https://github.com/oci-ai-incubations/corrino-lens-portal/commit/629c424eea92a4dbd1d5e66eb2eec9dde54c87ca)), [@jolettacheungoracle](https://github.com/jolettacheungoracle))
+
 #### Backend
 - Active health check trigger via CP ([corrino-lens-cp #50](https://github.com/oci-ai-incubations/corrino-lens-cp/pull/50), [@rtkgupta](https://github.com/rtkgupta))
 - Simplify logic to use host ip from Instance model ([corrino-lens-cp #55](https://github.com/oci-ai-incubations/corrino-lens-cp/pull/55), [@rtkgupta](https://github.com/rtkgupta))
