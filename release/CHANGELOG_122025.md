@@ -10,7 +10,7 @@ December 20, 2025
 | Portal        | v0.0.4      | iad.ocir.io/iduyx1qnmway/corrino-lens-portal:v0.0.4                                                                                                                                                             |
 | Plugin        | N/A      | iduyx1qnmway/lens-metric-collector/oci-dr-hpc-v2:cuda-latest<br>iduyx1qnmway/lens-metric-collector/oci-dr-hpc-v2:rocm-latest<br>iduyx1qnmway/lens-metric-collector/oci_lens_pod_node_info:v0.0.1<br>iduyx1qnmway/lens-metric-collector/oci_lens_metric_collector:v0.0.11 |
 | Helm          | v 0.1.14 | [lens-0.1.14-20251219-1606.tgz](https://github.com/oci-ai-incubations/corrino-lens-devops/blob/main/docs/lens-0.1.14-20251219-1606.tgz)                                                                                                 |
-| Quickstart    | v 0.1.14 | [v0.1.13](https://github.com/oracle-quickstart/oci-gpu-scanner/releases/download/v0.1.14/oci-gpu-scanner-deploy.zip)                                                                                                                                                    |
+| Quickstart    | v 0.1.14 | [v0.1.14](https://github.com/oracle-quickstart/oci-gpu-scanner/releases/download/v0.1.14/oci-gpu-scanner-deploy.zip)                                                                                                                                                    |
 
 ----
 ## Changelog
