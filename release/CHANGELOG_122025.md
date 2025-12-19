@@ -22,7 +22,6 @@ December 20, 2025
 - Security update: Grafana to use kubernetes secrets - ([Update to use grafana password as k8s secret](https://github.com/oci-ai-incubations/corrino-lens-devops/commit/c2edc8cce2f8f237d237a251003af64a96420dcf), ([@rtkgupta](https://github.com/rtkgupta))
 - Update CP to be able run k8s jobs ([corrino-lens-devops](https://github.com/oci-ai-incubations/corrino-lens-devops/commit/c2edc8cce2f8f237d237a251003af64a96420dcf), [@rtkgupta](https://github.com/rtkgupta))
 - Add auto active health check knobs to helm ([corrino-lens-devops](https://github.com/oci-ai-incubations/corrino-lens-devops/commit/a665745fde3986df8cc029b818d5012984cae004), [@rtkgupta](https://github.com/rtkgupta))
-- 
 
 #### Portal
 - Updated plugin install instructions ([corrino-lens-portal #36](https://github.com/oci-ai-incubations/corrino-lens-portal/pull/36), [@jolettacheungoracle](https://github.com/jolettacheungoracle))
