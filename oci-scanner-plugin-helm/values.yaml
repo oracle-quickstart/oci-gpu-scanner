@@ -134,7 +134,7 @@ drhpc:
       image:
         repository: oci-dr-hpc-v2       
         rocmVersion: rocm                 # ROCm version prefix
-        tag: 1.0.37                       # Tag comes after rocm version
+        tag: 1.0.50                       # Tag comes after rocm version
         pullPolicy: Always
       resultsHostPath: "/var/lib/oci-dr-hpc-v2"
       nodeSelector:
