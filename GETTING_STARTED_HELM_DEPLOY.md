@@ -97,10 +97,29 @@ Login to your existing OKE cluster where you would like to deploy. Run the below
 ``` bash
 helm search repo lens
 helm search repo oci-ai-incubations
+```
+Set the secrets:
+```bash
+kubectl create namespace lens
+export POSTGRES_USERNAME='your_secret_username'
+export POSTGRES_PASSWORD='your_secret_password'
+
+kubectl -n lens create secret generic lens-postgres-secret \
+  --from-literal=postgres-user="$POSTGRES_USERNAME" \
+  --from-literal=postgres-password="$POSTGRES_PASSWORD"
+
+export SUPERUSER_USERNAME='your_superuser_username'  
+export SUPERUSER_EMAIL='superuser@email.com'  
+export SUPERUSER_PASSWORD='your_superuser_password'
+
+kubectl -n lens create secret generic lens-backend-secret \
+  --from-literal=superuser-username="$SUPERUSER_USERNAME" \
+  --from-literal=superuser-email="$SUPERUSER_EMAIL" \
+  --from-literal=superuser-password="$SUPERUSER_PASSWORD"
+```
+Install: 
+```bash
 helm install lens oci-ai-incubations/lens -n lens --create-namespace \
-  --set backend.superuser.username="username for API & control plane e.g. admin" \
-  --set backend.superuser.email="your email" \
-  --set backend.superuser.password="access password for API & control plane" \
   --set grafana.adminPassword="access password for grafana portal. User name is admin by default"\
   --set monitoring.grafanaAdminPassword="password" \
   --set backend.tenancyId="your-oci-tenancy-id" \
@@ -120,9 +139,30 @@ If you already have Prometheus Postgateway and Grafana running, login to existin
 **Please make sure in this installation that VCNs have necessary firewall rules and DNS resolving ability for scanner portal to access the prometheus and grafana servers**
 
 ```bash
-
 helm repo update
 helm search repo oci-ai-incubations
+```
+Set the secrets:
+```bash
+kubectl create namespace lens
+export POSTGRES_USERNAME='your_secret_username'
+export POSTGRES_PASSWORD='your_secret_password'
+
+kubectl -n lens create secret generic lens-postgres-secret \
+  --from-literal=postgres-user="$POSTGRES_USERNAME" \
+  --from-literal=postgres-password="$POSTGRES_PASSWORD"
+
+export SUPERUSER_USERNAME='your_superuser_username'  
+export SUPERUSER_EMAIL='superuser@email.com'  
+export SUPERUSER_PASSWORD='your_superuser_password'
+
+kubectl -n lens create secret generic lens-backend-secret \
+  --from-literal=superuser-username="$SUPERUSER_USERNAME" \
+  --from-literal=superuser-email="$SUPERUSER_EMAIL" \
+  --from-literal=superuser-password="$SUPERUSER_PASSWORD"
+```
+Install: 
+```bash
 helm install lens oci-ai-incubations/lens -n lens --create-namespace \
   --set backend.prometheusPushgatewayUrl="http://YOUR_PUSHGATEWAY_IP_OR_SERVICE_NAME:9091" \
   --set backend.grafanaUrl="http://YOUR_GRAFANA_IP_OR_SERVICE_NAME:80" \
@@ -130,9 +170,6 @@ helm install lens oci-ai-incubations/lens -n lens --create-namespace \
   --set grafana.enabled=false \
   --set backend.tenancyId="your-oci-tenancy-id" \
   --set backend.regionName="your-oke-region-name" \
-  --set backend.superuser.username="username for API & control plane e.g. admin" \
-  --set backend.superuser.email="your email" \
-  --set backend.superuser.password="access password for API & control plane"
 ```
 
 **Note:** When using your own Grafana:
