@@ -138,6 +138,13 @@ If you already have Prometheus Postgateway and Grafana running, login to existin
 
 **Please make sure in this installation that VCNs have necessary firewall rules and DNS resolving ability for scanner portal to access the prometheus and grafana servers**
 
+**Note:** When using your own Grafana:
+- **Prerequisites** : Grafana >=10.4.8
+- Set `grafana.enabled=false` to prevent installing Grafana as a dependency
+- Provide `backend.grafanaUrl` with the URL to your existing Grafana instance
+- Provide `grafana-api-token` as secret with a Grafana API token for authentication (create one in Grafana under Administration > Users and Access > Service Accounts with admin rights)
+
+
 ```bash
 helm repo update
 helm search repo oci-ai-incubations
@@ -160,6 +167,10 @@ kubectl -n lens create secret generic lens-backend-secret \
   --from-literal=superuser-username="$SUPERUSER_USERNAME" \
   --from-literal=superuser-email="$SUPERUSER_EMAIL" \
   --from-literal=superuser-password="$SUPERUSER_PASSWORD"
+
+export GRAFANA_API_TOKEN='your_grafana_api_token'
+kubectl -n lens create secret generic lens-grafana-secret \
+  --from-literal=grafana-api-token="$GRAFANA_API_TOKEN"
 ```
 Install: 
 ```bash
@@ -172,11 +183,7 @@ helm install lens oci-ai-incubations/lens -n lens --create-namespace \
   --set backend.regionName="your-oke-region-name" \
 ```
 
-**Note:** When using your own Grafana:
-- **Prerequisites** : Grafana >=10.4.8
-- Set `grafana.enabled=false` to prevent installing Grafana as a dependency
-- Provide `backend.grafanaUrl` with the URL to your existing Grafana instance
-- Provide `backend.grafanaApiToken` with a Grafana API token for authentication (create one in Grafana under Administration > Users and Access > Service Accounts with admin rights)
+
 
 **Optional: Custom Domain Configuration**
 
@@ -207,7 +214,7 @@ All configuration is managed via `values.yaml`.
 If you already have Prometheus Pushgateway and Grafana running, find their external IPs:
 
 ```bash
-kubectl get ingress-n lens
+kubectl get ingress -n lens
 ```
 
 You should the below response with a list of public URLs for your deployments.
