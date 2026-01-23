@@ -1827,6 +1827,22 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Time Last Run"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "dateTimeAsIso"
+              },
+              {
+                "id": "custom.align",
+                "value": "auto"
+              }
+            ]
           }
         ]
       },
@@ -2020,6 +2036,21 @@
           "legendFormat": "__auto",
           "range": false,
           "refId": "K"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{DATASOURCE_PROMETHEUS}}"
+          },
+          "editorMode": "code",
+          "expr": "max by (instance) (push_time_seconds{job=\"oci_lens_healthchecks\"}) * 1000",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "L",
+          "exemplar": false,
+          "hide": false
         }
       ],
       "title": "OCI Active Performance Checks",
@@ -2183,12 +2214,14 @@
               "test 6": true,
               "test 7": true,
               "test 8": true,
-              "test 9": true
+              "test 9": true,
+              "Time 1": true,
+              "Value #L": false
             },
             "includeByName": {},
             "indexByName": {},
             "renameByName": {
-              "Time 1": "Time Last Run",
+              "Time 1": "",
               "Value #A": "Compute Throughput",
               "Value #B": "Memory Bandwidth",
               "Value #C": "Error Detection",
@@ -2200,7 +2233,7 @@
               "Value #I": "GPU Temperature Check",
               "Value #J": "GPU Power Check",
               "Value #K": "GPU Utilization Check",
-              "Value #L": "",
+              "Value #L": "Time Last Run",
               "__name__ 1": "",
               "gpu 1": "GPU",
               "hostGPU 1": "GPU Shape",
@@ -3888,5 +3921,5 @@
   "timezone": "",
   "title": "OCI Lens - Demo Pool H100 & MI300X Monitoring Ring",
   "uid": "mr-9de51de81e1587ceffbdeacba0b903a3",
-  "version": 2
+  "version": 3
 }
