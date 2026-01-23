@@ -3784,6 +3784,10 @@
             "default"
           ]
         },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "{{DATASOURCE_PROMETHEUS}}"
+        },
         "definition": "label_values(oci_lens_pod_node_info,namespace)",
         "description": "Where workloads are deployed and running",
         "includeAll": true,
