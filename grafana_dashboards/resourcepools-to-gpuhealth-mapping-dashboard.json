@@ -3948,6 +3948,10 @@
           "text": "All",
           "value": "$__all"
         },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "{{DATASOURCE_PROMETHEUS}}"
+        },
         "definition": "label_values(oci_lens_pod_node_info{workload_type=\"Deployment\"},workload)",
         "description": "Choose the Kubernetes deployments/Job ",
         "includeAll": true,
