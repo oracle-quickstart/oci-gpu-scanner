@@ -60,10 +60,7 @@ spec:
         
         livenessProbe:
           exec:
-            command:
-            - pgrep
-            - -f
-            - python3
+            command: ["sh", "-c", "kill -0 1"]
           initialDelaySeconds: 30
           periodSeconds: 30
           timeoutSeconds: 5
@@ -71,10 +68,7 @@ spec:
         
         readinessProbe:
           exec:
-            command:
-            - pgrep
-            - -f
-            - python3
+            command: ["sh", "-c", "kill -0 1"]
           initialDelaySeconds: 10
           periodSeconds: 10
           timeoutSeconds: 5
