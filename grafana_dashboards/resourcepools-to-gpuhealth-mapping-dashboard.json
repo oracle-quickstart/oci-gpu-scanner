@@ -2237,7 +2237,20 @@
               "dtype 18": true,
               "dtype 19": true,
               "dtype 20": true,
-              "dtype": true
+              "dtype": true,
+              "tensor_parallel_size 2": true,
+              "tensor_parallel_size 3": true,
+              "tensor_parallel_size 4": true,
+              "tensor_parallel_size 5": true,
+              "tensor_parallel_size 6": true,
+              "tensor_parallel_size 7": true,
+              "tensor_parallel_size 8": true,
+              "tensor_parallel_size 9": true,
+              "tensor_parallel_size 10": true,
+              "tensor_parallel_size 11": true,
+              "tensor_parallel_size 12": true,
+              "tensor_parallel_size 13": true,
+              "tensor_parallel_size 14": true
             },
             "includeByName": {},
             "indexByName": {
@@ -2261,6 +2274,7 @@
             },
             "renameByName": {
               "Time 1": "",
+              "tensor_parallel_size 1": "Tensor Parallel Size",
               "Value #A": "Compute Throughput",
               "Value #B": "Memory Bandwidth",
               "Value #C": "Error Detection",
