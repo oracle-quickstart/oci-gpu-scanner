@@ -3955,7 +3955,7 @@
         "definition": "label_values(oci_lens_pod_node_info{workload_type=\"Deployment\"},workload)",
         "description": "Choose the Kubernetes deployments/Job ",
         "includeAll": true,
-        "label": "Kubernetes Worklaod",
+        "label": "Kubernetes Workload",
         "multi": true,
         "name": "k8sworkload",
         "options": [],
