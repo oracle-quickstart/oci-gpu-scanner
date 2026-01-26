@@ -61,7 +61,7 @@
           "showLineNumbers": false,
           "showMiniMap": false
         },
-        "content": "# OCI GPU Scanner - OKE Worklaods to GPU mapping\nDedicated grafana board to help slice the Kubernetes workloads and job assciation to GPU node.",
+        "content": "# OCI GPU Scanner - OKE Workloads to GPU mapping\nDedicated grafana board to help slice the Kubernetes workloads and job assciation to GPU node.",
         "mode": "markdown"
       },
       "pluginVersion": "12.1.1",
@@ -3778,10 +3778,10 @@
       {
         "current": {
           "text": [
-            "default"
+            "All"
           ],
           "value": [
-            "default"
+            "$__all"
           ]
         },
         "datasource": {
@@ -3817,7 +3817,7 @@
         "definition": "label_values(oci_lens_pod_node_info{namespace=~\"$k8snamespace\"},workload)",
         "description": "Choose the Kubernetes deployments/Job ",
         "includeAll": true,
-        "label": "Kubernetes Worklaod",
+        "label": "Kubernetes Workload",
         "multi": true,
         "name": "k8sworkload",
         "options": [],
