@@ -2524,11 +2524,16 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "red",
+                "value": 0
               },
               {
-                "color": "red",
-                "value": 80
+                "color": "#EAB839",
+                "value": 400
+              },
+              {
+                "color": "green",
+                "value": 500
               }
             ]
           }
@@ -2596,10 +2601,15 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "red",
+                "value": 0
               },
               {
-                "color": "red",
+                "color": "#EAB839",
+                "value": 50
+              },
+              {
+                "color": "green",
                 "value": 80
               }
             ]
@@ -2853,15 +2863,16 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "#EAB839",
+                "value": 0
               },
               {
-                "color": "#EAB839",
-                "value": 1800
+                "color": "green",
+                "value": 400
               },
               {
                 "color": "red",
-                "value": 2200
+                "value": 6000
               }
             ]
           },
