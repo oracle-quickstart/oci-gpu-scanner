@@ -176,6 +176,8 @@ Install:
 ```bash
 helm install lens oci-ai-incubations/lens -n lens --create-namespace \
   --set backend.prometheusPushgatewayUrl="http://YOUR_PUSHGATEWAY_IP_OR_SERVICE_NAME:9091" \
+  --set backend.prometheusUrl="https://your-prometheus-url:9090" \
+  --set prometheus.enabled=false \
   --set backend.grafanaUrl="http://YOUR_GRAFANA_IP_OR_SERVICE_NAME:80" \
   --set backend.grafanaApiToken="your_grafana_api_token" \
   --set grafana.enabled=false \
