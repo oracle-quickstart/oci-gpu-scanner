@@ -102,14 +102,9 @@ spec:
               log "NVIDIA DCGM exporter detected (scraped directly by Prometheus, skipping push)"
             fi
             
-            # Collect Node Exporter metrics (should be on all nodes)
-            log "Checking for Node Exporter on port 9100..."
+            # Node Exporter (port 9100) - scraped directly by Prometheus via service annotations
             if curl -s --connect-timeout 5 --max-time 10 "http://localhost:9100/metrics" > /dev/null 2>&1; then
-              log "Node Exporter found, collecting metrics..."
-              NODE_METRICS=$(curl -s --connect-timeout 5 --max-time 10 "http://localhost:9100/metrics" 2>/dev/null || echo "")
-              push_metrics "node-exporter" "$NODE_METRICS" "$NODE_NAME"
-            else
-              log "Node Exporter not available (port 9100 not responding)"
+              log "Node Exporter detected (scraped directly by Prometheus, skipping push)"
             fi
             
             if [ "$GPU_TYPE" = "none" ]; then
