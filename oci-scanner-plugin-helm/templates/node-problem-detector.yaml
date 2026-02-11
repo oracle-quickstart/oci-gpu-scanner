@@ -20,6 +20,9 @@ spec:
       labels:
         app: oke-node-problem-detector
         component: gpu-monitoring
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: {{ .Values.nodeProblemDetector.prometheusPort | default "20257" | quote }}
     spec:
       nodeSelector:
         {{- if .Values.nodeProblemDetector.nodeSelector }}

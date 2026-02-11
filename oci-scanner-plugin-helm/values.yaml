@@ -99,7 +99,7 @@ dcgm-exporter:
 
 # Metrics Push Job
 metricsPushJob:
-  enabled: true
+  enabled: false
   pushIntervalSeconds: 60 
   enableServiceDiscovery: false
   
