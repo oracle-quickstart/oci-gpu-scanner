@@ -77,6 +77,9 @@ nvidiaGpuExporter:
 # Configuration for DCGM Exporter subchart
 dcgm-exporter:
   namespaceOverride: ""
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9400"
   nodeSelector:
     nvidia.com/gpu: "true"
   tolerations:

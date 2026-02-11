@@ -96,15 +96,10 @@ spec:
               log "AMD GPU exporter detected (scraped directly by Prometheus, skipping push)"
             fi
             
-            # Check for NVIDIA DCGM exporter (port 9400)
-            log "Checking for NVIDIA DCGM exporter on port 9400..."
+            # NVIDIA DCGM exporter (port 9400) - scraped directly by Prometheus via pod annotations
             if curl -s --connect-timeout 5 --max-time 10 "http://localhost:9400/metrics" > /dev/null 2>&1; then
-              log "NVIDIA DCGM exporter detected"
               GPU_TYPE="nvidia"
-              DCGM_METRICS=$(curl -s --connect-timeout 5 --max-time 10 "http://localhost:9400/metrics" 2>/dev/null || echo "")
-              push_metrics "dcgm-exporter" "$DCGM_METRICS" "$NODE_NAME"
-            else
-              log "NVIDIA DCGM exporter not available (port 9400 not responding)"
+              log "NVIDIA DCGM exporter detected (scraped directly by Prometheus, skipping push)"
             fi
             
             # Collect Node Exporter metrics (should be on all nodes)
