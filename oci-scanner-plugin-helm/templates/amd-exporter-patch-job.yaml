@@ -43,18 +43,28 @@ spec:
           # Apply the patch
           kubectl patch daemonset oci-gpu-scanner-plugin-amdgpu-metrics-exporter \
             -n {{ .Values.namespace.name }} \
-            -p '{"spec":{"template":{"spec":{"hostNetwork":true}}}}' || {
+            -p '{"spec":{"template":{"metadata":{"annotations":{"prometheus.io/scrape":"true","prometheus.io/port":"5000"}},"spec":{"hostNetwork":true}}}}' || {
               echo "Failed to patch DaemonSet. It may not exist yet."
               exit 1
             }
           
-          echo "Successfully patched AMD GPU exporter DaemonSet with hostNetwork=true"
+          echo "Successfully patched AMD GPU exporter DaemonSet with hostNetwork=true and prometheus annotations"
           
           # Verify the patch
           if kubectl get daemonset oci-gpu-scanner-plugin-amdgpu-metrics-exporter -n {{ .Values.namespace.name }} -o jsonpath='{.spec.template.spec.hostNetwork}' | grep -q "true"; then
             echo "✓ Verification successful: hostNetwork is enabled"
           else
             echo "⚠ Warning: hostNetwork may not be set correctly"
+            exit 1
+          fi
+          
+          # Verify prometheus annotations
+          SCRAPE_ANNOTATION=$(kubectl get daemonset oci-gpu-scanner-plugin-amdgpu-metrics-exporter -n {{ .Values.namespace.name }} -o jsonpath='{.spec.template.metadata.annotations.prometheus\.io/scrape}')
+          PORT_ANNOTATION=$(kubectl get daemonset oci-gpu-scanner-plugin-amdgpu-metrics-exporter -n {{ .Values.namespace.name }} -o jsonpath='{.spec.template.metadata.annotations.prometheus\.io/port}')
+          if [ "$SCRAPE_ANNOTATION" = "true" ] && [ "$PORT_ANNOTATION" = "5000" ]; then
+            echo "✓ Verification: prometheus.io/scrape=true, prometheus.io/port=5000"
+          else
+            echo "⚠ Warning: prometheus annotations may not be set correctly (scrape=$SCRAPE_ANNOTATION, port=$PORT_ANNOTATION)"
             exit 1
           fi
 {{- end }}

@@ -90,15 +90,10 @@ spec:
             # Detect GPU type by checking which exporter is available
             GPU_TYPE="none"
             
-            # Check for AMD GPU exporter (port 5000)
-            log "Checking for AMD GPU exporter on port 5000..."
+            # AMD GPU exporter (port 5000) - scraped directly by Prometheus via pod annotations
             if curl -s --connect-timeout 5 --max-time 10 "http://localhost:5000/metrics" > /dev/null 2>&1; then
-              log "AMD GPU exporter detected"
               GPU_TYPE="amd"
-              AMD_METRICS=$(curl -s --connect-timeout 5 --max-time 10 "http://localhost:5000/metrics" 2>/dev/null || echo "")
-              push_metrics "amd-gpu-exporter" "$AMD_METRICS" "$NODE_NAME"
-            else
-              log "AMD GPU exporter not available (port 5000 not responding)"
+              log "AMD GPU exporter detected (scraped directly by Prometheus, skipping push)"
             fi
             
             # Check for NVIDIA DCGM exporter (port 9400)
