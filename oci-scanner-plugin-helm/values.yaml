@@ -97,20 +97,6 @@ dcgm-exporter:
   serviceMonitor:
     enabled: false
 
-# Metrics Push Job
-metricsPushJob:
-  enabled: false
-  pushIntervalSeconds: 60 
-  enableServiceDiscovery: false
-  
-  resources:
-    requests:
-      memory: "32Mi"
-      cpu: "50m"
-    limits:
-      memory: "64Mi"
-      cpu: "100m"
-
 # Active Health Check
 healthCheck:
   enabled: true
