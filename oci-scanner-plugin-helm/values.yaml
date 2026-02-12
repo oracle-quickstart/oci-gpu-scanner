@@ -77,6 +77,9 @@ nvidiaGpuExporter:
 # Configuration for DCGM Exporter subchart
 dcgm-exporter:
   namespaceOverride: ""
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9400"
   nodeSelector:
     nvidia.com/gpu: "true"
   tolerations:
@@ -93,20 +96,6 @@ dcgm-exporter:
       nvidia.com/gpu: 1 
   serviceMonitor:
     enabled: false
-
-# Metrics Push Job
-metricsPushJob:
-  enabled: true
-  pushIntervalSeconds: 60 
-  enableServiceDiscovery: false
-  
-  resources:
-    requests:
-      memory: "32Mi"
-      cpu: "50m"
-    limits:
-      memory: "64Mi"
-      cpu: "100m"
 
 # Active Health Check
 healthCheck:
