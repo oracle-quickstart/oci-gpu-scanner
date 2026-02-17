@@ -39,6 +39,6 @@ generated/
 test*json
 
 # Helm chart dependencies
-*.tgz
+# *.tgz
 Chart.lock
 charts/
