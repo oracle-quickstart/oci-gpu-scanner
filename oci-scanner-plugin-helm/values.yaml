@@ -99,7 +99,7 @@ dcgm-exporter:
 
 # Active Health Check
 healthCheck:
-  enabled: true
+  enabled: false
   image:
     repository: oci_lens_healthcheck_amd
     tag: v0.0.6
