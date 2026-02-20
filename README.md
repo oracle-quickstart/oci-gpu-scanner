@@ -1,193 +1,236 @@
-# OCI GPU Scanner Service (in preview)
+# 🔍 OCI GPU Scanner Service (Preview)
+
 **Active GPU performance health check and monitoring tool for OCI GPU compute resources.**
 
-OCI GPU Scanner is a cloud-native, Prometheus- and Grafana-based solution for monitoring OCI GPU cluster resources and RDMA cluster health. It is deployed directly within your OCI tenancy. This solution provides comprehensive, active performance and passive health checks for both NVIDIA and AMD GPUs on OCI. OCI GPU Scanner executes periodic OCI-authored GPU health checks and pushes the results to a dedicated OCI GPU Scanner Portal, Prometheus, and Grafana Dashboards. Since everything is deployed in your tenancy, you can extend the solution to integrate additional metrics (such as PyTorch or vLLM Serving metrics) into the Grafana boards for a holistic view of application and hardware metrics. This solution is free for any OCI customer to use.
+---
 
-## Features
+## 📋 Table of Contents
+- [Overview](#-overview)
+- [Key Features](#-key-features)
+- [Quick Start](#-quick-start)
+- [Health Checks](#-health-checks)
+- [Architecture](#-architecture)
+- [Dashboards & Monitoring](#-dashboards--monitoring)
+- [Dependencies](#-third-party-software-dependency)
+- [Roadmap](#-roadmap)
+- [Limitations](#-limitations)
+- [Support & Contact](#-support--contact)
 
-### Usability
-- Tenancy-level monitoring solution – no region barriers no compartment restrictions
-- Supports Nvidia A100, H100, B200, H200 and AMD GPU MI300X OCI GPU shapes
-- Supports native OKE integration running as a daemon set as well as system service if running on the single-node -  Bare Metal or virtual machines
-- Ability to run on-demand active health checks when performance degradation is observed at the individual node level using REST APIs
-- Data never leaves your tenancy boundary giving you full control and a private experience
+---
 
-### Metrics & Health Checks
-- Full GPU metrics collection through NVIDIA DCGM Exporter and AMD SMI Exporter including custom RDMA cluster and NIC performance metrics collection
-- **Active performance health checks (occupy GPUs)** (PyTorch-based), benchmarked against a baseline stating if the numbers are within the threshold
--**Passive health check (does not occupy GPUs)** runs periodically and results sent to the Prometheus server using the Prometheus schema
-- Grafana dashboards pre-configured giving you the view at cluster level, node level or at GPU node level filters
+## 🎯 Overview
 
-### Extensibility
+OCI GPU Scanner is a **cloud-native monitoring solution** for OCI GPU clusters, powered by Prometheus and Grafana. It runs directly in your OCI tenancy, giving you complete control and privacy—your data never leaves your environment.
 
-- Integrated with OKE Node Problem Detector that helps auto tagging nodes to no-schedule when heath check fail in a OKE cluster
-- Supports bring your own prometheus and grafana instance to the deployments
+### What It Does
+- ✅ Monitors GPU health and performance (NVIDIA & AMD)
+- ✅ Validates RDMA cluster connectivity
+- ✅ Provides real-time dashboards and metrics
+- ✅ Executes active performance checks and passive health monitoring
+- ✅ Integrates with your existing infrastructure
 
-## Getting Started
-To install OCI GPU Scanner, you have the below options. The solution is installed within your OCI tenancy and is currently not a managed service within OCI:
+### Why Use It
+- **Free**: Available to all OCI customers at no cost
+- **Private**: Deployed in your tenancy—you control the data
+- **Comprehensive**: Covers both hardware and application metrics
+- **Extensible**: Integrate PyTorch, vLLM, or custom metrics
 
-- [Install through Terraform & OCI Resource Manager Template (includes a new OKE cluster install)](./GETTING_STARTED_RM_DEPLOY.md)
-- [Install through OKE Managed Add-On Deployment through OCI Console for existing OKE cluster](./GETTING_STARTED_CONSOLE_DEPLOY.md)
-- [Install through **helm** on existing OKE cluster](./GETTING_STARTED_HELM_DEPLOY.md)
+---
 
-## Health Checks
+## ✨ Key Features
 
-OCI GPU Scanner performs both passive (non-intrusive) and active (GPU-occupying) performance health checks. Results are reported in the Grafana dashboard. 
+### 🚀 Usability
+- **Tenancy-wide monitoring** – no region or compartment restrictions
+- **Multi-GPU support**: NVIDIA (A100, H100, B200, H200) and AMD (MI300X)
+- **Flexible deployment**: Native OKE integration (DaemonSet) or system service (bare metal/VMs)
+- **On-demand checks**: Trigger active health checks via REST API when needed
+- **Complete privacy**: All data stays within your tenancy boundary
 
-### Active Performance Checks
-Active health checks run when the OCI GPU Scanner plugin is installed on GPU nodes. These checks can also be initiated on demand through the portal or via REST API endpoints provided by OCI GPU Scanner. All active checks use PyTorch Matmul and Linear Regression to generate performance scores. Multi-node health checks utilize Message Passing Interface (MPI) to stress test HPC cluster configurations.
+### 📊 Metrics & Health Checks
+- **GPU metrics collection** via NVIDIA DCGM Exporter and AMD SMI Exporter
+- **Custom RDMA cluster metrics** for network performance
+- **Active checks** (GPU-occupying): PyTorch-based benchmarks with baseline thresholds
+- **Passive checks** (non-intrusive): Periodic monitoring without disrupting workloads
+- **Pre-configured Grafana dashboards** with cluster, node, and GPU-level views
 
-See samples of health check [for H100 active check runs.](./sampleoutput/nvidia_h100_active_healthcheck_singlenode_sample.json) and [for AMD MI300X active check runs.](./sampleoutput/amd_mi300x_active_healthcheck_singlenode_sample.json).
+### 🔧 Extensibility
+- Integrates with **OKE Node Problem Detector** for auto-tagging failed nodes
+- Supports **bring-your-own Prometheus/Grafana** instances
+- Easily extend with custom metrics (PyTorch, vLLM, etc.)
 
-Below checks are part of GPU Active Health Check Tests
+---
 
-- model_mfu
-- background_computation
-- compute_throughput
-- memory_bandwidth
-- error_detection
-- tensor_core_utilization
-- sustained_workload
-- mixed_precision_testing
-- gpu_power_check
-- gpu_temperature_check
-- gpu_utilization_check
-- gpu_topology
-- gpu_xid_errors_check
-- gpu_xid_errors_check
-- rdma_mpi_multinode_all2all
-- rdma_mpi_multinode_allgather
-- rdma_mpi_multinode_allreduce
-- rdma_mpi_multinode_broadcast
+## 🚀 Quick Start
 
-### Passive Health Checks
-Passive checks are authored by OCI, and do not occupy GPUs when they are running. By default, these run every minute, but you can adjust the frequency during installation. These scripts are maintained by the OCI GPU Core Compute team and released as part of Dr.HPC V2 binaries. The following checks are currently performed for both Nvidia and AMD GPU compute nodes:
+Choose your preferred installation method:
 
-Below are the checks currently run for both Nvidia and AMD based GPU compute nodes. 
+| Method | Best For | Link |
+|--------|----------|------|
+| **Terraform & OCI Resource Manager** | New deployments (includes OKE cluster) | [Getting Started Guide](./GETTING_STARTED_RM_DEPLOY.md) |
+| **OKE Managed Add-On** | Existing OKE clusters (via Console) | [Console Deploy Guide](./GETTING_STARTED_CONSOLE_DEPLOY.md) |
+| **Helm** | Existing OKE clusters (CLI) | [Helm Deploy Guide](./GETTING_STARTED_HELM_DEPLOY.md) |
 
-- GPU count check: Checks GPU count using nvidia-smi and amd-smi
-- PCIe error check: Checks for PCIe errors in system logs
-- PCIe speed check: Verifies PCIe speed matches the expected threshold
-- PCIe width missing lanes check: Checks PCIe link width for missing lanes
-- RDMA NIC count: Checks the number of RDMA NICs
-- RX discards check: Checks the network interface for RX discards
-- GID index check: Verifies device GID index is within the correct range
-- Link check: Checks RDMA link state and parameters
-- Ethernet link check: Checks Ethernet link state and parameters for 100GbE RoCE interfaces
-- Auth check: Checks authentication status of RDMA interfaces using wpa_cli
-- SRAM error check: Checks for both correctable and uncorrectable SRAM errors
-- GPU driver check: Checks GPU driver version compatibility
-- GPU clock check: Ensures GPU clock speeds are within the acceptable range
-eth0 presence check: Checks if the eth0 network interface is present
-- HCA error check: Checks for MLX5 HCA fatal errors in system logs
-- Missing interface check: Checks for missing PCIe interfaces (revision ff)
-- Thermal throttling check: Monitors GPU for thermal throttling events
-- Source-based routing check: Verifies source-based routing configuration for - RDMA network communication
-- Oracle Cloud Agent version check: Confirms Oracle Cloud Agent version meets minimum requirements
-- RDMA link flap check: Identifies RDMA link flap events in system logs
-- PCIe walk check: Validates PCIe hierarchy for GPU and RDMA devices, including link speeds and widths
-- Max ACC check: Checks MAX_ACC_OUT_READ and ADVANCED_PCI_SETTINGS configuration
-- Row remap error check: Uses nvidia-smi to check for GPU row remap errors
-- RTTCC status check: Checks Real Time Telemetry Congestion Control (RTTCC) status for H100 GPU hosts
-- Model MFU, background computation, compute throughput, memory bandwidth, error detection, tensor core utilization, sustained workload, mixed precision testing, - GPU power check, GPU temperature check, GPU utilization check, GPU topology, GPU XID errors check, RDMA MPI multinode all2all/allgather/allreduce/broadcast, etc.
+---
 
-Additional checks are performed based on GPU type (AMD or NVIDIA), such as XGMI, NVLINK, and fabric manager monitoring. Failures of passive health checks produce necessary recommended actions customers can take to attempt and fix the issue. 
+## 🏥 Health Checks
 
-## Architecture
+OCI GPU Scanner performs two types of health checks:
 
-The solution is broken down into these components:
+### ⚡ Active Performance Checks
+**Note**: These checks occupy GPUs during execution.
 
-### Control plane components
-1. **Frontend (Portal)**
-   - React/Node.js application
-   - Served on port 3000
-   - Service for internal/external access
+Active checks run when the plugin is installed or triggered on-demand via the portal/REST API. They use PyTorch operations (Matmul, Linear Regression) to generate performance scores, and leverage MPI for multi-node cluster testing.
 
-2. **Backend (Control Plane)**
-   - Django application
-   - Served on port 5000 (container), 80 (service)
-   - External access via LoadBalancer service
-   - Connects to Postgres
-   - Configured with Prometheus Push gateway and Grafana URLs
+**Sample outputs**:
+- [H100 active check results](./sampleoutput/nvidia_h100_active_healthcheck_singlenode_sample.json)
+- [AMD MI300X active check results](./sampleoutput/amd_mi300x_active_healthcheck_singlenode_sample.json)
 
-3. **Postgres Database**
-   - Managed via StatefulSet/Deployment
-   - Persistent storage via PVC
-   - Service for backend connectivity
+#### Checks Performed:
+- Model MFU (Model FLOPs Utilization)
+- Background computation
+- Compute throughput
+- Memory bandwidth
+- Error detection
+- Tensor core utilization
+- Sustained workload
+- Mixed precision testing
+- GPU power, temperature, and utilization
+- GPU topology and XID errors
+- RDMA MPI multi-node tests (all2all, allgather, allreduce, broadcast)
 
-4. **ConfigMaps and Secrets**
-   - All environment variables and sensitive data are managed via ConfigMaps and Kubernetes Secrets
+### 🛡️ Passive Health Checks
+**Note**: These do NOT occupy GPUs.
 
-### Data plane/node plugin components
+Passive checks run every minute by default (configurable during installation). They're maintained by the OCI GPU Core Compute team and included in Dr.HPC V2 binaries.
 
-**Node plugin**
-   - NVIDIA DCGM Exporter
-   - AMD SMI Exporter
-   - Prometheus Node Exporter
-   - OCI GPU Scanner Active & Passive Health Check Scripts
-   - OCI GPU Scanner Prometheus Schema Converters
-   - Control Plane Connectors
+#### Checks Performed (NVIDIA & AMD):
+- GPU count verification
+- PCIe error, speed, and width checks
+- RDMA NIC count and link validation
+- Network RX discards and GID index
+- Ethernet link state (100GbE RoCE)
+- Authentication status (wpa_cli)
+- SRAM error detection
+- GPU driver version compatibility
+- GPU clock speeds
+- eth0 interface presence
+- HCA fatal errors
+- Thermal throttling monitoring
+- Source-based routing configuration
+- Oracle Cloud Agent version
+- RDMA link flap detection
+- PCIe hierarchy validation
+- Row remap errors (nvidia-smi)
+- RTTCC status (H100)
 
-Sample deployment stamp.
+**GPU-specific checks**: XGMI (AMD), NVLINK, fabric manager (NVIDIA).
 
-![deployment architecture](/media/scanner_architecture.png "architecture snapshot")
+Failures include recommended remediation actions.
 
-## Dashboards & Monitoring
-After deployment, you will have access to Grafana, Prometheus, and Portal endpoints for data interaction. See example screenshots below:
+---
 
-<img src="./media/scanner_portal_fetch_gpu_nodes.png" alt="OCI GPU Scanner Monitoring Portal">
+## 🏗️ Architecture
 
-<img src="./media/scanner_portal_resource_groups.png" alt="OCI GPU Monitoring Resource Group">
+### Control Plane Components
 
-<img src="./media/scanner_grafana_dashboard_summary.png" alt="Grafana Portal With Health Checks">
+| Component | Technology | Port | Access |
+|-----------|-----------|------|--------|
+| **Frontend (Portal)** | React/Node.js | 3000 | Internal/External |
+| **Backend (Control Plane)** | Django | 5000 (container), 80 (service) | External (LoadBalancer) |
+| **Database** | PostgreSQL | - | Internal (StatefulSet/PVC) |
+| **Configuration** | ConfigMaps & Secrets | - | - |
 
-<img src="./media/scanner_grafana_dashboard_metrics.png" alt="Grafana Portal With GPU Metrics">
+### Data Plane / Node Plugin Components
+- NVIDIA DCGM Exporter
+- AMD SMI Exporter
+- Prometheus Node Exporter
+- OCI GPU Scanner Active & Passive Health Check Scripts
+- Prometheus Schema Converters
+- Control Plane Connectors
 
-## Third Party Software Dependency
+### Deployment Diagram
+![Deployment Architecture](./media/scanner_architecture.png)
 
-The below Open-Source solutions are used in this solution:
+---
+
+## 📈 Dashboards & Monitoring
+
+After deployment, you'll have access to:
+- **Grafana**: Real-time metrics and health check visualization
+- **Prometheus**: Metrics storage and querying
+- **Portal**: Resource management and on-demand checks
+
+### Portal Screenshots
+
+**GPU Nodes Overview**  
+<img src="./media/scanner_portal_fetch_gpu_nodes.png" alt="OCI GPU Scanner Monitoring Portal" width="800">
+
+**Resource Groups**  
+<img src="./media/scanner_portal_resource_groups.png" alt="OCI GPU Monitoring Resource Group" width="800">
+
+### Grafana Dashboards
+
+**Health Check Summary**  
+<img src="./media/scanner_grafana_dashboard_summary.png" alt="Grafana Portal With Health Checks" width="800">
+
+**GPU Metrics**  
+<img src="./media/scanner_grafana_dashboard_metrics.png" alt="Grafana Portal With GPU Metrics" width="800">
+
+---
+
+## 📦 Third-Party Software Dependency
+
+This solution uses the following open-source projects:
 
 1. [Grafana](https://github.com/grafana/grafana)
 2. [Prometheus](https://github.com/prometheus/prometheus)
-3. [NGINIX Controller for Kubernetes](https://github.com/kubernetes/ingress-nginx)
+3. [NGINX Ingress Controller for Kubernetes](https://github.com/kubernetes/ingress-nginx)
 4. [PostgreSQL](https://www.postgresql.org/)
 5. [NVIDIA DCGM Exporter](https://github.com/NVIDIA/dcgm-exporter)
 6. [AMD SMI Exporter](https://github.com/amd/amd_smi_exporter)
 7. [Prometheus Node Exporter](https://github.com/prometheus/node_exporter)
 
-## Roadmap
-The below list of features are being prioritized. If you would like a new feature please open a issue or email the contacts listed below. 
+---
+
+## 🗺️ Roadmap
+
+We're actively developing new features. Want something specific? [Open an issue](../../issues) or contact us below!
+
 ### Health Checks
-- Multi-Node NCCL/RCCL
-- PyTorch FSDP Multi-Node Training Testing RDMA Backend
-- Low priority Kubernetes jobs auto scheduling of active-checks
-- B200 NVLink & Infiniband MPI validations
+- [ ] Multi-Node NCCL/RCCL testing
+- [ ] PyTorch FSDP multi-node training with RDMA
+- [ ] Low-priority Kubernetes job auto-scheduling for active checks
+- [ ] B200 NVLink & InfiniBand MPI validations
 
 ### Onboarding
-- Public and private domain access deployments of ingress controller for control plane access
-- Narrowed down OCI tenancy policy options
+- [ ] Public and private domain access for ingress controller
+- [ ] Simplified OCI tenancy policy options
 
-### Portal & Experiences
+### Portal & Experience
+- [ ] Advanced Grafana boards with K8s job filtering
+- [ ] Deployment via OCI Console
 
-- Advanced Grafana boards with K8s job filtering
-- Deployment through OCI Console
+### Remediation
+- [ ] OKE Node Problem Detector integration for taints
+- [ ] Auto-remediation controller for self-healing
 
-## Remediation
+### GPU Support
+- [ ] GB200 & ARM64 runtime support
+- [ ] AMD MI355X
 
-- OKE Node problem detector integration for taints
-- Auto-remediation controller for self healing
+---
 
-### GPU’s Support
+## ⚠️ Limitations
 
-- GB200 & ARM64 Runtime Support
-- AMD MI355X
+1. **OS Support**: Only Ubuntu Linux-based GPU nodes are supported
+2. **Control Plane**: Requires x86 CPU nodes
+3. **Active Checks**: Do not run as low-priority jobs—will disrupt existing GPU workloads
 
-## Limitations
+---
 
-1. Only Ubuntu Linux OS based GPU node monitoring is supported.
-2. Control plane components only work with x86 CPU nodes.
-3. Active health checks do not run as low priority jobs hence running a active health check will disrupt any existing GPU workloads active on that node.   
+## 💬 Support & Contact
 
-## Support & Contact
+This solution is provided **without SLOs or SLAs** from Oracle. However, a dedicated team manages the product and will support issues on a best-effort basis. The OCI Compute engineering team maintains the health check scripts.
 
-This solution is provided with no Service Level Objectives (SLOs) or Service Level Agreements (SLAs) from Oracle. However, a dedicated team product manages the solution and will do their best to support any issues you may encounter. We also have a dedicated OCI Compute engineering team that support active and passive health check scripts. For questions, issues, or feedback, please contact amar.gowda@oracle.com.
+**Questions, issues, or feedback?**  
+📧 Contact: amar.gowda@oracle.com
