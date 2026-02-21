@@ -3945,6 +3945,122 @@
     "list": [
       {
         "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "{{DATASOURCE_INFINITY}}"
+        },
+        "definition": "",
+        "description": "Monitor resources by OCI Region.",
+        "includeAll": true,
+        "label": "OCI Region",
+        "multi": true,
+        "name": "ociregion",
+        "options": [],
+        "query": {
+          "infinityQuery": {
+            "columns": [],
+            "filters": [],
+            "format": "table",
+            "parser": "backend",
+            "refId": "variable",
+            "root_selector": "",
+            "source": "url",
+            "type": "json",
+            "url": "{{INFINITY_DATASOURCE_BASE_URL}}/monitoring-rings/{{MONITORING_RING_ID}}/instances/",
+            "url_options": {
+              "data": "",
+              "headers": [
+                {
+                  "key": "Authorization",
+                  "value": "Token {{INFINITY_DATASOURCE_AUTH_TOKEN}}"
+                }
+              ],
+              "method": "GET",
+              "params": [
+                {
+                  "key": "field",
+                  "value": "region"
+                },
+                {
+                  "key": "output",
+                  "value": "grafana"
+                }
+              ]
+            }
+          },
+          "query": "",
+          "queryType": "infinity"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "{{DATASOURCE_INFINITY}}"
+        },
+        "definition": "",
+        "description": "Filter by GPU Types",
+        "includeAll": true,
+        "label": "GPU Type",
+        "multi": true,
+        "name": "hostshape",
+        "options": [],
+        "query": {
+          "infinityQuery": {
+            "columns": [],
+            "filters": [],
+            "format": "table",
+            "parser": "backend",
+            "refId": "variable",
+            "root_selector": "",
+            "source": "url",
+            "type": "json",
+            "url": "{{INFINITY_DATASOURCE_BASE_URL}}/monitoring-rings/{{MONITORING_RING_ID}}/instances/",
+            "url_options": {
+              "data": "",
+              "headers": [
+                {
+                  "key": "Authorization",
+                  "value": "Token {{INFINITY_DATASOURCE_AUTH_TOKEN}}"
+                }
+              ],
+              "method": "GET",
+              "params": [
+                {
+                  "key": "field",
+                  "value": "shape"
+                },
+                {
+                  "key": "output",
+                  "value": "grafana"
+                },
+                {
+                  "key": "regions",
+                  "value": "${ociregion:csv}"
+                }
+              ]
+            }
+          },
+          "query": "",
+          "queryType": "infinity"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
           "text": [
             "All"
           ],
