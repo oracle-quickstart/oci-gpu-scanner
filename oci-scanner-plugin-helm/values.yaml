@@ -209,23 +209,6 @@ podNodeMapper:
 # Node Problem Detector
 nodeProblemDetector:
   enabled: true
-  enableGpuChecks: true  # Enable GPU health checks via DRHPC
-  
-  # DRHPC results path - must match the hostPath where DRHPC writes results
-  # Default is /var/lib/oci-dr-hpc-v2 which matches drhpc.resultsHostPath
-  drhpcResultsPath: "/var/lib/oci-dr-hpc-v2"
-  
-  image:
-    repository: phx.ocir.io/idnlixcmffxd/oke-public-node-problem-detector
-    tag: v0.8.20.7
-    sha256: sha256:399b506dbfa5c33e60a247d0d3199f025d242b7a7480c956446e70eaa090c599
-    pullPolicy: Always
-  
-  prometheusPort: 20257
-  
-# Node Problem Detector
-nodeProblemDetector:
-  enabled: true
   enableGpuChecks: true
   namespace: kube-system
   
@@ -245,7 +228,7 @@ nodeProblemDetector:
   nodeSelector:
     oci.oraclecloud.com/oke-node-problem-detector-enabled: "true"
   
-  # TolenableGpuCheckserations for GPU nodes
+  # Tolerations for GPU nodes
   tolerations:
     - key: CriticalAddonsOnly
       operator: Exists
