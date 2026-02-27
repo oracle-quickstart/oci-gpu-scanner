@@ -207,8 +207,8 @@ helm install lens oci-ai-incubations/lens -n lens --create-namespace \
 |------|----------|---------|-------------|
 | `backend.tenancyId` | ✅ | - | Your OCI tenancy OCID |
 | `backend.regionName` | ✅ | - | OKE region (e.g., `us-ashburn-1`) |
-| `backend.authorizedCompartments` | ❌ | (all) | Restrict to specific compartment OCID |
-| `ingress.domain` | ❌ | `nip.io` | Custom domain (see [Custom Domain Setup](INGRESS_AND_TLS_SETUP.md)) |
+| `backend.authorizedCompartments` | optional | (all) | Restrict to specific compartment OCID |
+| `ingress.domain` | optional | `nip.io` | Custom domain (see [Custom Domain Setup](INGRESS_AND_TLS_SETUP.md)) |
 
 **Note:** Grafana admin password is auto-generated during installation. See [Access Your Deployment](#2-access-your-deployment) for retrieval instructions.
 
@@ -261,8 +261,8 @@ helm install lens oci-ai-incubations/lens -n lens --create-namespace \
 | `grafana.enabled` | ✅ | `true` | **Must set to `false`** |
 | `backend.tenancyId` | ✅ | - | Your OCI tenancy OCID |
 | `backend.regionName` | ✅ | - | OKE region (e.g., `us-ashburn-1`) |
-| `backend.authorizedCompartments` | ❌ | (all) | Restrict to specific compartment OCID |
-| `ingress.domain` | ❌ | `nip.io` | Custom domain (see [Custom Domain Setup](INGRESS_AND_TLS_SETUP.md)) |
+| `backend.authorizedCompartments` | optional | (all) | Restrict to specific compartment OCID |
+| `ingress.domain` | optional | `nip.io` | Custom domain (see [Custom Domain Setup](INGRESS_AND_TLS_SETUP.md)) |
 
 **Example with Optional Flags:**
 
