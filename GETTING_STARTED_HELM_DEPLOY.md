@@ -46,19 +46,18 @@ Type the name as "OCI-gpu-scanner-backend-access". Add required description. Cho
 
 Choose "Manual Editor" and add the below statements
 
+To give read access to the entire tenancy:
 ```sql
-Allow any-user to manage instances in tenancy where all { request.principal.type = 'workload', request.principal.namespace = 'lens', request.principal.service_account = 'corrino-lens-backend-sa', request.principal.cluster_id = '<existingOKEclusterID>' }
-
 Allow any-user to read cluster-family in tenancy where all { request.principal.type = 'workload', request.principal.namespace = 'lens', request.principal.service_account = 'corrino-lens-backend-sa', request.principal.cluster_id = 'existingOKEclusterID' }
 
 Allow any-user to read compute-management-family in tenancy where all { request.principal.type = 'workload', request.principal.namespace = 'lens', request.principal.service_account = 'corrino-lens-backend-sa', request.principal.cluster_id = 'existingOKEclusterID' }
+```
 
-Allow any-user to manage instance-family in tenancy where all { request.principal.type = 'workload', request.principal.namespace = 'lens', request.principal.service_account = 'corrino-lens-backend-sa', request.principal.cluster_id = 'existingOKEclusterID' }
+To give read access to specific compartment:
+```sql
+Allow any-user to read cluster-family in compartment id 'your-compartment-id' where all { request.principal.type = 'workload', request.principal.namespace = 'lens', request.principal.service_account = 'corrino-lens-backend-sa', request.principal.cluster_id = 'existingOKEclusterID' }
 
-Allow any-user to manage tag-namespaces in tenancy where all { request.principal.type = 'workload', request.principal.namespace = 'lens', request.principal.service_account = 'corrino-lens-backend-sa', request.principal.cluster_id = '<existingOKEclusterID>' }
-
-Allow any-user to manage tags in tenancy where all { request.principal.type = 'workload', request.principal.namespace = 'lens', request.principal.service_account = 'corrino-lens-backend-sa', request.principal.cluster_id = '<existingOKEclusterID>' }
-
+Allow any-user to read compute-management-family in compartment id 'your-compartment-id' where all { request.principal.type = 'workload', request.principal.namespace = 'lens', request.principal.service_account = 'corrino-lens-backend-sa', request.principal.cluster_id = 'existingOKEclusterID' }
 ```
 
 The backend application can now use the OCI SDK with workload identity authentication. The service account token is automatically mounted and the application can authenticate without additional configuration.
@@ -125,6 +124,10 @@ helm install lens oci-ai-incubations/lens -n lens --create-namespace \
   --set backend.tenancyId="your-oci-tenancy-id" \
   --set backend.regionName="your-oke-region-name"
 ```
+If you only grant compartment level access, add this flag:
+```bash
+  --set backend.authorizedCompartments="your-compartment-id"
+```
 
 **Optional: Custom Domain Configuration**
 
@@ -184,7 +187,10 @@ helm install lens oci-ai-incubations/lens -n lens --create-namespace \
   --set backend.tenancyId="your-oci-tenancy-id" \
   --set backend.regionName="your-oke-region-name" \
 ```
-
+If you only grant compartment level access, add this flag:
+```bash
+  --set backend.authorizedCompartments="your-compartment-id"
+```
 
 
 **Optional: Custom Domain Configuration**
