@@ -30,3 +30,9 @@ data:
   INTERNAL_GRAFANA_URL: {{ printf "http://%s-%s.%s.%s:%v" .Values.backend.servicePrefix .Values.backend.internalGrafanaService .Release.Namespace .Values.backend.internalServiceDomain (.Values.monitoring.grafanaPort | int) | quote }}
   INTERNAL_PROMETHEUS_URL: {{ printf "http://%s-%s.%s.%s:%v" .Values.backend.servicePrefix .Values.backend.internalPrometheusService .Release.Namespace .Values.backend.internalServiceDomain (.Values.monitoring.prometheusPort | int) | quote }}
   INTERNAL_PUSHGATEWAY_URL: {{ printf "http://%s-%s.%s.%s:%v" .Values.backend.servicePrefix .Values.backend.internalPushgatewayService .Release.Namespace .Values.backend.internalServiceDomain (.Values.monitoring.pushgatewayPort | int) | quote }}
+  OCI_IAM_ISSUER: {{ .Values.backend.ociIamIssuer | quote }}
+  OCI_IAM_CLIENT_ID: {{ .Values.backend.ociIamClientId | quote }}
+  OCI_IAM_CLIENT_SECRET: {{ .Values.backend.ociIamClientSecret | quote }}
+  OCI_IAM_SCOPE: {{ .Values.backend.ociIamScope | quote }}
+  OCI_IAM_REDIRECT_URI: {{ .Values.backend.ociIamRedirectUri | quote }}
+  OAUTH_SUCCESS_REDIRECT_URL: {{ .Values.backend.oauthSuccessRedirectUrl | quote }}

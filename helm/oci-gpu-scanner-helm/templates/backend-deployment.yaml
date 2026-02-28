@@ -169,6 +169,31 @@ spec:
                 configMapKeyRef:
                   name: {{ include "corrino-lens.fullname" . }}-backend-configmap
                   key: INTERNAL_PUSHGATEWAY_URL
+            - name: OCI_IAM_ISSUER
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: OCI_IAM_ISSUER
+            - name: OCI_IAM_CLIENT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: OCI_IAM_CLIENT_ID
+            - name: OCI_IAM_CLIENT_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: OCI_IAM_CLIENT_SECRET
+            - name: OCI_IAM_SCOPE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: OCI_IAM_SCOPE
+            - name: OCI_IAM_REDIRECT_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: OCI_IAM_REDIRECT_URI
           resources:
             requests:
               memory: {{ .Values.backend.resources.requests.memory | quote }}

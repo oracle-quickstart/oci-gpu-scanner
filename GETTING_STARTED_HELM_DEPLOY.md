@@ -111,6 +111,10 @@ The backend deployment uses a Kubernetes service account with workload identity 
 
 📚 **Reference:** [OCI Workload Identity Documentation](https://docs.oracle.com/en-us/iaas/Content/ContEng/Tasks/contenggrantingworkloadaccesstoresources.htm)
 
+#### Configure OCI IAM Authentication
+
+OCI IAM (IDCS) must be configured for authentication. Include the issuer, client ID, and client secret in the initial `helm install` command or apply them later with `helm upgrade`.
+
 ---
 
 ### 2. Clone the Repository
@@ -192,7 +196,10 @@ kubectl -n lens create secret generic lens-grafana-secret \
 ```bash
 helm install lens . -n lens --create-namespace \
   --set backend.tenancyId="YOUR_OCI_TENANCY_OCID" \
-  --set backend.regionName="YOUR_OKE_REGION"
+  --set backend.regionName="YOUR_OKE_REGION" \
+  --set backend.ociIamIssuer="https://idcs-<YOUR_IDCS_GUID>.identity.oraclecloud.com:443" \
+  --set backend.ociIamClientId="YOUR_OCI_IAM_CLIENT_ID" \
+  --set backend.ociIamClientSecret="YOUR_OCI_IAM_CLIENT_SECRET"
 ```
 
 **Configuration Reference:**
@@ -201,6 +208,9 @@ helm install lens . -n lens --create-namespace \
 |------|----------|---------|-------------|
 | `backend.tenancyId` | ✅ | - | Your OCI tenancy OCID |
 | `backend.regionName` | ✅ | - | OKE region (e.g., `us-ashburn-1`) |
+| `backend.ociIamIssuer` | ✅ | - | OCI IAM (IDCS) issuer URL |
+| `backend.ociIamClientId` | ✅ | - | OAuth2 client ID registered in OCI IAM |
+| `backend.ociIamClientSecret` | ✅ | - | OAuth2 client secret for the registered application |
 | `backend.authorizedCompartments` | optional | (all) | Restrict to specific compartment OCID |
 | `ingress.domain` | optional | `nip.io` | Custom domain (see [Custom Domain Setup](INGRESS_AND_TLS_SETUP.md)) |
 
@@ -212,6 +222,9 @@ helm install lens . -n lens --create-namespace \
 helm install lens . -n lens --create-namespace \
   --set backend.tenancyId="ocid1.tenancy.oc1..aaaaaaaa..." \
   --set backend.regionName="us-ashburn-1" \
+  --set backend.ociIamIssuer="https://idcs-<YOUR_IDCS_GUID>.identity.oraclecloud.com:443" \
+  --set backend.ociIamClientId="YOUR_OCI_IAM_CLIENT_ID" \
+  --set backend.ociIamClientSecret="YOUR_OCI_IAM_CLIENT_SECRET" \
   --set backend.authorizedCompartments="ocid1.compartment.oc1..aaaaaaaa..." \
   --set ingress.domain="gpu-scanner.example.com"
 ```
@@ -241,7 +254,10 @@ helm install lens . -n lens --create-namespace \
   --set prometheus.enabled=false \
   --set grafana.enabled=false \
   --set backend.tenancyId="YOUR_OCI_TENANCY_OCID" \
-  --set backend.regionName="YOUR_OKE_REGION"
+  --set backend.regionName="YOUR_OKE_REGION" \
+  --set backend.ociIamIssuer="https://idcs-<YOUR_IDCS_GUID>.identity.oraclecloud.com:443" \
+  --set backend.ociIamClientId="YOUR_OCI_IAM_CLIENT_ID" \
+  --set backend.ociIamClientSecret="YOUR_OCI_IAM_CLIENT_SECRET"
 ```
 
 **Configuration Reference:**
@@ -255,6 +271,9 @@ helm install lens . -n lens --create-namespace \
 | `grafana.enabled` | ✅ | `true` | **Must set to `false`** |
 | `backend.tenancyId` | ✅ | - | Your OCI tenancy OCID |
 | `backend.regionName` | ✅ | - | OKE region (e.g., `us-ashburn-1`) |
+| `backend.ociIamIssuer` | ✅ | - | OCI IAM (IDCS) issuer URL |
+| `backend.ociIamClientId` | ✅ | - | OAuth2 client ID registered in OCI IAM |
+| `backend.ociIamClientSecret` | ✅ | - | OAuth2 client secret for the registered application |
 | `backend.authorizedCompartments` | optional | (all) | Restrict to specific compartment OCID |
 | `ingress.domain` | optional | `nip.io` | Custom domain (see [Custom Domain Setup](INGRESS_AND_TLS_SETUP.md)) |
 
@@ -269,6 +288,9 @@ helm install lens . -n lens --create-namespace \
   --set grafana.enabled=false \
   --set backend.tenancyId="ocid1.tenancy.oc1..aaaaaaaa..." \
   --set backend.regionName="us-phoenix-1" \
+  --set backend.ociIamIssuer="https://idcs-<YOUR_IDCS_GUID>.identity.oraclecloud.com:443" \
+  --set backend.ociIamClientId="YOUR_OCI_IAM_CLIENT_ID" \
+  --set backend.ociIamClientSecret="YOUR_OCI_IAM_CLIENT_SECRET" \
   --set backend.authorizedCompartments="ocid1.compartment.oc1..aaaaaaaa..." \
   --set ingress.domain="gpu-scanner.mycompany.com"
 ```
