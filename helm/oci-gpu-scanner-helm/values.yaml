@@ -1,0 +1,251 @@
+# Global configuration
+global:
+  regionName: "us-ashburn-1"
+  tenancyId: "ocid1.tenancy.oc1..aaaaaaaa2mvjha24vj6evyafdqtis6nzqibhrnxxhzt65zkc3upy4xlrz5za"
+  postgresSecret: lens-postgres-secret
+  postgresUsernameKey: postgres-user
+  postgresPasswordKey: postgres-password
+  postgresDb: "ps_db"
+
+database:
+  image:
+    repository: docker.io/library/postgres
+    tag: "13"
+    pullPolicy: IfNotPresent
+  storageClassName: oci-bv
+  storageSize: 10Gi
+  servicePort: 5432
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "250m"
+    limits:
+      memory: "5Gi"
+      cpu: "500m"
+
+backend:
+  # Service account configuration for workload identity
+  serviceAccount:
+    create: true
+    name: "corrino-lens-backend-sa"
+    automountToken: true
+  image:
+    repository: iad.ocir.io/iduyx1qnmway/corrino-lens-backend
+    tag: v0.0.7
+    pullPolicy: Always
+  servicePort: 80
+  containerPort: 5000
+  servicePrefix: "lens"
+  developerMode: "False"
+  # Backend secret configuration
+  backendSecret: lens-backend-secret
+  superuserUsernameKey: superuser-username
+  superuserEmailKey: superuser-email
+  superuserPasswordKey: superuser-password
+  # Django secret configuration
+  djangoSecret: lens-django-secret
+  djangoSecretKey: django-secret 
+  djangoAllowedHosts: "127.0.0.1,localhost,lens-backend.lens.svc.cluster.local"
+  djangoCsrfTrustedOrigins: "http://127.0.0.1,http://localhost,http://lens-backend.lens.svc.cluster.local"
+  postgresPort: "5432"
+  loggingLevel: "DEBUG"
+  authorizedCompartments: "ocid1.compartment.oc1..aaaaaaaa5rwhi5wj3grdiqzvz244gwzycpfl2ctlb4nvl7vi7wu55tqi375a"
+  gpuUtilizationMonitoringEnabled: "True"
+  gpuUtilizationCheckInterval: "15"
+  gpuUtilizationThreshold: "5.0"
+  gpuMinTimeBetweenChecks: "1440"
+  skipRegions: "us-saltlake-1,ap-singapore-2"
+  grafanaUrl: ""
+  grafanaTemplatesGithubUrl: "https://api.github.com/repos/oracle-quickstart/oci-gpu-scanner/contents/grafana_dashboards"
+  grafanaTemplatesGithubBranch: "main"
+  prometheusUrl: ""
+  prometheusPushgatewayUrl: ""
+  # Internal service configuration (assembled dynamically in configmap)
+  internalGrafanaService: "grafana"
+  internalPrometheusService: "prometheus-server"
+  internalPushgatewayService: "prometheus-pushgateway"
+  internalServiceDomain: "svc.cluster.local"
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "250m"
+    limits:
+      memory: "2Gi"
+      cpu: "500m"
+
+frontend:
+  servicePort: 80
+  containerPort: 3000
+  
+  image:
+    repository: iad.ocir.io/iduyx1qnmway/corrino-lens-portal
+    tag: v0.0.4
+    pullPolicy: Always
+
+  env:
+    NODE_ENV: "production"
+
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m" 
+  
+  replicaCount: 1
+
+# Prometheus configuration
+prometheus:
+  enabled: true
+  server:
+    service:
+      type: ClusterIP
+      servicePort: 9090
+    persistentVolumeClaim:
+      storageClassName: oci-bv
+      size: 10Gi
+    resources:
+      requests:
+        memory: 1Gi
+        cpu: 500m
+      limits:
+        memory: 10Gi
+        cpu: 500m
+  extraScrapeConfigs: |
+    - job_name: 'opencost'
+      honor_labels: true
+      scrape_interval: 60s
+      scrape_timeout: 30s
+      static_configs:
+        - targets:
+            - oci-gpu-scanner-plugin-opencost.oci-gpu-scanner-plugin.svc.cluster.local:9003
+  prometheus-pushgateway:
+    enabled: true
+    service:
+      type: ClusterIP
+      port: 9091
+  alertmanager:
+    enabled: false
+  kube-state-metrics:
+    enabled: false
+  prometheus-node-exporter:
+    enabled: false
+
+# Grafana configuration
+grafana:
+  enabled: true
+  admin:
+    existingSecret: "lens-grafana-secret"
+    userKey: admin-user
+    passwordKey: admin-password
+  service:
+    type: ClusterIP
+    port: 80
+  persistence:
+    enabled: true
+    storageClassName: oci-bv
+    size: 5Gi
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 200m
+    limits:
+      memory: 256Mi
+      cpu: 400m
+  plugins:
+    - yesoreyeram-infinity-datasource
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          url: http://lens-prometheus-server:9090
+          access: proxy
+          isDefault: true
+        - name: Infinity
+          type: yesoreyeram-infinity-datasource
+          access: proxy
+
+ingress-nginx:
+  enabled: true
+  controller:
+    ingressClassResource:
+      name: lens-nginx 
+      enabled: true
+      default: false
+    ingressClassByName: true
+    service:
+      type: LoadBalancer
+      ports:
+        http: 80
+        https: 443
+    admissionWebhooks:
+      enabled: true
+      patch:
+        enabled: true
+
+# Cert-manager configuration
+cert-manager:
+  enabled: true
+  installCRDs: true
+  startupapicheck:
+    enabled: false
+
+# External monitoring components configuration and backend configuration for URL generation
+monitoring:
+  # Service names from subcharts
+  grafanaService: "lens-grafana"
+  grafanaPort: 80
+  
+  prometheusService: "lens-prometheus-server"
+  prometheusPort: 9090
+  
+  pushgatewayService: "lens-prometheus-pushgateway"
+  pushgatewayPort: 9091
+
+serviceAccount:
+  create: true
+  name: ""
+
+# Terminate node configuration
+terminateNode:
+  serviceAccount:
+    create: false
+    name: "corrino-lens-backend-sa"
+    automountToken: true
+  image:
+    repository: iad.ocir.io/iduyx1qnmway/terminate-node-image
+    tag: v0.0.1
+    pullPolicy: Always
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+
+ingress:
+  domain: "nip.io"
+  className: "lens-nginx"
+  certManager:
+    clusterIssuer: "letsencrypt-prod"
+    email: "admin@oracle.com"
+  # External ingress controller configuration (used when ingress-nginx.enabled=false)
+  external:
+    # Service name of the external ingress controller
+    serviceName: "ingress-nginx-controller"
+    # Namespace where the external ingress controller is deployed
+    namespace: "cluster-tools"
+
+# Reboot condition checker configuration
+rebootGPUErrorTag:
+  enabled: true
+  image: "docker.io/alpine/k8s:1.31.10"
+  serviceAccount:
+    create: false
+    name: "corrino-lens-backend-sa"
+    automountToken: true
+

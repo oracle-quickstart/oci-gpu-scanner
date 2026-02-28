@@ -1,0 +1,181 @@
+# helm/templates/grafana-datasource-setup-job.yaml
+# Setup required datasources in external Grafana when grafana.enabled=false
+{{- if not .Values.grafana.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "corrino-lens.fullname" . }}-grafana-datasource-setup
+  labels:
+    {{- include "corrino-lens.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      serviceAccountName: {{ include "corrino-lens.fullname" . }}-grafana-datasource-setup
+      containers:
+        - name: grafana-datasource-setup
+          image: docker.io/curlimages/curl:latest
+          env:
+            - name: GRAFANA_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: lens-grafana-secret
+                  key: grafana-api-token
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              GRAFANA_URL="{{ .Values.backend.grafanaUrl }}"
+              GRAFANA_TOKEN="${GRAFANA_API_TOKEN}"
+              echo "========================================="
+              echo "Setting up Grafana datasources for Lens"
+              echo "========================================="
+              echo ""
+              echo "Grafana URL: $GRAFANA_URL"
+              echo ""
+              if [ -z "$GRAFANA_URL" ] || [ "$GRAFANA_URL" = "" ]; then
+                echo "ERROR: backend.grafanaUrl is not set"
+                exit 1
+              fi
+              if [ -z "$GRAFANA_TOKEN" ] || [ "$GRAFANA_TOKEN" = "" ]; then
+                echo "ERROR: Grafana API token is not set in secret lens-grafana-secret (key grafana-api-token)"
+                exit 1
+              fi
+              
+              # Wait for Grafana to be accessible
+              echo "Waiting for Grafana to be accessible..."
+              for i in $(seq 1 30); do
+                if curl -s -f -H "Authorization: Bearer $GRAFANA_TOKEN" "$GRAFANA_URL/api/health" > /dev/null 2>&1; then
+                  echo "✓ Grafana is accessible"
+                  break
+                fi
+                echo "Waiting for Grafana... (attempt $i/30)"
+                sleep 5
+              done
+              
+              # Check if we can authenticate
+              echo ""
+              echo "Verifying authentication..."
+              AUTH_CHECK=$(curl -s -w "%{http_code}" -o /tmp/auth_check.json \
+                -H "Authorization: Bearer $GRAFANA_TOKEN" \
+                "$GRAFANA_URL/api/org")
+              
+              if [ "$AUTH_CHECK" != "200" ]; then
+                echo "ERROR: Authentication failed (HTTP $AUTH_CHECK)"
+                cat /tmp/auth_check.json 2>/dev/null || true
+                exit 1
+              fi
+              echo "✓ Authentication successful"
+              
+              # Function to check if datasource exists
+              datasource_exists() {
+                DS_NAME="$1"
+                HTTP_CODE=$(curl -s -w "%{http_code}" -o /dev/null \
+                  -H "Authorization: Bearer $GRAFANA_TOKEN" \
+                  "$GRAFANA_URL/api/datasources/name/$DS_NAME")
+                [ "$HTTP_CODE" = "200" ]
+              }
+              
+              # Function to create or update datasource
+              create_or_update_datasource() {
+                DS_NAME="$1"
+                DS_TYPE="$2"
+                DS_URL="$3"
+                IS_DEFAULT="$4"
+                
+                if datasource_exists "$DS_NAME"; then
+                  echo "Datasource '$DS_NAME' exists, updating..."
+                  # Get existing datasource ID
+                  DS_ID=$(curl -s -H "Authorization: Bearer $GRAFANA_TOKEN" \
+                    "$GRAFANA_URL/api/datasources/name/$DS_NAME" | grep -o '"id":[0-9]*' | cut -d':' -f2)
+                  
+                  # Update datasource
+                  curl -s -X PUT \
+                    -H "Authorization: Bearer $GRAFANA_TOKEN" \
+                    -H "Content-Type: application/json" \
+                    "$GRAFANA_URL/api/datasources/$DS_ID" \
+                    -d "{
+                      \"id\": $DS_ID,
+                      \"name\": \"$DS_NAME\",
+                      \"type\": \"$DS_TYPE\",
+                      \"url\": \"$DS_URL\",
+                      \"access\": \"proxy\",
+                      \"isDefault\": $IS_DEFAULT
+                    }" > /tmp/ds_update.json
+                  
+                  if grep -q '"message":"Datasource updated"' /tmp/ds_update.json 2>/dev/null; then
+                    echo "✓ Updated datasource: $DS_NAME"
+                  else
+                    echo "✓ Datasource exists: $DS_NAME"
+                  fi
+                else
+                  echo "Creating datasource '$DS_NAME'..."
+                  curl -s -X POST \
+                    -H "Authorization: Bearer $GRAFANA_TOKEN" \
+                    -H "Content-Type: application/json" \
+                    "$GRAFANA_URL/api/datasources" \
+                    -d "{
+                      \"name\": \"$DS_NAME\",
+                      \"type\": \"$DS_TYPE\",
+                      \"url\": \"$DS_URL\",
+                      \"access\": \"proxy\",
+                      \"isDefault\": $IS_DEFAULT
+                    }" > /tmp/ds_create.json
+                  
+                  if grep -q '"message":"Datasource added"' /tmp/ds_create.json 2>/dev/null; then
+                    echo "✓ Created datasource: $DS_NAME"
+                  else
+                    echo "Note: Datasource creation response:"
+                    cat /tmp/ds_create.json 2>/dev/null || true
+                  fi
+                fi
+              }
+              
+              echo ""
+              echo "========================================="
+              echo "Configuring Required Datasources"
+              echo "========================================="
+              echo ""
+              
+              # 1. Setup Prometheus datasource
+              PROMETHEUS_URL="http://{{ .Values.backend.servicePrefix }}-prometheus-server.{{ .Release.Namespace }}.svc.cluster.local:9090"
+              echo "1. Setting up Prometheus datasource..."
+              echo "   URL: $PROMETHEUS_URL"
+              # Set Prometheus datasource as not default to prevent overriding the existing default datasource outside of OGS
+              create_or_update_datasource "Prometheus" "prometheus" "$PROMETHEUS_URL" "false"
+              echo ""
+              
+              # 2. Setup Infinity datasource
+              echo "2. Setting up Infinity datasource..."
+              create_or_update_datasource "Infinity" "yesoreyeram-infinity-datasource" "" "false"
+              echo ""
+              
+              # List all datasources
+              echo "========================================="
+              echo "Current Datasources Configuration"
+              echo "========================================="
+              curl -s -H "Authorization: Bearer $GRAFANA_TOKEN" \
+                "$GRAFANA_URL/api/datasources" | \
+                grep -o '"name":"[^"]*","type":"[^"]*","uid":"[^"]*"' | \
+                sed 's/"name":"/✓ /g' | sed 's/","type":"/ (/g' | sed 's/","uid":"/) - UID: /g' | sed 's/"$//g' || \
+                echo "Unable to parse datasources list"
+              
+              echo ""
+              echo "========================================="
+              echo "Datasource setup completed successfully!"
+              echo "========================================="
+              echo ""
+              echo "IMPORTANT: If the Infinity datasource shows an error about"
+              echo "the plugin not being installed, you need to:"
+              echo "1. Install the plugin in your Grafana instance:"
+              echo "   grafana-cli plugins install yesoreyeram-infinity-datasource"
+              echo "2. Restart your Grafana instance"
+              echo "3. Re-run: helm upgrade lens helm/ -n lens"
+              echo ""
+{{- end }}
+

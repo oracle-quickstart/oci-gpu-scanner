@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+  labels:
+    {{- include "corrino-lens.labels" . | nindent 4 }}
+data:
+  DEVELOPER_MODE: {{ .Values.backend.developerMode | quote }}
+  SERVICE_PREFIX: {{ .Values.backend.servicePrefix | quote }}
+  DJANGO_ALLOWED_HOSTS: {{ .Values.backend.djangoAllowedHosts | quote }}
+  DJANGO_CSRF_TRUSTED_ORIGINS: {{ .Values.backend.djangoCsrfTrustedOrigins | quote }}
+  TENANCY_ID: {{ .Values.global.tenancyId | quote }}
+  REGION_NAME: {{ .Values.global.regionName | quote }}
+  AUTHORIZED_COMPARTMENTS: {{ default "" .Values.backend.authorizedCompartments | quote }}
+  GPU_UTILIZATION_MONITORING_ENABLED: {{ .Values.backend.gpuUtilizationMonitoringEnabled | quote }}
+  GPU_UTILIZATION_CHECK_INTERVAL: {{ .Values.backend.gpuUtilizationCheckInterval | quote }}
+  GPU_UTILIZATION_THRESHOLD: {{ .Values.backend.gpuUtilizationThreshold | quote }}
+  GPU_MIN_TIME_BETWEEN_CHECKS: {{ .Values.backend.gpuMinTimeBetweenChecks | quote }}
+  POSTGRES_HOST: {{ include "corrino-lens.postgresHost" . }}
+  POSTGRES_PORT: {{ .Values.backend.postgresPort | quote }}
+  POSTGRES_DB: {{ .Values.global.postgresDb | quote }}
+  LOGGING_LEVEL: {{ .Values.backend.loggingLevel | quote }}
+  SKIP_REGIONS: {{ .Values.backend.skipRegions | quote }}
+  GRAFANA_URL: {{ .Values.backend.grafanaUrl | quote }}
+  GRAFANA_API_TOKEN: {{ .Values.backend.grafanaApiToken | quote }}
+  GRAFANA_TEMPLATES_GITHUB_URL: {{ .Values.backend.grafanaTemplatesGithubUrl | quote }}
+  GRAFANA_TEMPLATES_GITHUB_BRANCH: {{ .Values.backend.grafanaTemplatesGithubBranch | quote }}
+  PROMETHEUS_URL: {{ .Values.backend.prometheusUrl | quote }}
+  PROMETHEUS_PUSHGATEWAY_URL: {{ .Values.backend.prometheusPushgatewayUrl | quote }}
+  INTERNAL_GRAFANA_URL: {{ printf "http://%s-%s.%s.%s:%v" .Values.backend.servicePrefix .Values.backend.internalGrafanaService .Release.Namespace .Values.backend.internalServiceDomain (.Values.monitoring.grafanaPort | int) | quote }}
+  INTERNAL_PROMETHEUS_URL: {{ printf "http://%s-%s.%s.%s:%v" .Values.backend.servicePrefix .Values.backend.internalPrometheusService .Release.Namespace .Values.backend.internalServiceDomain (.Values.monitoring.prometheusPort | int) | quote }}
+  INTERNAL_PUSHGATEWAY_URL: {{ printf "http://%s-%s.%s.%s:%v" .Values.backend.servicePrefix .Values.backend.internalPushgatewayService .Release.Namespace .Values.backend.internalServiceDomain (.Values.monitoring.pushgatewayPort | int) | quote }}

@@ -1,106 +1,140 @@
-# Deploy OCI GPU Scanner solution through HELM Quickstart 
+# OCI GPU Scanner - Control Plane Helm Deployment
 
-**❗❗IMPORTANT: The instructions below are for deploying to an existing OKE cluster. If you'd like to install OCI GPU Scanner solution as a standalone service, follow the steps here: [Install OCI GPU Scanner to an Existing OKE Cluster](./GETTING_STARTED_README.md)**
+## Overview
 
-This product has 2 main components and installation steps
+**This guide covers Control Plane deployment only.**
 
-- [**Step 1: OCI GPU Scanner Control Plane Installation**](#step1-install-oci-gpu-scanner-control-plane-as-part-of-existing-kubernetes-cluster) (one install per OKE cluster) 
-- [**Step 2: OCI GPU Data Plane Plugin As Kubernetes DaemonSet**](#step-2-oci-gpu-data-plane-plugin-installation-on-gpu-nodes) (runs on each monitored GPU compute OKE nodes. Can be added to any other OKE cluster running GPU nodes) 
+For Data Plane plugin installation on GPU nodes, see [oci-gpu-scanner-plugin-helm](./helm/oci-gpu-scanner-plugin-helm/README.md).
+
+### What This Deploys
+
+- **Control Plane UI:** Web interface for managing and monitoring GPU nodes/clusters
+- **REST API Backend:** Programmatic operations and management
+- **Monitoring Stack:** Prometheus + Grafana (or integrate with your existing monitoring)
+
+### Customization Options
+
+This deployment supports:
+
+- ✅ **Bring Your Own Monitoring:** Use existing Prometheus & Grafana instead of deploying new instances
+- ✅ **Custom Domains:** Configure your own domain instead of default `nip.io`
+- ✅ **Compartment Restrictions:** Limit OCI access to specific compartments
+- ✅ **Resource Overrides:** Customize replicas, images, storage, and more via Helm values
+
+---
+
+## Quick Start Decision Tree
+
+**Do you already have Prometheus and Grafana, and don't want to deploy new monitoring stacks?**
+
+- **NO** → [Option 1: Full Installation](#option-1-full-installation-control-plane--monitoring-stack) (includes monitoring stack)
+- **YES** → [Option 2: Control Plane Only](#option-2-control-plane-only-byo-monitoring) (BYO monitoring)
+
+---
 
 ## Prerequisites
 
+### System Requirements
+
 - Kubernetes 1.26+
 - Helm 3.0+
-- (Optional) OCI Block Volume CSI driver for dynamic PVC provisioning
 - Linux OS Machine
-- An OKE cluster with at least 2 CPU nodes
+- OKE cluster with ≥2 CPU nodes
+- (Optional) OCI Block Volume CSI driver for dynamic PVC provisioning
 
-### Pre-req Step 1: Create workload identity configuration policy
-
-The backend deployment is configured with a service account that enables workload identity access to OCI resources. This allows the application to authenticate with OCI services using the Kubernetes service account identity.
-
-#### Service Account Configuration
-
-**NOTE:** This step requires you to have enough OCI tenancy level permissions to create a policy. Policies are always created in your OCI home region. 
-
-The helm deployments create a name below that needs to be used when a policy is created
-
-```yaml
-name: "corrino-lens-backend-sa"
-```
-
-Follow [these instructions](https://docs.oracle.com/en-us/iaas/Content/Identity/policymgmt/managingpolicies_topic-To_create_a_policy.htm) to get to policy manager in your OCI console. 
-
-Get the following details before you can start creating policies:
-
-1. **Get the required information:**
-   - **request.principal.cluster_id**: `this is your existing OKE cluster OCID e.g ocid1.cluster.oc1.iad.aaaaaaaaalwej3x7nlecvak2z2psrduvqo6mqkjg7er3aolnmcuvyljsqtva `
-   - **request.principal.namespace**: `lens` (or your deployment namespace if you changed it from default install)
-   - **request.principal.service_account**: `corrino-lens-backend-sa`
-
-2. **Create an IAM policy to access all resources in the tenancy (recommended)** in the OCI Console:
-   - Navigate to **Identity & Security** > **Policies**
-   - Create a new policy with the following statement:
-
-Type the name as "OCI-gpu-scanner-backend-access". Add required description. Choose root compartment or a compartment where your existing OKE cluster is installed. 
-
-Choose "Manual Editor" and add the below statements
-
-```sql
-Allow any-user to manage instances in tenancy where all { request.principal.type = 'workload', request.principal.namespace = 'lens', request.principal.service_account = 'corrino-lens-backend-sa', request.principal.cluster_id = '<existingOKEclusterID>' }
-
-Allow any-user to read cluster-family in tenancy where all { request.principal.type = 'workload', request.principal.namespace = 'lens', request.principal.service_account = 'corrino-lens-backend-sa', request.principal.cluster_id = 'existingOKEclusterID' }
-
-Allow any-user to read compute-management-family in tenancy where all { request.principal.type = 'workload', request.principal.namespace = 'lens', request.principal.service_account = 'corrino-lens-backend-sa', request.principal.cluster_id = 'existingOKEclusterID' }
-
-Allow any-user to manage instance-family in tenancy where all { request.principal.type = 'workload', request.principal.namespace = 'lens', request.principal.service_account = 'corrino-lens-backend-sa', request.principal.cluster_id = 'existingOKEclusterID' }
-
-Allow any-user to manage tag-namespaces in tenancy where all { request.principal.type = 'workload', request.principal.namespace = 'lens', request.principal.service_account = 'corrino-lens-backend-sa', request.principal.cluster_id = '<existingOKEclusterID>' }
-
-Allow any-user to manage tags in tenancy where all { request.principal.type = 'workload', request.principal.namespace = 'lens', request.principal.service_account = 'corrino-lens-backend-sa', request.principal.cluster_id = '<existingOKEclusterID>' }
-
-```
-
-The backend application can now use the OCI SDK with workload identity authentication. The service account token is automatically mounted and the application can authenticate without additional configuration.
-
-For more information, see the [Oracle Cloud Infrastructure documentation](https://docs.oracle.com/en-us/iaas/Content/ContEng/Tasks/contenggrantingworkloadaccesstoresources.htm).
-
-
-### Pre-req Step 2: Download the helm chart into your deployment environment
-Both installation use helm charts for installation. Please download these charts to your deployment CLI environment. 
-
-``` bash
-helm repo add lens https://oci-ai-incubations.github.io/corrino-lens-devops/
-helm repo add oci-ai-incubations https://oci-ai-incubations.github.io/corrino-lens-devops/
-helm repo update
-```
-
-## Step 1: Install OCI GPU Scanner control plane as part of existing Kubernetes cluster
-
-Once the steps are finished you will have access to the below:
-
-1. OCI GPU Scanner Control Plane to help manage and monitor GPU nodes or OKE clusters through UI. 
-2. OCI GPU Scanner Control Plane REST API Backend to manage operations through REST. 
-3. A dedicated OCI Scanner Prometheus server (open-source version) instance & prometheus push gateway.
-4. A dedicated OCI Scanner Grafana (open-source version) for advanced monitoring, visualization and alerting.
-
-With control plane installation, you also have a choice to bring your own Prometheus server and Grafana server instead. You have two options to install the control plane
-
-1. [Option 1: Install all dependency services for control plane to work e.g Prometheus & Grafana in this cluster](#option-1-install-all-the-control-plane-components-and-dependencies-to-existing-oke-cluster)
-2. [Option 2: Install only control plane components and use your existing Grafana & Prometheus](#option-2-install-control-plane-with-your-existing-grafana--prometheus-to-existing-oke-cluster)
 ---
 
-### Option 1: Install all the control plane components and dependencies to existing OKE cluster
+### 1. OCI IAM Policy Setup
 
-Login to your existing OKE cluster where you would like to deploy. Run the below  command. Fill in all the requited placeholder details.
+The backend deployment uses a Kubernetes service account with workload identity to access OCI resources.
 
-``` bash
-helm search repo lens
-helm search repo oci-ai-incubations
-```
-Set the secrets:
+#### Service Account Details
+
+- **Namespace:** `lens`
+- **Service Account Name:** `corrino-lens-backend-sa`
+- **Required Permissions:** Read access to `cluster-family` and `compute-management-family`
+
+#### Create IAM Policy
+
+**Note:** This step requires OCI tenancy-level permissions. Policies are always created in your OCI home region.
+
+1. **Gather Required Information:**
+   - `request.principal.cluster_id`: Your existing OKE cluster OCID (e.g., `ocid1.cluster.oc1.iad.aaaaaaaaa...`)
+   - `request.principal.namespace`: `lens`
+   - `request.principal.service_account`: `corrino-lens-backend-sa`
+
+2. **Create Policy in OCI Console:**
+   - Navigate to **Identity & Security** > **Policies**
+   - Click **Create Policy**
+   - **Name:** `oci-gpu-scanner-backend-access`
+   - **Description:** Enable OCI GPU Scanner backend workload identity access
+   - **Compartment:** Root compartment (or compartment where OKE cluster resides)
+   - **Policy Builder:** Switch to **Manual Editor**
+
+3. **Add Policy Statements:**
+
+   **Option A: Tenancy-Level Access (Recommended)**
+   ```sql
+   Allow any-user to read instance-family in tenancy where all {
+     request.principal.type = 'workload',
+     request.principal.namespace = 'lens',
+     request.principal.service_account = 'corrino-lens-backend-sa',
+     request.principal.cluster_id = 'YOUR_OKE_CLUSTER_OCID'
+   }
+
+   Allow any-user to read compute-management-family in tenancy where all {
+     request.principal.type = 'workload',
+     request.principal.namespace = 'lens',
+     request.principal.service_account = 'corrino-lens-backend-sa',
+     request.principal.cluster_id = 'YOUR_OKE_CLUSTER_OCID'
+   }
+   ```
+
+   **Option B: Compartment-Level Access (Restricted)**
+   ```sql
+   Allow any-user to read instance-family in compartment id 'YOUR_COMPARTMENT_OCID' where all {
+     request.principal.type = 'workload',
+     request.principal.namespace = 'lens',
+     request.principal.service_account = 'corrino-lens-backend-sa',
+     request.principal.cluster_id = 'YOUR_OKE_CLUSTER_OCID'
+   }
+
+   Allow any-user to read compute-management-family in compartment id 'YOUR_COMPARTMENT_OCID' where all {
+     request.principal.type = 'workload',
+     request.principal.namespace = 'lens',
+     request.principal.service_account = 'corrino-lens-backend-sa',
+     request.principal.cluster_id = 'YOUR_OKE_CLUSTER_OCID'
+   }
+   ```
+
+   Replace `YOUR_OKE_CLUSTER_OCID` and `YOUR_COMPARTMENT_OCID` with your actual values.
+
+📚 **Reference:** [OCI Workload Identity Documentation](https://docs.oracle.com/en-us/iaas/Content/ContEng/Tasks/contenggrantingworkloadaccesstoresources.htm)
+
+---
+
+### 2. Clone the Repository
+
+Clone the OCI GPU Scanner repository and navigate to the root:
+
 ```bash
+git clone https://github.com/oracle-quickstart/oci-gpu-scanner.git
+cd oci-gpu-scanner/helm/oci-gpu-scanner-helm
+```
+
+The Helm chart is located at `./helm/oci-gpu-scanner-helm` relative to the repository root. All `helm` commands in this guide should be run from the repository root.
+
+---
+
+### 3. Create Kubernetes Secrets
+
+All installation options require PostgreSQL and superuser credentials. **Run these commands before installation:**
+
+```bash
+# Create namespace
 kubectl create namespace lens
+
+# PostgreSQL credentials
 export POSTGRES_USERNAME='your_secret_username'
 export POSTGRES_PASSWORD='your_secret_password'
 
@@ -108,8 +142,9 @@ kubectl -n lens create secret generic lens-postgres-secret \
   --from-literal=postgres-user="$POSTGRES_USERNAME" \
   --from-literal=postgres-password="$POSTGRES_PASSWORD"
 
-export SUPERUSER_USERNAME='your_superuser_username'  
-export SUPERUSER_EMAIL='superuser@email.com'  
+# Superuser credentials (for Control Plane UI/API access)
+export SUPERUSER_USERNAME='your_superuser_username'
+export SUPERUSER_EMAIL='superuser@email.com'
 export SUPERUSER_PASSWORD='your_superuser_password'
 
 kubectl -n lens create secret generic lens-backend-secret \
@@ -117,248 +152,429 @@ kubectl -n lens create secret generic lens-backend-secret \
   --from-literal=superuser-email="$SUPERUSER_EMAIL" \
   --from-literal=superuser-password="$SUPERUSER_PASSWORD"
 ```
-Install: 
-```bash
-helm install lens oci-ai-incubations/lens -n lens --create-namespace \
-  --set grafana.adminPassword="access password for grafana portal. User name is admin by default"\
-  --set monitoring.grafanaAdminPassword="password" \
-  --set backend.tenancyId="your-oci-tenancy-id" \
-  --set backend.regionName="your-oke-region-name"
-```
 
-**Optional: Custom Domain Configuration**
-
-By default, the deployment uses `nip.io` for ingress (no DNS setup required). To use your own domain, add `--set ingress.domain="your-domain"` to the helm command above.
-
-For detailed instructions on custom domain setup and required DNS records, see [Custom Domain Configuration](INGRESS_AND_TLS_SETUP.md#custom-domain-configuration).
-
-### OPTION 2: Install control plane with your existing grafana & prometheus to existing OKE cluster
-
-If you already have Prometheus Postgateway and Grafana running, login to existing OKE cluster where you would like to install this:
-
-**Please make sure in this installation that VCNs have necessary firewall rules and DNS resolving ability for scanner portal to access the prometheus and grafana servers**
-
-**Note:** When using your own Grafana:
-- **Prerequisites** : Grafana >=10.4.8
-- Set `grafana.enabled=false` to prevent installing Grafana as a dependency
-- Provide `backend.grafanaUrl` with the URL to your existing Grafana instance
-- Provide `grafana-api-token` as secret with a Grafana API token for authentication (create one in Grafana under Administration > Users and Access > Service Accounts with admin rights)
-
+**For Option 2 only** (BYO Grafana), also create:
 
 ```bash
-helm repo update
-helm search repo oci-ai-incubations
-```
-Set the secrets:
-```bash
-kubectl create namespace lens
-export POSTGRES_USERNAME='your_secret_username'
-export POSTGRES_PASSWORD='your_secret_password'
-
-kubectl -n lens create secret generic lens-postgres-secret \
-  --from-literal=postgres-user="$POSTGRES_USERNAME" \
-  --from-literal=postgres-password="$POSTGRES_PASSWORD"
-
-export SUPERUSER_USERNAME='your_superuser_username'  
-export SUPERUSER_EMAIL='superuser@email.com'  
-export SUPERUSER_PASSWORD='your_superuser_password'
-
-kubectl -n lens create secret generic lens-backend-secret \
-  --from-literal=superuser-username="$SUPERUSER_USERNAME" \
-  --from-literal=superuser-email="$SUPERUSER_EMAIL" \
-  --from-literal=superuser-password="$SUPERUSER_PASSWORD"
-
+# Grafana API token (Option 2 only)
 export GRAFANA_API_TOKEN='your_grafana_api_token'
+
 kubectl -n lens create secret generic lens-grafana-secret \
   --from-literal=grafana-api-token="$GRAFANA_API_TOKEN"
 ```
-Install: 
+
+**How to create a Grafana API token:**
+
+1. Log in to your existing Grafana instance
+2. Navigate to **Administration** → **Users and access** → **Service Accounts**
+3. Click **Add service account**
+   - Name: `oci-gpu-scanner` (or your preferred name)
+   - Role: **Admin** (required for dashboard provisioning)
+4. Click **Add service account token**
+5. Copy the generated token (you won't be able to see it again)
+6. Use this token as `GRAFANA_API_TOKEN` in the command above
+
+📚 **Reference:** [Grafana Service Accounts Documentation](https://grafana.com/docs/grafana/latest/administration/service-accounts/)
+
+---
+
+## Installation Options
+
+### Option 1: Full Installation (Control Plane + Monitoring Stack)
+
+**What You Get:**
+- ✅ Control Plane (UI + API)
+- ✅ Prometheus + Pushgateway
+- ✅ Grafana (open-source)
+
+**Installation Command:**
+
 ```bash
-helm install lens oci-ai-incubations/lens -n lens --create-namespace \
-  --set backend.prometheusPushgatewayUrl="http://YOUR_PUSHGATEWAY_IP_OR_SERVICE_NAME:9091" \
-  --set backend.prometheusUrl="https://your-prometheus-url:9090" \
-  --set prometheus.enabled=false \
-  --set backend.grafanaUrl="http://YOUR_GRAFANA_IP_OR_SERVICE_NAME:80" \
-  --set backend.grafanaApiToken="your_grafana_api_token" \
-  --set grafana.enabled=false \
-  --set backend.tenancyId="your-oci-tenancy-id" \
-  --set backend.regionName="your-oke-region-name" \
+helm install lens . -n lens --create-namespace \
+  --set backend.tenancyId="YOUR_OCI_TENANCY_OCID" \
+  --set backend.regionName="YOUR_OKE_REGION"
 ```
 
+**Configuration Reference:**
 
+| Flag | Required | Default | Description |
+|------|----------|---------|-------------|
+| `backend.tenancyId` | ✅ | - | Your OCI tenancy OCID |
+| `backend.regionName` | ✅ | - | OKE region (e.g., `us-ashburn-1`) |
+| `backend.authorizedCompartments` | optional | (all) | Restrict to specific compartment OCID |
+| `ingress.domain` | optional | `nip.io` | Custom domain (see [Custom Domain Setup](INGRESS_AND_TLS_SETUP.md)) |
 
-**Optional: Custom Domain Configuration**
+**Note:** Grafana admin password is auto-generated during installation. See [Access Your Deployment](#2-access-your-deployment) for retrieval instructions.
 
-By default, the deployment uses `nip.io` for ingress (no DNS setup required). To use your own domain, add `--set ingress.domain="your-domain"` to the helm command above.
+**Example with Optional Flags:**
 
-For detailed instructions on custom domain setup and required DNS records, see [Custom Domain Configuration](INGRESS_AND_TLS_SETUP.md#custom-domain-configuration).
+```bash
+helm install lens . -n lens --create-namespace \
+  --set backend.tenancyId="ocid1.tenancy.oc1..aaaaaaaa..." \
+  --set backend.regionName="us-ashburn-1" \
+  --set backend.authorizedCompartments="ocid1.compartment.oc1..aaaaaaaa..." \
+  --set ingress.domain="gpu-scanner.example.com"
+```
 
-## Verify for successful install
+---
 
-Once the installation is complete you should see the following pods in the "lens" namespace. If you don't please uninstall and reinstall or check the helm install events/logs. 
+### Option 2: Control Plane Only (BYO Monitoring)
+
+**Prerequisites:**
+- ✅ Prometheus Pushgateway running (accessible URL)
+- ✅ Grafana ≥10.4.8 running (accessible URL)
+- ✅ Grafana API token with admin rights ([create in Grafana](https://grafana.com/docs/grafana/latest/administration/service-accounts/))
+- ✅ VCN firewall rules allow Control Plane → Prometheus/Grafana
+- ✅ DNS resolution between Control Plane and monitoring services
+
+**What You Get:**
+- ✅ Control Plane (UI + API)
+- ✅ Integration with your existing Prometheus & Grafana
+
+**Installation Command:**
+
+```bash
+helm install lens . -n lens --create-namespace \
+  --set backend.prometheusPushgatewayUrl="http://YOUR_PUSHGATEWAY_IP:9091" \
+  --set backend.prometheusUrl="http://YOUR_PROMETHEUS_IP:9090" \
+  --set backend.grafanaUrl="http://YOUR_GRAFANA_IP:80" \
+  --set prometheus.enabled=false \
+  --set grafana.enabled=false \
+  --set backend.tenancyId="YOUR_OCI_TENANCY_OCID" \
+  --set backend.regionName="YOUR_OKE_REGION"
+```
+
+**Configuration Reference:**
+
+| Flag | Required | Default | Description |
+|------|----------|---------|-------------|
+| `backend.prometheusPushgatewayUrl` | ✅ | - | Your Pushgateway URL (e.g., `http://pushgateway.example.com:9091`) |
+| `backend.prometheusUrl` | ✅ | - | Your Prometheus URL (e.g., `http://prometheus.example.com:9090`) |
+| `backend.grafanaUrl` | ✅ | - | Your Grafana URL (e.g., `http://grafana.example.com:80`) |
+| `prometheus.enabled` | ✅ | `true` | **Must set to `false`** |
+| `grafana.enabled` | ✅ | `true` | **Must set to `false`** |
+| `backend.tenancyId` | ✅ | - | Your OCI tenancy OCID |
+| `backend.regionName` | ✅ | - | OKE region (e.g., `us-ashburn-1`) |
+| `backend.authorizedCompartments` | optional | (all) | Restrict to specific compartment OCID |
+| `ingress.domain` | optional | `nip.io` | Custom domain (see [Custom Domain Setup](INGRESS_AND_TLS_SETUP.md)) |
+
+**Example with Optional Flags:**
+
+```bash
+helm install lens . -n lens --create-namespace \
+  --set backend.prometheusPushgatewayUrl="http://10.0.1.50:9091" \
+  --set backend.prometheusUrl="http://10.0.1.51:9090" \
+  --set backend.grafanaUrl="http://10.0.1.52:80" \
+  --set prometheus.enabled=false \
+  --set grafana.enabled=false \
+  --set backend.tenancyId="ocid1.tenancy.oc1..aaaaaaaa..." \
+  --set backend.regionName="us-phoenix-1" \
+  --set backend.authorizedCompartments="ocid1.compartment.oc1..aaaaaaaa..." \
+  --set ingress.domain="gpu-scanner.mycompany.com"
+```
+
+---
+
+## Post-Installation
+
+### 1. Verify Installation
+
+Check that all pods are running:
+
+```bash
+kubectl get pods -n lens
+```
+
+**Expected pods (Option 1 - Full Installation):**
+- `lens-backend-*`
+- `lens-frontend-*`
+- `lens-postgres-*`
+- `lens-prometheus-server-*`
+- `lens-prometheus-pushgateway-*`
+- `lens-grafana-*`
+
+**Expected pods (Option 2 - BYO Monitoring):**
+- `lens-backend-*`
+- `lens-frontend-*`
+- `lens-postgres-*`
+
+All pods should show `Running` status. If not, check [Troubleshooting](#troubleshooting).
+
+Reference screenshot:
 
 ![List of pods in lens namespace](/media/running-pods-success.png)
 
+---
 
-## Configuration and access to configuration values
+### 2. Access Your Deployment
 
-All configuration is managed via `values.yaml`.
-
-### Key Sections in `values.yaml`
-
-- `database`: PostgreSQL image, credentials, storage, and service port
-- `backend`: Backend image, environment, and service configuration
-- `frontend`: Frontend image, environment, and service configuration
-- `monitoring`: External monitoring components configuration
-
-## Finding your application URLs
-
-If you already have Prometheus Pushgateway and Grafana running, find their external IPs:
+Get the ingress URLs for your deployment:
 
 ```bash
 kubectl get ingress -n lens
 ```
 
-You should the below response with a list of public URLs for your deployments.
+**Expected output:**
 
-![List of services](/media//successful-services.png)
+![List of services](/media/successful-services.png)
 
-You can use these URL'S to access portal, API backend and Grafana/Prometheus instance. Use the password created during helm install phases. 
+**Service Endpoints:**
 
-## Monitoring and Troubleshooting
+| Service | URL Pattern | Default Credentials |
+|---------|-------------|---------------------|
+| Control Plane UI | `https://lens.<EXTERNAL_IP>.nip.io` | Username: `$SUPERUSER_USERNAME`<br>Password: `$SUPERUSER_PASSWORD` |
+| API Backend | `https://api.<EXTERNAL_IP>.nip.io` | Same as UI |
+| Grafana (Option 1) | `https://grafana.<EXTERNAL_IP>.nip.io` | Username: `admin`<br>Password: *See [Access Grafana](#access-grafana)* |
+| Prometheus (Option 1) | `https://prometheus.<EXTERNAL_IP>.nip.io` | No authentication |
+| Pushgateway (Option 1) | `https://pushgateway.<EXTERNAL_IP>.nip.io` | No authentication |
 
-### Check Deployment Status
+**Notes:**
+- If using a custom domain, URLs will use your configured domain instead of `nip.io`
+- Option 2 deployments use your existing Grafana/Prometheus URLs (not listed in ingress)
+
+---
+
+### 3. Next Steps
+
+**Deploy Data Plane Plugin on GPU Nodes:**
+
+To start monitoring GPU nodes, install the Data Plane plugin. See [oci-gpu-scanner-plugin-helm](./helm/oci-gpu-scanner-plugin-helm/README.md) for installation instructions.
+
+The plugin can be installed on:
+- Individual GPU instances
+- OKE cluster GPU nodes (via DaemonSet)
+- Slurm cluster nodes
+- Cloud-init scripts for automated deployment
+
+---
+
+## Monitoring & Dashboards
+
+### Access Grafana
+
+**Option 1 (Deployed Grafana):**
+- **URL:** `https://grafana.<EXTERNAL_IP>.nip.io` (or custom domain)
+- **Username:** `admin`
+- **Password:** Auto-generated during installation
+
+Retrieve the auto-generated Grafana admin password:
+
 ```bash
-kubectl get pods -n lens
-kubectl get svc -n lens
-kubectl get pvc -n lens
+kubectl get secret lens-grafana-secret -A -o name 2>/dev/null || \
+  kubectl get secret lens-grafana-secret -n lens -o jsonpath='{.data.admin-password}' 2>/dev/null | base64 -d; echo
 ```
 
-### Verify Monitoring Integration
+**Option 2 (BYO Grafana):**
+- Use your existing Grafana URL
+- Dashboards will be automatically provisioned via API
 
-If you're using existing monitoring components:
+### Available Dashboards
+
+1. **Standalone Nodes:** Monitor individual GPU instances (utilization, memory, temperature)
+2. **OKE Clusters:** Monitor Kubernetes cluster health and GPU pod metrics
+3. **Cluster Networks:** Monitor RDMA network performance and topology
+
+### Creating Monitoring Rings
+
+1. Navigate to the Control Plane UI
+2. Go to **Dashboards** section
+3. Select specific resources (nodes, clusters, networks)
+4. Create custom monitoring groups ("rings")
+5. View aggregated metrics in Grafana
+
+### Advanced Features
+
+- **Custom Queries:** Use Prometheus queries for custom visualizations
+- **Alerting:** Configure alerts for GPU utilization, temperature, or cluster issues
+- **Data Export:** Export metrics for external analysis
+
+---
+
+## Configuration Reference
+
+### Advanced Customization
+
+All configuration is managed via Helm values. Override any value using `--set` flags or a custom `values.yaml` file:
 
 ```bash
-# Check if backend can reach your monitoring services
-kubectl exec -it deployment/lens-corrino-lens-backend -n lens -- \
-  curl -I http://YOUR_PUSHGATEWAY_IP:9091/-/healthy
+# Using --set flags
+helm install lens . -n lens \
+  --set frontend.replicaCount=3 \
+  --set backend.image.tag=stable
 
-kubectl exec -it deployment/lens-corrino-lens-backend -n lens -- \
-  curl -I http://YOUR_GRAFANA_IP:80/api/health
-
-# Check backend environment variables
-kubectl exec -it deployment/lens-corrino-lens-backend -n lens -- env | grep -E "(PUSHGATEWAY|GRAFANA)"
+# Using custom values file
+helm install lens . -n lens -f custom-values.yaml
 ```
 
-### View Logs
-```bash
-# Frontend logs
-kubectl logs -l app=lens-corrino-lens-frontend -n lens
-# Backend logs
-kubectl logs -l app=lens-corrino-lens-backend -n lens
-```
+### Key Configuration Sections
 
-### Check Events
-```bash
-kubectl get events -n lens
-```
+| Section | Description |
+|---------|-------------|
+| `database` | PostgreSQL image, storage, service port |
+| `backend` | Backend image, replicas, environment variables |
+| `frontend` | Frontend image, replicas, service configuration |
+| `monitoring` | Prometheus/Grafana configuration |
+| `ingress` | Domain, TLS, and ingress controller settings |
+
+For detailed configuration options, see the default `values.yaml` in the Helm chart.
+
+### Custom Domain & TLS Setup
+
+For production deployments with custom domains and TLS certificates, see:
+- [Custom Domain Configuration](INGRESS_AND_TLS_SETUP.md#custom-domain-configuration)
+- [TLS Certificate Setup](INGRESS_AND_TLS_SETUP.md#tls-setup)
+
+---
 
 ## Troubleshooting
 
-### Pushgateway Service Type Issue
+### Common Issues
 
-If you encounter an issue where the Prometheus Pushgateway service is created as `ClusterIP` instead of `LoadBalancer`, the installation script automatically handles this by patching the service. If you need to do this manually:
+#### 1. Services Not Getting External IPs
+
+**Symptom:** `kubectl get svc -n lens` shows `<pending>` for `EXTERNAL-IP`
+
+**Cause:** Cluster missing LoadBalancer controller
+
+**Solution:**
+- Verify LoadBalancer controller is installed: `kubectl get pods -n kube-system | grep cloud-controller`
+- For OKE, ensure cluster has correct IAM policies for LoadBalancer provisioning
+
+---
+
+#### 2. Pushgateway Service Type Mismatch (Option 1)
+
+**Symptom:** Prometheus Pushgateway created as `ClusterIP` instead of `LoadBalancer`
+
+**Cause:** Helm chart default configuration issue
+
+**Solution:** Patch the service manually:
 
 ```bash
 # Check current service type
-kubectl get svc prometheus-prometheus-pushgateway -n lens
+kubectl get svc lens-prometheus-pushgateway -n lens
 
-# Patch to LoadBalancer if needed
-kubectl patch svc prometheus-prometheus-pushgateway -n lens -p '{"spec":{"type":"LoadBalancer"}}'
+# Patch to LoadBalancer
+kubectl patch svc lens-prometheus-pushgateway -n lens -p '{"spec":{"type":"LoadBalancer"}}'
 
 # Wait for external IP
-kubectl get svc prometheus-prometheus-pushgateway -n lens -w
+kubectl get svc lens-prometheus-pushgateway -n lens -w
 ```
 
-### Common Issues
+**Note:** Future Helm chart updates may automate this fix.
 
-1. **Services not getting external IPs**: Check if your cluster has a LoadBalancer controller installed
-2. **Backend can't reach monitoring services**: Verify the external IPs are correct in the values file
-3. **Pods not starting**: Check events with `kubectl get events -n lens`
-
-## Customization
-
-Override any value in `values.yaml` using `--set` or a custom values file:
-```bash
-helm install lens ./helm -n lens \
-  --set frontend.replicaCount=3 \
-  --set backend.image.tag=stable
-```
-
-
-## Step 2: OCI GPU Data Plane Plugin installation on GPU Nodes
-
-**NOTE** : Running data control plane plugin as a Kubernetes native plugin running daemon sets for [AMD and Nvidia  nodes can be found here](./oci-scanner-plugin-helm/README.md). Supported GPUs are: MI300x, MI355x, A10, H100 and B200.
-
-1. **Navigate to Dashboards**: Go to the dashboard section of the OCI GPU Scanner Portal
-2. **Go to Tab - OCI GPU Scanner Install Script**:
-   - You can use the script there and deploy the oci-scanner plugin on to your gpus nodes manually (works on Ubuntu OS based GPU nodes). 
-   - Embed them into a slurm script if you run a slurm cluster.
-   - Use the same scripts to be added as part of your new GPU compute deployments through cloud-init scripts.
-
-  Example script:
-
-  ```bash
-  chdir /home/ubuntu/
-mkdir "$(hostname)"
-cd "$(hostname)"
-curl -X GET https://objectstorage.us-ashburn-1.oraclecloud.com/p/N6955_gYqc8g04xQLQkWyxHumraL_hy6qIxHR6Hd4H69ZOf8mQJFxN7-M-TNQOlJ/n/iduyx1qnmway/b/bucket-corrino-lens-dev/o/oci_plugin.tar.gz --output oci_plugin.tar.gz
-tar -xzvf oci_plugin.tar.gz
-cd oci_lens_plugin
-export PUSH_GATEWAY="https://pushgateway.132.226.100.100.nip.io/"
-export OCI_PAR_R="https://objectstorage.us-ashburn-1.oraclecloud.com/p/YmY6NBiA5VSkxVAoymx8FhZNfiFGDq9Gdqt0Q5G7e-CQsjDjnVWslylOSsIRuO2b/n/iduyx1qnmway/b/bucket-corrino-lens-dev/o/oci_lens_plugin"
-export OCI_LENS_CP="http://api.100.100.100.nip.io"
-export CP_AUTH_TOKEN="ad37cf7d9bcdd520d27c4va06eae5a3bc15a06e911bc0"
-chmod -R +x *
-./run.sh
-  ```
 ---
 
-## Step 3: Explore Monitoring Dashboards
+#### 3. Backend Can't Reach Monitoring Services (Option 2)
 
-1. **Navigate to Dashboards**: Go to the dashboard section
-2. **View Available Dashboards**:
-   - **Standalone Nodes**: Monitor individual GPU instances
-   - **OKE Clusters**: Monitor Kubernetes cluster health
-   - **Cluster Networks**: Monitor RDMA network performance
-3. **Create Monitoring Rings**: Select specific resources to create custom monitoring groups
-4. **Access Grafana**: Go to "View Dashboard" under the Grafana URL
-5. **Log in to Grafana**: Use default credentials. Username: `admin`; Password: `admin123`
-6. **Access Additional Features**:
-   - **Custom Queries**: Use Prometheus queries to create custom visualizations
-   - **Alerting**: Set up alerts for critical GPU or cluster issues
+**Symptom:** Backend pod logs show connection errors to Prometheus/Grafana
+
+**Cause:** Network connectivity or DNS resolution issues
+
+**Solution:**
+
+```bash
+# Test connectivity from backend pod
+kubectl exec -it deployment/lens-backend -n lens -- \
+  curl -I http://YOUR_PUSHGATEWAY_IP:9091/-/healthy
+
+kubectl exec -it deployment/lens-backend -n lens -- \
+  curl -I http://YOUR_GRAFANA_IP:80/api/health
+
+# Check backend environment variables
+kubectl exec -it deployment/lens-backend -n lens -- \
+  env | grep -E "(PUSHGATEWAY|GRAFANA|PROMETHEUS)"
+```
+
+**Fix checklist:**
+- ✅ VCN security lists allow traffic from OKE subnet to monitoring services
+- ✅ Network Security Groups (NSGs) permit required ports
+- ✅ DNS resolution works (if using hostnames instead of IPs)
+- ✅ Monitoring services are running and accessible
+
+---
+
+#### 4. Pods Not Starting
+
+**Symptom:** Pods stuck in `Pending`, `CrashLoopBackOff`, or `Error` state
+
+**Diagnosis:**
+
+```bash
+# Check pod status
+kubectl get pods -n lens
+
+# Describe problematic pod
+kubectl describe pod <POD_NAME> -n lens
+
+# Check pod logs
+kubectl logs <POD_NAME> -n lens
+
+# Check events
+kubectl get events -n lens --sort-by='.lastTimestamp'
+```
+
+**Common causes:**
+- Missing secrets (check Prerequisites section)
+- Insufficient cluster resources (CPU/memory)
+- Image pull errors (check image registry access)
+- PVC provisioning failures (check StorageClass configuration)
+
+---
+
+### Diagnostic Commands
+
+```bash
+# Overall cluster health
+kubectl get pods -n lens
+kubectl get svc -n lens
+kubectl get ingress -n lens
+kubectl get pvc -n lens
+
+# Pod logs
+kubectl logs -l app=lens-frontend -n lens
+kubectl logs -l app=lens-backend -n lens
+kubectl logs -l app=lens-postgres -n lens
+
+# Events timeline
+kubectl get events -n lens --sort-by='.lastTimestamp'
+
+# Resource usage
+kubectl top pods -n lens
+kubectl top nodes
+```
+
 ---
 
 ## Cleanup
 
-You can remove all control plane resources in **one step**:
+### Uninstall Control Plane
 
-### Uninstall the control plane components from OKE cluster 
+Remove all Control Plane resources with a single command:
 
 ```bash
 helm uninstall lens -n lens
 ```
 
-### Uninstall the data plane components installed as system services (per GPU node)
+**Optional:** Delete the namespace (removes all secrets and PVCs):
 
 ```bash
-cd /home/ubuntu/$(hostname)/oci-lens-plugin/
-./uninstall 
-cd ..
-rm -rf *
-cd ..
-rmdir  $(hostname)
-
+kubectl delete namespace lens
 ```
 
-Once the stack is destroyed, your OKE cluster will be free of any OCI GPU Scanner-related resources including the GPU monitored nodes.
+⚠️ **Warning:** Deleting the namespace will permanently remove all data, including PostgreSQL databases and monitoring history.
+
+---
+
+### Uninstall Data Plane Plugin
+
+For Data Plane plugin cleanup on GPU nodes, see [oci-gpu-scanner-plugin-helm](./helm/oci-gpu-scanner-plugin-helm/README.md).
+
+---
+
+## Additional Resources
+
+- [Data Plane Plugin Installation](./helm/oci-gpu-scanner-plugin-helm/README.md)
+- [Custom Domain & TLS Setup](INGRESS_AND_TLS_SETUP.md)
+- [OCI Workload Identity Documentation](https://docs.oracle.com/en-us/iaas/Content/ContEng/Tasks/contenggrantingworkloadaccesstoresources.htm)
+- [Grafana Service Accounts](https://grafana.com/docs/grafana/latest/administration/service-accounts/)

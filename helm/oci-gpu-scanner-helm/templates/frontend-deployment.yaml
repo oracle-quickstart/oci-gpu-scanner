@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "corrino-lens.fullname" . }}-frontend
+  labels:
+    {{- include "corrino-lens.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ include "corrino-lens.fullname" . }}-frontend
+  replicas: {{ .Values.frontend.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "corrino-lens.fullname" . }}-frontend
+    spec:
+      containers:
+        - name: oci-lens-portal
+          image: {{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.frontend.containerPort }}
+          env:
+            - name: API_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-frontend-configmap
+                  key: API_BASE_URL
+            - name: NODE_ENV
+              value: {{ .Values.frontend.env.NODE_ENV | quote }}
+          resources:
+            requests:
+              memory: {{ .Values.frontend.resources.requests.memory | quote }}
+              cpu: {{ .Values.frontend.resources.requests.cpu | quote }}
+            limits:
+              memory: {{ .Values.frontend.resources.limits.memory | quote }}
+              cpu: {{ .Values.frontend.resources.limits.cpu | quote }}
+      nodeSelector:
+        kubernetes.io/arch: amd64

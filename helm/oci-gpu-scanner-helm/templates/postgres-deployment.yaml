@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "corrino-lens.fullname" . }}-postgres
+  labels:
+    {{- include "corrino-lens.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "corrino-lens.fullname" . }}-postgres
+  template:
+    metadata:
+      labels:
+        app: {{ include "corrino-lens.fullname" . }}-postgres
+    spec:
+      initContainers:
+        - name: init-pgdata-dir
+          image: docker.io/library/busybox:1.34
+          command:
+            - sh
+            - -c
+            - |
+              mkdir -p /var/lib/postgresql/data/pgdata
+              chown -R 999:999 /var/lib/postgresql/data
+          volumeMounts:
+            - name: postgresdata
+              mountPath: /var/lib/postgresql/data
+      containers:
+        - name: postgres
+          image: "{{ .Values.database.image.repository }}:{{ .Values.database.image.tag }}"
+          imagePullPolicy: {{ .Values.database.image.pullPolicy }}
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.postgresSecret }}
+                  key:  {{ .Values.global.postgresUsernameKey }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.postgresSecret }}
+                  key:  {{ .Values.global.postgresPasswordKey }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "corrino-lens.fullname" . }}-postgres-secret
+          ports:
+            - containerPort: {{ .Values.database.servicePort }}
+          resources:
+            requests:
+              memory: {{ .Values.database.resources.requests.memory | quote }}
+              cpu: {{ .Values.database.resources.requests.cpu | quote }}
+            limits:
+              memory: {{ .Values.database.resources.limits.memory | quote }}
+              cpu: {{ .Values.database.resources.limits.cpu | quote }}
+          volumeMounts:
+            - name: postgresdata
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: postgresdata
+          persistentVolumeClaim:
+            claimName: {{ include "corrino-lens.fullname" . }}-postgresql-pv-claim

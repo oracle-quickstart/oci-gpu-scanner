@@ -1,0 +1,666 @@
+{{- if .Values.rebootGPUErrorTag.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reboot-gpu-error-tag
+  namespace: lens
+  labels:
+    app: reboot-gpu-error-tag
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reboot-gpu-error-tag
+  template:
+    metadata:
+      labels:
+        app: reboot-gpu-error-tag
+    spec:
+      serviceAccountName: {{ .Values.rebootGPUErrorTag.serviceAccount.name }}
+      automountServiceAccountToken: {{ .Values.rebootGPUErrorTag.serviceAccount.automountToken }}
+      initContainers:
+      - name: wait-for-backend
+        image: docker.io/alpine/k8s:1.31.10
+        command:
+        - sh
+        - -c
+        - |
+          #!/bin/sh
+          echo "Waiting for Lens backend service to be ready..."
+          
+          # Wait for the backend service to be available by checking the login endpoint
+          # A 200 or 400/405 response means the endpoint exists (backend is ready)
+          #TODO: allow the service name to be configurable and the namespace to be configurable
+          until curl -s -o /dev/null -w "%{http_code}" http://lens-backend.lens.svc.cluster.local:{{ .Values.backend.servicePort }}/login/ 2>/dev/null | grep -qE "^(200|400|405)"; do
+            echo "Backend not ready yet, waiting 5 seconds..."
+            sleep 5
+          done
+          
+          echo "Lens backend is ready!"
+      containers:
+      - name: reboot-gpu-error-tag
+        image: {{ .Values.rebootGPUErrorTag.image | default "bitnami/kubectl:latest" }}
+        volumeMounts:
+        - name: error-resolution-config
+          mountPath: /etc/error-resolution
+          readOnly: true
+        command:
+        - /bin/bash
+        - -c
+        - |
+          #!/bin/bash
+          set -e
+          
+          # Install curl and jq if not available (alpine-based images)
+          if ! command -v curl &> /dev/null; then
+            echo "Installing curl..."
+            apk add --no-cache curl
+          fi
+          if ! command -v jq &> /dev/null; then
+            echo "Installing jq..."
+            apk add --no-cache jq
+          fi
+          
+          # Backend service configuration
+          BACKEND_SERVICE="http://lens-backend.lens.svc.cluster.local:{{ .Values.backend.servicePort }}"
+          BACKEND_USERNAME="$BACKEND_USERNAME"
+          BACKEND_PASSWORD="$BACKEND_PASSWORD"
+          
+          # Setup kubectl to use service account token
+          export KUBECONFIG=/tmp/kubeconfig
+          cat > $KUBECONFIG << EOF
+          apiVersion: v1
+          kind: Config
+          clusters:
+          - cluster:
+              certificate-authority-data: $(cat /var/run/secrets/kubernetes.io/serviceaccount/ca.crt | base64 -w 0)
+              server: https://kubernetes.default.svc
+            name: default-cluster
+          contexts:
+          - context:
+              cluster: default-cluster
+              namespace: default
+              user: default-user
+            name: default-context
+          current-context: default-context
+          users:
+          - name: default-user
+            user:
+              token: $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+          EOF
+          
+          # ==========================================================================
+          # LENS API INTEGRATION FUNCTIONS
+          # ==========================================================================
+          # These functions integrate with the Lens backend API to:
+          # 1. Authenticate and get a token
+          # 2. Query autoremediation settings for the user
+          # 
+          # The autoremediation setting is per-user (not per-node) and applies
+          # to all nodes managed by that user.
+          # ==========================================================================
+          
+          # Function to get authentication token from Lens API
+          get_auth_token() {
+            echo "Authenticating with Lens backend..." >&2
+            
+            # Authenticate using Django REST Framework Token Authentication
+            local response=$(curl -s -X POST "$BACKEND_SERVICE/login/" \
+              -H "Content-Type: application/json" \
+              -d "{\"username\":\"$BACKEND_USERNAME\",\"password\":\"$BACKEND_PASSWORD\"}")
+            
+            # Parse token from response (format: {"token":"xxx"} or {"key":"xxx"})
+            local token=$(echo "$response" | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
+            if [ -z "$token" ]; then
+              # Try alternate format with "key" field
+              token=$(echo "$response" | grep -o '"key":"[^"]*"' | cut -d'"' -f4)
+            fi
+            
+            if [ -z "$token" ]; then
+              echo "ERROR: Failed to get authentication token" >&2
+              echo "Response: $response" >&2
+              return 1
+            fi
+            
+            echo "$token"
+          }
+          
+          # Function to authenticate and validate token (single source of truth)
+          # Returns 0 on success, 1 on failure
+          # Outputs token to stdout on success
+          authenticate_and_validate_token() {
+            local context="${1:-AUTH}"  # Optional context for error messages
+            
+            local auth_token
+            auth_token=$(get_auth_token)
+            local auth_exit_code=$?
+            
+            if [ -z "$auth_token" ] || [ $auth_exit_code -ne 0 ]; then
+              echo "$context: ERROR - Failed to authenticate with Lens backend (exit code: $auth_exit_code)" >&2
+              return 1
+            fi
+            
+            echo "$context: SUCCESS - Authenticated with Lens backend" >&2
+            echo "$context: Auth token length: ${#auth_token}" >&2
+            echo "$auth_token"
+            return 0
+          }
+          
+          # Function to check if autoremediation is enabled via Lens API
+          # Returns the user's autoremediation preference (applies to all nodes)
+          get_autoremediation_status() {
+            local auth_token="$1"
+            
+            echo "Querying autoremediation status from Lens API..." >&2
+            
+            # Query the UserProfile API endpoint
+            local response=$(curl -s -X GET "$BACKEND_SERVICE/user-profile/autoremediation/status/" \
+              -H "Authorization: Token $auth_token" \
+              -H "Content-Type: application/json")
+            
+            # Parse the autoremediation_enabled field from response
+            # Expected format: {"autoremediation_enabled": true} or {"autoremediation_enabled": false}
+            local is_enabled=$(echo "$response" | grep -o '"autoremediation_enabled":\s*true' || echo "")
+            
+            if [ -n "$is_enabled" ]; then
+              echo "Autoremediation is ENABLED for user $BACKEND_USERNAME" >&2
+              return 0
+            else
+              echo "Autoremediation is DISABLED for user $BACKEND_USERNAME" >&2
+              return 1
+            fi
+          }
+          
+          # Error resolution JSON file path (mounted from ConfigMap)
+          # Redeploy required when error resolution JSON file is updated
+          ERROR_RESOLUTION_JSON="/etc/error-resolution/error_resolution_type.json"
+          
+          # Function to load error resolution data
+          load_error_resolution_data() {
+            local error_resolution_json="$ERROR_RESOLUTION_JSON"
+            
+            if [ ! -f "$error_resolution_json" ]; then
+              echo "ERROR: Error resolution JSON file not found at $error_resolution_json" >&2
+              return 1
+            fi
+            
+            # Validate JSON before returning
+            if ! jq empty "$error_resolution_json" 2>/dev/null; then
+              echo "ERROR: Invalid JSON in error resolution file" >&2
+              return 1
+            fi
+            
+            # Return the file contents
+            cat "$error_resolution_json"
+          }
+          
+          # Function to check if an error code should trigger a reboot
+          # Returns 0 if reboot is needed, 1 otherwise
+          # Checks all three reboot arrays: reboot, reboot_then_terminate_for_repair, reboot_then_non_terminate_repair
+          is_reboot_required_for_error_code() {
+            local error_code="$1"
+            local node_name="$2"
+            local auth_token="$3"
+            
+            if [ -z "$error_code" ]; then
+              return 1
+            fi
+            
+            echo "Checking if error code $error_code should trigger reboot for node $node_name"
+            
+            # Load error resolution data
+            local error_data
+            error_data=$(load_error_resolution_data)
+            
+            if [ $? -ne 0 ]; then
+              echo "ERROR: Failed to load error resolution data" >&2
+              return 1
+            fi
+            
+            # Check if error code is in any of the reboot arrays: "reboot", "reboot_then_terminate_for_repair", or "reboot_then_non_terminate_repair"
+            local found_in_array
+            found_in_array=$(echo "$error_data" | jq -r --arg code "$error_code" '
+              (.reboot[] | select(. == $code)) // 
+              (.reboot_then_terminate_for_repair[] | select(. == $code)) // 
+              (.reboot_then_non_terminate_repair[] | select(. == $code))
+            ')
+            
+            if [ -n "$found_in_array" ]; then
+              echo "Error code $error_code requires reboot"
+              return 0
+            fi
+            
+            echo "Error code $error_code does not require reboot"
+            return 1
+          }
+          
+          # Function to get error codes from a node
+          # Only checks node conditions' Message field where status="True" (error codes are only in Conditions section)
+          # Skips standard Kubernetes conditions like "Ready" which don't contain error codes
+          get_error_codes_from_node() {
+            local node_name="$1"
+            local error_codes=""
+            
+            # Parse error codes from Conditions section Message field
+            # Format: ["HPCGPU-1021-01"]: PCIe speed check failed...
+            # Get all condition messages using jq for robust parsing
+            local node_json=$(kubectl get node "$node_name" -o json 2>/dev/null || echo "{}")
+            
+            if [ -n "$node_json" ] && [ "$node_json" != "{}" ]; then
+              # Extract only conditions where status="True" and parse error codes from their messages
+              # This filters for TRUE conditions only - FALSE conditions are ignored
+              # Also filters out the "Ready" condition which is a standard K8s condition
+              while IFS= read -r condition_info; do
+                if [ -n "$condition_info" ] && [ "$condition_info" != "null" ]; then
+                  # Parse the condition info which contains both type and message
+                  local condition_type=$(echo "$condition_info" | jq -r '.type // empty')
+                  local condition_message=$(echo "$condition_info" | jq -r '.message // empty')
+                  
+                  # Skip the Ready condition as it's a standard Kubernetes condition without error codes
+                  if [ "$condition_type" = "Ready" ]; then
+                    continue
+                  fi
+                  
+                  echo "Checking condition: $condition_type on node: $node_name" >&2
+                  
+                  if [ -n "$condition_message" ]; then
+                    # Extract error codes from patterns like ["HPCGPU-1021-01"] or ["HPCRDMA-1002-01"]
+                    # Match patterns: ["HPCGPU-####-##"] or ["HPCRDMA-####-##"] with optional suffixes
+                    # The pattern matches: [" followed by error code followed by "]
+                    if [[ "$condition_message" =~ \[\"(HPCGPU-[0-9]+-[0-9]+[^\"]*|HPCRDMA-[0-9]+-[0-9]+[^\"]*)\"\] ]]; then
+                      local extracted_code="${BASH_REMATCH[1]}"
+                      echo "Condition $condition_type is TRUE on node $node_name with error code: $extracted_code" >&2
+                      error_codes="$error_codes $extracted_code"
+                    else
+                      echo "Condition $condition_type is TRUE on node $node_name but no error code found in message" >&2
+                    fi
+                  fi
+                fi
+              done < <(echo "$node_json" | jq -c '.status.conditions[]? | select(.status == "True")' 2>/dev/null || echo "")
+            fi
+            
+            # Trim and return unique error codes
+            echo "$error_codes" | tr ' ' '\n' | grep -v '^$' | sort -u | tr '\n' ' ' | xargs
+          }
+          
+          # Function to ensure GPU node has the node-problem-detector-enabled tag
+          # This tag is required for OKE node problem detector to monitor the node
+          ensure_node_problem_detector_label() {
+            local node_name="$1"
+            
+            # Get current label value
+            local current_label=$(kubectl get node "$node_name" -o jsonpath='{.metadata.labels.oci\.oraclecloud\.com/oke-node-problem-detector-enabled}' 2>/dev/null || echo "")
+            
+            # Check if the label exists
+            if [ -z "$current_label" ]; then
+              # Label doesn't exist, set it to true
+              echo "Adding oci.oraclecloud.com/oke-node-problem-detector-enabled=true label to node $node_name"
+              kubectl label node "$node_name" oci.oraclecloud.com/oke-node-problem-detector-enabled=true
+            elif [ "$current_label" = "true" ]; then
+              # Label exists and is already true
+              echo "Node $node_name already has oci.oraclecloud.com/oke-node-problem-detector-enabled=true label"
+            else
+              # Label exists with a different value, do not override
+              echo "Node $node_name already has oci.oraclecloud.com/oke-node-problem-detector-enabled=$current_label label, not overriding"
+            fi
+          }
+          
+          # Function to ensure node has auto-repair-enabled label based on user's Lens setting
+          # The autoremediation setting is per-user and applies to all nodes
+          ensure_auto_repair_label() {
+            local node_name="$1"
+            local autoremediation_enabled="$2"  # "true" or "false"
+            
+            # Get current label value
+            local current_label=$(kubectl get node "$node_name" -o jsonpath='{.metadata.labels.oke\.oraclecloud\.com/node-autoremediation-enabled}' 2>/dev/null || echo "")
+            
+            if [ "$autoremediation_enabled" = "true" ]; then
+              # Autoremediation is enabled, ensure the label is set
+              if [ "$current_label" != "true" ]; then
+                echo "Adding oke.oraclecloud.com/node-autoremediation-enabled=true label to node $node_name"
+                kubectl label node "$node_name" oke.oraclecloud.com/node-autoremediation-enabled=true --overwrite
+              else
+                echo "Node $node_name already has oke.oraclecloud.com/node-autoremediation-enabled=true label"
+              fi
+            else
+              # Autoremediation is disabled, ensure the label is NOT set or set to false
+              if [ "$current_label" = "true" ]; then
+                echo "Setting oke.oraclecloud.com/node-autoremediation-enabled=false on node $node_name (autoremediation disabled in Lens)"
+                kubectl label node "$node_name" oke.oraclecloud.com/node-autoremediation-enabled=false --overwrite
+              else
+                echo "Node $node_name autoremediation label is already false/unset"
+              fi
+            fi
+          }
+          
+          # Function to extract instance OCID from node
+          # In OKE, the instance OCID is available in the node's provider ID
+          # Format: oci://<instance_ocid>
+          get_instance_ocid_from_node() {
+            local node_name="$1"
+            
+            echo "GET_INSTANCE_OCID: Extracting instance OCID for node $node_name" >&2
+            
+            # Get provider ID from node
+            local provider_id=$(kubectl get node "$node_name" -o jsonpath='{.spec.providerID}' 2>/dev/null || echo "")
+            local kubectl_exit_code=$?
+            
+            if [ $kubectl_exit_code -ne 0 ]; then
+              echo "GET_INSTANCE_OCID: ERROR - kubectl command failed (exit code: $kubectl_exit_code)" >&2
+              return 1
+            fi
+            
+            if [ -z "$provider_id" ]; then
+              echo "GET_INSTANCE_OCID: ERROR - Provider ID is empty for node $node_name" >&2
+              echo "GET_INSTANCE_OCID: This may indicate the node is not an OCI instance" >&2
+              return 1
+            fi
+            
+            echo "GET_INSTANCE_OCID: Provider ID retrieved: $provider_id" >&2
+            
+            # Extract OCID from provider ID (remove oci:// prefix if present)
+            local instance_ocid
+            if [[ "$provider_id" == oci://* ]]; then
+              instance_ocid="${provider_id#oci://}"
+            else
+              # Provider ID might already be the OCID directly
+              instance_ocid="$provider_id"
+            fi
+            
+            if [ -z "$instance_ocid" ]; then
+              echo "GET_INSTANCE_OCID: ERROR - Could not extract OCID from provider ID: $provider_id" >&2
+              return 1
+            fi
+            
+            echo "GET_INSTANCE_OCID: SUCCESS - Extracted instance OCID: $instance_ocid" >&2
+            
+            # Output the OCID to stdout for the caller to capture
+            echo "$instance_ocid"
+            return 0
+          }
+          
+          # Function to increment reboot count via backend API
+          increment_reboot_count() {
+            local instance_ocid="$1"
+            local auth_token="$2"
+            
+            echo "========================================="
+            echo "INCREMENT_REBOOT_COUNT: Starting increment for instance $instance_ocid"
+            echo "INCREMENT_REBOOT_COUNT: Backend service: $BACKEND_SERVICE"
+            echo "INCREMENT_REBOOT_COUNT: Instance OCID: $instance_ocid"
+            echo "INCREMENT_REBOOT_COUNT: Auth token present: $([ -n "$auth_token" ] && echo "YES" || echo "NO")"
+            echo "INCREMENT_REBOOT_COUNT: Auth token length: ${#auth_token}"
+            
+            # Build the full URL
+            local api_url="$BACKEND_SERVICE/instances/$instance_ocid/reboot-count/"
+            echo "INCREMENT_REBOOT_COUNT: Full API URL: $api_url"
+            
+            # Call POST /instances/<instance_ocid>/reboot-count/ endpoint
+            echo "INCREMENT_REBOOT_COUNT: Making POST request to increment reboot count..."
+            local response=$(curl -s -w "\n%{http_code}" -X POST \
+              "$api_url" \
+              -H "Authorization: Token $auth_token" \
+              -H "Content-Type: application/json" \
+              2>&1)
+
+            # Extract HTTP status code (last line)
+            local http_code=$(echo "$response" | tail -n1)
+            local body=$(echo "$response" | head -n-1)
+            
+            echo "INCREMENT_REBOOT_COUNT: HTTP status code: $http_code"
+            echo "INCREMENT_REBOOT_COUNT: Response body: $body"
+            
+            if [ "$http_code" -ge 200 ] && [ "$http_code" -lt 300 ]; then
+              # Try to parse the reboot_count from response for additional logging
+              local new_count=$(echo "$body" | jq -r '.reboot_count // "unknown"' 2>/dev/null || echo "unknown")
+              echo "INCREMENT_REBOOT_COUNT: SUCCESS - Reboot count incremented for instance $instance_ocid"
+              echo "INCREMENT_REBOOT_COUNT: New reboot count value: $new_count"
+              echo "INCREMENT_REBOOT_COUNT: Full response: $body"
+              echo "========================================="
+              return 0
+            else
+              echo "INCREMENT_REBOOT_COUNT: ERROR - Failed to increment reboot count for instance $instance_ocid" >&2
+              echo "INCREMENT_REBOOT_COUNT: HTTP status code: $http_code" >&2
+              echo "INCREMENT_REBOOT_COUNT: Error response body: $body" >&2
+              echo "INCREMENT_REBOOT_COUNT: This may indicate:" >&2
+              echo "  - Backend API endpoint not available" >&2
+              echo "  - Authentication token invalid or expired" >&2
+              echo "  - Instance OCID not found in backend" >&2
+              echo "  - Backend API error" >&2
+              echo "=========================================" >&2
+              return 1
+            fi
+          }
+          
+          # Function to label a node for reboot
+          label_node_for_reboot() {
+            local node_name="$1"
+            local auth_token="$2"
+            
+            echo "========================================="
+            echo "LABEL_NODE_FOR_REBOOT: Starting reboot process for node $node_name"
+            echo "LABEL_NODE_FOR_REBOOT: Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            
+            # Label the node for reboot
+            echo "LABEL_NODE_FOR_REBOOT: Applying kubectl label to node $node_name..."
+            local label_result
+            label_result=$(kubectl label node "$node_name" oke.oraclecloud.com/node_operation=okereboot --overwrite 2>&1)
+            local label_exit_code=$?
+            
+            if [ $label_exit_code -eq 0 ]; then
+              echo "LABEL_NODE_FOR_REBOOT: SUCCESS - Node $node_name labeled for reboot"
+              echo "LABEL_NODE_FOR_REBOOT: Label command output: $label_result"
+            else
+              echo "LABEL_NODE_FOR_REBOOT: WARNING - Failed to label node $node_name (exit code: $label_exit_code)" >&2
+              echo "LABEL_NODE_FOR_REBOOT: Label command output: $label_result" >&2
+            fi
+            
+            # Increment reboot count via backend API
+            echo "LABEL_NODE_FOR_REBOOT: Getting instance OCID for node $node_name..."
+            local instance_ocid
+            instance_ocid=$(get_instance_ocid_from_node "$node_name")
+            local ocid_exit_code=$?
+            
+            if [ $ocid_exit_code -eq 0 ] && [ -n "$instance_ocid" ]; then
+              echo "LABEL_NODE_FOR_REBOOT: SUCCESS - Retrieved instance OCID for node $node_name"
+              echo "LABEL_NODE_FOR_REBOOT: Instance OCID: $instance_ocid"
+              
+              # Verify auth token before making API call
+              if [ -z "$auth_token" ]; then
+                echo "LABEL_NODE_FOR_REBOOT: ERROR - Auth token is empty, cannot increment reboot count" >&2
+                return 1
+              fi
+              
+              echo "LABEL_NODE_FOR_REBOOT: Auth token verified (length: ${#auth_token})"
+              echo "LABEL_NODE_FOR_REBOOT: Calling increment_reboot_count()..."
+              
+              increment_reboot_count "$instance_ocid" "$auth_token"
+              local increment_exit_code=$?
+              
+              if [ $increment_exit_code -eq 0 ]; then
+                echo "LABEL_NODE_FOR_REBOOT: SUCCESS - Reboot count increment completed successfully"
+              else
+                echo "LABEL_NODE_FOR_REBOOT: ERROR - Reboot count increment failed (exit code: $increment_exit_code)" >&2
+                echo "LABEL_NODE_FOR_REBOOT: Node was labeled for reboot, but count increment failed" >&2
+              fi
+            else
+              echo "LABEL_NODE_FOR_REBOOT: ERROR - Could not get instance OCID for node $node_name" >&2
+              echo "LABEL_NODE_FOR_REBOOT: get_instance_ocid_from_node exit code: $ocid_exit_code" >&2
+              echo "LABEL_NODE_FOR_REBOOT: Instance OCID value: '${instance_ocid:-empty}'" >&2
+              echo "LABEL_NODE_FOR_REBOOT: Skipping reboot count increment due to missing instance OCID" >&2
+            fi
+            
+            echo "LABEL_NODE_FOR_REBOOT: Completed reboot process for node $node_name"
+            echo "========================================="
+          }
+          
+          # Function to check conditions on a specific node
+          check_node_conditions() {
+            local node_name="$1"
+            local autoremediation_enabled="$2"  # "true" or "false"
+            local auth_token="$3"
+            echo "Checking conditions on node: $node_name"
+            
+            # First, ensure the GPU node has the node-problem-detector-enabled label
+            ensure_node_problem_detector_label "$node_name"
+            
+            # Then, ensure the node has the auto-repair-enabled label based on user's Lens setting
+            ensure_auto_repair_label "$node_name" "$autoremediation_enabled"
+            
+            # If autoremediation is disabled, skip condition checking
+            if [ "$autoremediation_enabled" != "true" ]; then
+              echo "Autoremediation is disabled, skipping condition checks for node $node_name"
+              return 0
+            fi
+            
+            # Check if node is already labeled for reboot
+            local current_operation_label
+            current_operation_label=$(kubectl get node "$node_name" -o jsonpath='{.metadata.labels.oke\.oraclecloud\.com/node_operation}' 2>/dev/null || echo "")
+            
+            if [ -n "$current_operation_label" ] && echo "$current_operation_label" | grep -q "okereboot"; then
+              echo "========================================="
+              echo "CHECK_NODE_CONDITIONS: Node $node_name is already labeled for reboot"
+              echo "CHECK_NODE_CONDITIONS: Current operation label: $current_operation_label"
+              echo "CHECK_NODE_CONDITIONS: Skipping condition check and reboot count increment (node already queued for reboot)"
+              echo "========================================="
+              return 0
+            fi
+            
+            # Initialize reboot_needed flag
+            reboot_needed=false
+            
+            # Get error codes from the node
+            echo "Extracting error codes from node $node_name"
+            error_codes=$(get_error_codes_from_node "$node_name")
+            
+            if [ -z "$error_codes" ]; then
+              echo "No error codes found on node $node_name"
+            else
+              echo "Found error codes on node $node_name: $error_codes"
+              
+              # Check each error code against the error resolution JSON
+              for error_code in $error_codes; do
+                if is_reboot_required_for_error_code "$error_code" "$node_name" "$auth_token"; then
+                  echo "Node $node_name: Error code $error_code requires reboot"
+                  reboot_needed=true
+                  break  # If any error code requires reboot, reboot is needed
+                fi
+              done
+            fi
+            
+            # Label node for reboot if any error code requires it
+            if [ "$reboot_needed" = true ]; then
+              echo "========================================="
+              echo "CHECK_NODE_CONDITIONS: Reboot is needed for node $node_name"
+              echo "CHECK_NODE_CONDITIONS: Error codes that triggered reboot: $error_codes"
+              echo "CHECK_NODE_CONDITIONS: Calling label_node_for_reboot()..."
+              echo "========================================="
+              label_node_for_reboot "$node_name" "$auth_token"
+              local label_exit_code=$?
+              if [ $label_exit_code -eq 0 ]; then
+                echo "CHECK_NODE_CONDITIONS: label_node_for_reboot() completed (exit code: $label_exit_code)"
+              else
+                echo "CHECK_NODE_CONDITIONS: WARNING - label_node_for_reboot() returned non-zero exit code: $label_exit_code" >&2
+              fi
+            else
+              echo "Node $node_name: No reboot-required error codes found"
+            fi
+          }
+          
+          # Function to run the check cycle
+          run_check_cycle() {
+            echo "========================================="
+            echo "RUN_CHECK_CYCLE: Starting reboot condition checker at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "RUN_CHECK_CYCLE: Backend service: $BACKEND_SERVICE"
+            echo "RUN_CHECK_CYCLE: Backend username: $BACKEND_USERNAME"
+            
+            # Get authentication token from Lens API
+            local auth_token
+            auth_token=$(authenticate_and_validate_token "RUN_CHECK_CYCLE")
+            
+            if [ $? -ne 0 ]; then
+              echo "RUN_CHECK_CYCLE: Skipping this check cycle" >&2
+              echo "=========================================" >&2
+              return 1
+            fi
+            
+            # Query autoremediation status from Lens API
+            # This is a user-level setting that applies to all nodes
+            local autoremediation_enabled="false"
+            if get_autoremediation_status "$auth_token"; then
+              autoremediation_enabled="true"
+              echo "User has autoremediation ENABLED - will label nodes accordingly"
+            else
+              autoremediation_enabled="false"
+              echo "User has autoremediation DISABLED - nodes will not be auto-rebooted"
+            fi
+            
+            # Get all GPU nodes (with amd.com/gpu=true or nvidia.com/gpu=true labels)
+            echo "Fetching GPU nodes with amd.com/gpu=true or nvidia.com/gpu=true labels..."
+            amd_nodes=$(kubectl get nodes -l amd.com/gpu=true -o jsonpath='{.items[*].metadata.name}' 2>/dev/null || echo "")
+            nvidia_nodes=$(kubectl get nodes -l nvidia.com/gpu=true -o jsonpath='{.items[*].metadata.name}' 2>/dev/null || echo "")
+            
+            # Combine both lists and remove duplicates
+            nodes=$(echo "$amd_nodes $nvidia_nodes" | tr ' ' '\n' | sort -u | tr '\n' ' ')
+            
+            if [ -z "$nodes" ]; then
+              echo "No GPU nodes found with amd.com/gpu=true or nvidia.com/gpu=true labels"
+              return 1
+            fi
+            
+            echo "Found GPU nodes: $nodes"
+            
+            # Check each node with the user's autoremediation setting
+            echo "RUN_CHECK_CYCLE: Processing ${#nodes[@]} GPU node(s) with autoremediation=$autoremediation_enabled"
+            local node_count=0
+            for node in $nodes; do
+              node_count=$((node_count + 1))
+              echo "RUN_CHECK_CYCLE: Processing node $node_count: $node"
+              check_node_conditions "$node" "$autoremediation_enabled" "$auth_token"
+              echo "RUN_CHECK_CYCLE: Completed processing node $node"
+            done
+            
+            echo "RUN_CHECK_CYCLE: Reboot condition check completed at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "RUN_CHECK_CYCLE: Processed $node_count node(s) total"
+            echo "========================================="
+          }
+          
+          # Main loop - run continuously with 30 second delay
+          while true; do
+            # Run the check cycle and let it complete
+            run_check_cycle || echo "Check cycle encountered an error, will retry in 30 seconds"
+            
+            # Wait 30 seconds before next check
+            echo "Waiting 30 seconds before next check..."
+            sleep 30
+          done
+        env:
+        - name: BACKEND_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.backend.backendSecret }}
+              key: {{ .Values.backend.superuserUsernameKey }}
+        - name: BACKEND_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.backend.backendSecret }}
+              key: {{ .Values.backend.superuserPasswordKey }}
+        - name: KUBERNETES_SERVICE_HOST
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: KUBERNETES_SERVICE_PORT
+          value: "443"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+      volumes:
+      - name: error-resolution-config
+        configMap:
+          name: {{ include "corrino-lens.fullname" . }}-error-resolution-configmap
+      restartPolicy: Always
+{{- end }}

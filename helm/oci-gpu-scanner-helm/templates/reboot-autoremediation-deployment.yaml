@@ -1,0 +1,17 @@
+apiVersion: oci.oraclecloud.com/v1beta1
+kind: NodeOperationRule
+metadata:
+  name: "gpu-reboot-autoremediation"
+  namespace: lens
+spec:
+  actions:
+    - "reboot"
+  nodeSelector:
+    matchTriggerLabel:
+      oke.oraclecloud.com/node_operation: "okereboot"
+    matchCustomLabels:
+      oke.oraclecloud.com/node-autoremediation-enabled: "true"
+  maxParallelism: 2
+  nodeEvictionSettings:
+    evictionGracePeriod: 10
+    isForceActionAfterGraceDuration: true

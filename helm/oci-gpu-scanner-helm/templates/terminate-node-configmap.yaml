@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: terminate-node-failure-counter
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "corrino-lens.labels" . | nindent 4 }}
+data:
+  failure_count: "0"
+  last_failure_time: ""
+  last_node_failed: ""
+

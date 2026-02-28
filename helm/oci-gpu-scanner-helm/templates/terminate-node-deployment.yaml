@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: terminate-node-deployment
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "corrino-lens.labels" . | nindent 4 }}
+  annotations:
+    description: "Persistent deployment for node termination monitoring"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "corrino-lens.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: kubectl-terminate-nodes-deployment
+  template:
+    metadata:
+      labels:
+        {{- include "corrino-lens.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: kubectl-terminate-nodes-deployment
+    spec:
+      restartPolicy: Always
+      serviceAccountName: {{ .Values.terminateNode.serviceAccount.name }}
+      automountServiceAccountToken: {{ .Values.terminateNode.serviceAccount.automountToken }}
+      containers:
+      - name: kubectl-terminate-nodes-cronjob
+        image: {{ .Values.terminateNode.image.repository }}:{{ .Values.terminateNode.image.tag }}
+        imagePullPolicy: {{ .Values.terminateNode.image.pullPolicy }}
+        env:
+        - name: FREQUENCY_IN_SEC
+          value: "30"
+        - name: OCI_CLI_AUTH
+          value: "oke_workload_identity"
+        - name: OCI_REGION
+          value: {{ .Values.global.regionName | quote }}
+        - name: OCI_TENANCY_ID
+          value: {{ .Values.global.tenancyId | quote }}
+        - name: TERMINATION_DELAY
+          value: "30"
+        - name: DRAIN_TIMEOUT
+          value: "300"
+        - name: CONFIGMAP_NAME
+          value: "terminate-node-failure-counter"
+        - name: CONFIGMAP_NAMESPACE
+          value: {{ .Release.Namespace | quote }}
+        resources:
+          requests:
+            memory: {{ .Values.terminateNode.resources.requests.memory | quote }}
+            cpu: {{ .Values.terminateNode.resources.requests.cpu | quote }}
+          limits:
+            memory: {{ .Values.terminateNode.resources.limits.memory | quote }}
+            cpu: {{ .Values.terminateNode.resources.limits.cpu | quote }}
+      nodeSelector:
+        kubernetes.io/arch: amd64

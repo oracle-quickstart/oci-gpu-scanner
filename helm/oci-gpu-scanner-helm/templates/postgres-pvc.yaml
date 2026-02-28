@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "corrino-lens.fullname" . }}-postgresql-pv-claim
+  labels:
+    {{- include "corrino-lens.labels" . | nindent 4 }}
+spec:
+  storageClassName: {{ .Values.database.storageClassName | quote }}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.database.storageSize | quote }}
