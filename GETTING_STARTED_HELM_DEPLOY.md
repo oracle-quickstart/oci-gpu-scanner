@@ -4,7 +4,7 @@
 
 **This guide covers Control Plane deployment only.**
 
-For Data Plane plugin installation on GPU nodes, see [oci-scanner-plugin-helm](./oci-scanner-plugin-helm/README.md).
+For Data Plane plugin installation on GPU nodes, see [oci-gpu-scanner-plugin-helm](./helm/oci-gpu-scanner-plugin-helm/README.md).
 
 ### What This Deploys
 
@@ -75,7 +75,7 @@ The backend deployment uses a Kubernetes service account with workload identity 
 
    **Option A: Tenancy-Level Access (Recommended)**
    ```sql
-   Allow any-user to read cluster-family in tenancy where all {
+   Allow any-user to read instance-family in tenancy where all {
      request.principal.type = 'workload',
      request.principal.namespace = 'lens',
      request.principal.service_account = 'corrino-lens-backend-sa',
@@ -92,7 +92,7 @@ The backend deployment uses a Kubernetes service account with workload identity 
 
    **Option B: Compartment-Level Access (Restricted)**
    ```sql
-   Allow any-user to read cluster-family in compartment id 'YOUR_COMPARTMENT_OCID' where all {
+   Allow any-user to read instance-family in compartment id 'YOUR_COMPARTMENT_OCID' where all {
      request.principal.type = 'workload',
      request.principal.namespace = 'lens',
      request.principal.service_account = 'corrino-lens-backend-sa',
@@ -113,22 +113,16 @@ The backend deployment uses a Kubernetes service account with workload identity 
 
 ---
 
-### 2. Helm Repository Setup
+### 2. Clone the Repository
 
-Add the OCI GPU Scanner Helm repository:
-
-```bash
-helm repo add lens https://oci-ai-incubations.github.io/corrino-lens-devops/
-helm repo add oci-ai-incubations https://oci-ai-incubations.github.io/corrino-lens-devops/
-helm repo update
-```
-
-Verify the repository:
+Clone the OCI GPU Scanner repository and navigate to the root:
 
 ```bash
-helm search repo lens
-helm search repo oci-ai-incubations
+git clone https://github.com/oracle-quickstart/oci-gpu-scanner.git
+cd oci-gpu-scanner/helm/oci-gpu-scanner-helm
 ```
+
+The Helm chart is located at `./helm/oci-gpu-scanner-helm` relative to the repository root. All `helm` commands in this guide should be run from the repository root.
 
 ---
 
@@ -196,7 +190,7 @@ kubectl -n lens create secret generic lens-grafana-secret \
 **Installation Command:**
 
 ```bash
-helm install lens oci-ai-incubations/lens -n lens --create-namespace \
+helm install lens . -n lens --create-namespace \
   --set backend.tenancyId="YOUR_OCI_TENANCY_OCID" \
   --set backend.regionName="YOUR_OKE_REGION"
 ```
@@ -215,7 +209,7 @@ helm install lens oci-ai-incubations/lens -n lens --create-namespace \
 **Example with Optional Flags:**
 
 ```bash
-helm install lens oci-ai-incubations/lens -n lens --create-namespace \
+helm install lens . -n lens --create-namespace \
   --set backend.tenancyId="ocid1.tenancy.oc1..aaaaaaaa..." \
   --set backend.regionName="us-ashburn-1" \
   --set backend.authorizedCompartments="ocid1.compartment.oc1..aaaaaaaa..." \
@@ -240,7 +234,7 @@ helm install lens oci-ai-incubations/lens -n lens --create-namespace \
 **Installation Command:**
 
 ```bash
-helm install lens oci-ai-incubations/lens -n lens --create-namespace \
+helm install lens . -n lens --create-namespace \
   --set backend.prometheusPushgatewayUrl="http://YOUR_PUSHGATEWAY_IP:9091" \
   --set backend.prometheusUrl="http://YOUR_PROMETHEUS_IP:9090" \
   --set backend.grafanaUrl="http://YOUR_GRAFANA_IP:80" \
@@ -267,7 +261,7 @@ helm install lens oci-ai-incubations/lens -n lens --create-namespace \
 **Example with Optional Flags:**
 
 ```bash
-helm install lens oci-ai-incubations/lens -n lens --create-namespace \
+helm install lens . -n lens --create-namespace \
   --set backend.prometheusPushgatewayUrl="http://10.0.1.50:9091" \
   --set backend.prometheusUrl="http://10.0.1.51:9090" \
   --set backend.grafanaUrl="http://10.0.1.52:80" \
@@ -292,16 +286,16 @@ kubectl get pods -n lens
 ```
 
 **Expected pods (Option 1 - Full Installation):**
-- `lens-corrino-lens-backend-*`
-- `lens-corrino-lens-frontend-*`
+- `lens-backend-*`
+- `lens-frontend-*`
 - `lens-postgres-*`
-- `prometheus-server-*`
-- `prometheus-prometheus-pushgateway-*`
+- `lens-prometheus-server-*`
+- `lens-prometheus-pushgateway-*`
 - `lens-grafana-*`
 
 **Expected pods (Option 2 - BYO Monitoring):**
-- `lens-corrino-lens-backend-*`
-- `lens-corrino-lens-frontend-*`
+- `lens-backend-*`
+- `lens-frontend-*`
 - `lens-postgres-*`
 
 All pods should show `Running` status. If not, check [Troubleshooting](#troubleshooting).
@@ -344,7 +338,7 @@ kubectl get ingress -n lens
 
 **Deploy Data Plane Plugin on GPU Nodes:**
 
-To start monitoring GPU nodes, install the Data Plane plugin. See [oci-scanner-plugin-helm](./oci-scanner-plugin-helm/README.md) for installation instructions.
+To start monitoring GPU nodes, install the Data Plane plugin. See [oci-gpu-scanner-plugin-helm](./helm/oci-gpu-scanner-plugin-helm/README.md) for installation instructions.
 
 The plugin can be installed on:
 - Individual GPU instances
@@ -404,12 +398,12 @@ All configuration is managed via Helm values. Override any value using `--set` f
 
 ```bash
 # Using --set flags
-helm install lens oci-ai-incubations/lens -n lens \
+helm install lens . -n lens \
   --set frontend.replicaCount=3 \
   --set backend.image.tag=stable
 
 # Using custom values file
-helm install lens oci-ai-incubations/lens -n lens -f custom-values.yaml
+helm install lens . -n lens -f custom-values.yaml
 ```
 
 ### Key Configuration Sections
@@ -458,13 +452,13 @@ For production deployments with custom domains and TLS certificates, see:
 
 ```bash
 # Check current service type
-kubectl get svc prometheus-prometheus-pushgateway -n lens
+kubectl get svc lens-prometheus-pushgateway -n lens
 
 # Patch to LoadBalancer
-kubectl patch svc prometheus-prometheus-pushgateway -n lens -p '{"spec":{"type":"LoadBalancer"}}'
+kubectl patch svc lens-prometheus-pushgateway -n lens -p '{"spec":{"type":"LoadBalancer"}}'
 
 # Wait for external IP
-kubectl get svc prometheus-prometheus-pushgateway -n lens -w
+kubectl get svc lens-prometheus-pushgateway -n lens -w
 ```
 
 **Note:** Future Helm chart updates may automate this fix.
@@ -481,14 +475,14 @@ kubectl get svc prometheus-prometheus-pushgateway -n lens -w
 
 ```bash
 # Test connectivity from backend pod
-kubectl exec -it deployment/lens-corrino-lens-backend -n lens -- \
+kubectl exec -it deployment/lens-backend -n lens -- \
   curl -I http://YOUR_PUSHGATEWAY_IP:9091/-/healthy
 
-kubectl exec -it deployment/lens-corrino-lens-backend -n lens -- \
+kubectl exec -it deployment/lens-backend -n lens -- \
   curl -I http://YOUR_GRAFANA_IP:80/api/health
 
 # Check backend environment variables
-kubectl exec -it deployment/lens-corrino-lens-backend -n lens -- \
+kubectl exec -it deployment/lens-backend -n lens -- \
   env | grep -E "(PUSHGATEWAY|GRAFANA|PROMETHEUS)"
 ```
 
@@ -538,9 +532,9 @@ kubectl get ingress -n lens
 kubectl get pvc -n lens
 
 # Pod logs
-kubectl logs -l app=lens-corrino-lens-frontend -n lens
-kubectl logs -l app=lens-corrino-lens-backend -n lens
-kubectl logs -l app=postgres -n lens
+kubectl logs -l app=lens-frontend -n lens
+kubectl logs -l app=lens-backend -n lens
+kubectl logs -l app=lens-postgres -n lens
 
 # Events timeline
 kubectl get events -n lens --sort-by='.lastTimestamp'
@@ -574,13 +568,13 @@ kubectl delete namespace lens
 
 ### Uninstall Data Plane Plugin
 
-For Data Plane plugin cleanup on GPU nodes, see [oci-scanner-plugin-helm](./oci-scanner-plugin-helm/README.md).
+For Data Plane plugin cleanup on GPU nodes, see [oci-gpu-scanner-plugin-helm](./helm/oci-gpu-scanner-plugin-helm/README.md).
 
 ---
 
 ## Additional Resources
 
-- [Data Plane Plugin Installation](./oci-scanner-plugin-helm/README.md)
+- [Data Plane Plugin Installation](./helm/oci-gpu-scanner-plugin-helm/README.md)
 - [Custom Domain & TLS Setup](INGRESS_AND_TLS_SETUP.md)
 - [OCI Workload Identity Documentation](https://docs.oracle.com/en-us/iaas/Content/ContEng/Tasks/contenggrantingworkloadaccesstoresources.htm)
 - [Grafana Service Accounts](https://grafana.com/docs/grafana/latest/administration/service-accounts/)
