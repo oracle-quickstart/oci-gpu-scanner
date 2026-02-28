@@ -15,7 +15,7 @@ February 27, 2026
 ----
 ## Changelog
 ### Breaking Changes
-1. **App helm that originally leaves in `corrino-lens-devops` repo has been migrated to this repo in `helm/oci-gpu-scanner`, and original `oci-scanner-plugin-helm` has been migrated to `helm/oci-gpu-scanner-plugin-helm`. For future installations and upgrades, no more `.tgz` or `.zip` files of helm will be created.**
+1. **App helm that originally lives in `corrino-lens-devops` repo has been migrated to this repo in `helm/oci-gpu-scanner`, and original `oci-scanner-plugin-helm` has been migrated to `helm/oci-gpu-scanner-plugin-helm`. For future installations and upgrades, no more `.tgz` or `.zip` files of helm will be created.**
 - Added app helm to repo and improved documentation #88 ([oci-gpu-scanner #88](https://github.com/oracle-quickstart/oci-gpu-scanner/pull/88), [@gablyu-oci](https://github.com/gablyu-oci))
 
 2. **Auto-remediation, termination and reboot features from frontend have been temporarily removed for security purpose.**  
