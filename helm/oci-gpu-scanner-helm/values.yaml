@@ -1,7 +1,10 @@
 # Global configuration
 global:
+  # Region name
   regionName: "us-ashburn-1"
-  tenancyId: "ocid1.tenancy.oc1..aaaaaaaa2mvjha24vj6evyafdqtis6nzqibhrnxxhzt65zkc3upy4xlrz5za"
+  # Tenancy ID
+  #tenancyId: "ocid1.tenancy.oc1..<tenancy-id>"
+  tenancyId: ""
   postgresSecret: lens-postgres-secret
   postgresUsernameKey: postgres-user
   postgresPasswordKey: postgres-password
@@ -31,7 +34,7 @@ backend:
     automountToken: true
   image:
     repository: iad.ocir.io/iduyx1qnmway/corrino-lens-backend
-    tag: v0.0.7
+    tag: v0.0.8
     pullPolicy: Always
   servicePort: 80
   containerPort: 5000
@@ -46,10 +49,20 @@ backend:
   djangoSecret: lens-django-secret
   djangoSecretKey: django-secret 
   djangoAllowedHosts: "127.0.0.1,localhost,lens-backend.lens.svc.cluster.local"
-  djangoCsrfTrustedOrigins: "http://127.0.0.1,http://localhost,http://lens-backend.lens.svc.cluster.local"
+  djangoCsrfTrustedOrigins: "http://localhost,http://localhost:8000,http://127.0.0.1,http://127.0.0.1:8000,http://lens-backend.lens.svc.cluster.local"
+  # OAuth 2.0 / OCI IAM configuration
+  #ociIamIssuer: "https://idcs-<idcs-tenant-id>.identity.oraclecloud.com:443"
+  #ociIamClientId: "<oci-iam-client-id>"
+  #ociIamClientSecret: "<oci-iam-client-secret>"
+  ociIamIssuer: ""
+  ociIamClientId: ""
+  ociIamClientSecret: ""
+  ociIamScope: "openid profile email"
+  #ociIamRedirectUri: "https://<backend-ingress-host>/oauth/callback"
+  ociIamRedirectUri: ""
   postgresPort: "5432"
   loggingLevel: "DEBUG"
-  authorizedCompartments: "ocid1.compartment.oc1..aaaaaaaa5rwhi5wj3grdiqzvz244gwzycpfl2ctlb4nvl7vi7wu55tqi375a"
+  authorizedCompartments: ""
   gpuUtilizationMonitoringEnabled: "True"
   gpuUtilizationCheckInterval: "15"
   gpuUtilizationThreshold: "5.0"

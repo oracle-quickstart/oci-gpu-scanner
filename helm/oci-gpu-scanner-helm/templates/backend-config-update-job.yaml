@@ -113,6 +113,14 @@ spec:
             echo "Backend ingress hostname: $BACKEND_INGRESS_HOST"
           fi
 
+          # Build OCI IAM redirect URI from ingress URL
+          if [ -n "{{ .Values.backend.ociIamRedirectUri }}" ]; then
+            OCI_IAM_REDIRECT_URI="{{ .Values.backend.ociIamRedirectUri }}"
+          else
+            OCI_IAM_REDIRECT_URI="https://$BACKEND_INGRESS_HOST/oauth/callback"
+          fi
+          echo "OCI IAM redirect URI: $OCI_IAM_REDIRECT_URI"
+
           echo "Updating ConfigMap with backend DNS and monitoring URLs..."
 
           # Build ALLOWED_HOSTS with both internal and external hostnames
@@ -165,6 +173,9 @@ spec:
           kubectl patch configmap $CONFIGMAP_NAME -n $NAMESPACE --type='merge' \
             -p="{\"data\":{\"GRAFANA_URL\":\"$GRAFANA_URL\"}}"
 
+          kubectl patch configmap $CONFIGMAP_NAME -n $NAMESPACE --type='merge' \
+            -p="{\"data\":{\"OCI_IAM_REDIRECT_URI\":\"$OCI_IAM_REDIRECT_URI\"}}"
+
           echo "ConfigMap updated successfully"
 
           echo "Restarting backend deployment..."
@@ -180,3 +191,4 @@ spec:
           echo "  Prometheus URL: $PROMETHEUS_URL"
           echo "  Pushgateway URL: $PUSHGATEWAY_URL"
           echo "  Grafana URL: $GRAFANA_URL"
+          echo "  OCI IAM Redirect URI: $OCI_IAM_REDIRECT_URI"
