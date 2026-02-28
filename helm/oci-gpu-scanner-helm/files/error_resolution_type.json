@@ -1,0 +1,55 @@
+{
+  "software_fix_or_config_change": [
+      "HPCGPU-1001-02",
+      "HPCGPU-1043-01",
+      "HPCGPU-1013-01",
+      "HPCGPU-1016-01",
+      "HPCGPU-1017-01",
+      "HPCGPU-1018-01",
+      "HPCGPU-1019-01",
+      "HPCGPU-1044-01"
+  ],
+  "reboot": [
+      "HPCGPU-1008-01",
+      "HPCGPU-1023-01",
+      "HPCGPU-1012-01",
+      "HPCGPU-1046-01",
+      "HPCGPU-1045-01",
+      "HPCRDMA-1008-01"
+  ],
+  "reboot_then_terminate_for_repair": [
+    "HPCGPU-1001-01",
+    "HPCGPU-1002-02",
+    "HPCGPU-1002-03",
+    "HPCGPU-1003-01",
+    "HPCGPU-1004-01",
+    "HPCGPU-1004-03",
+    "HPCGPU-1005-01",
+    "HPCGPU-1006-01",
+    "HPCGPU-1007-01",
+    "HPCGPU-1008-02",
+    "HPCGPU-1010-01",
+    "HPCGPU-1011-01",
+    "HPCGPU-1014-01",
+    "HPCGPU-1015-01",
+    "HPCGPU-1020-01",
+    "HPCGPU-1021-01",
+    "HPCGPU-1022-01",
+    "HPCGPU-1040-01",
+    "HPCGPU-1041-01",
+    "HPCGPU-1042-01",
+    "HPCGPU-1002-04",
+    "HPCGPU-1016-02",
+    "HPCGPU-1024-01",
+    "HPCRDMA-1001-01"
+  ],
+  "reboot_then_non_terminate_repair": [
+    "HPCGPU-1009-01",
+    "HPCRDMA-1002-01",
+    "HPCRDMA-1002-04",
+    "HPCRDMA-1002-02",
+    "HPCRDMA-1003-02",
+    "HPCRDMA-1007-01",
+    "HPCRDMA-1008-02"
+  ]
+}

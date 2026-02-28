@@ -1,0 +1,112 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-ingress-update
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "corrino-lens.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-weight: "2"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "corrino-lens.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: ingress-update
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ include "corrino-lens.serviceAccountName" . }}
+      containers:
+      - name: ingress-update
+        image: docker.io/alpine/k8s:1.31.10
+        command:
+        - /bin/bash
+        - -c
+        - |
+          echo "Updating ingress resources with external IP..."
+
+          {{- if index .Values "ingress-nginx" "enabled" }}
+          # Using bundled ingress-nginx controller
+          INGRESS_SVC_NAMESPACE="{{ .Release.Namespace }}"
+          INGRESS_SVC_NAME="{{ .Release.Name }}-ingress-nginx-controller"
+          {{- else }}
+          # Using external ingress controller
+          INGRESS_SVC_NAMESPACE="{{ .Values.ingress.external.namespace }}"
+          INGRESS_SVC_NAME="{{ .Values.ingress.external.serviceName }}"
+          {{- end }}
+          
+          echo "Looking for ingress controller service: $INGRESS_SVC_NAME in namespace: $INGRESS_SVC_NAMESPACE"
+          
+          EXTERNAL_IP=""
+          for i in {1..60}; do
+            EXTERNAL_IP=$(kubectl get svc -n $INGRESS_SVC_NAMESPACE $INGRESS_SVC_NAME \
+              -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+            if [ -z "$EXTERNAL_IP" ] || [ "$EXTERNAL_IP" = "null" ]; then
+              EXTERNAL_IP=$(kubectl get svc -n $INGRESS_SVC_NAMESPACE $INGRESS_SVC_NAME \
+                -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+            fi
+            if [ -n "$EXTERNAL_IP" ] && [ "$EXTERNAL_IP" != "null" ]; then
+              echo "External address: $EXTERNAL_IP"
+              break
+            fi
+            echo "Waiting for external address… (attempt $i/60)"
+            sleep 10
+          done
+
+          [ -z "$EXTERNAL_IP" ] && echo "Failed to get external address" && exit 1
+
+          echo "Patching ingress resources with external IP: $EXTERNAL_IP"
+
+          # Update backend ingress
+          kubectl patch ingress {{ .Release.Name }}-backend-ingress -n {{ .Release.Namespace }} --type='merge' \
+            -p='{"spec":{"rules":[{"host":"api.'$EXTERNAL_IP'.{{ .Values.ingress.domain }}","http":{"paths":[{"path":"/","pathType":"Prefix","backend":{"service":{"name":"{{ include "corrino-lens.fullname" . }}-backend","port":{"number":{{ .Values.backend.servicePort }}}}}}]}}],"tls":[{"hosts":["api.'$EXTERNAL_IP'.{{ .Values.ingress.domain }}"],"secretName":"{{ .Release.Name }}-backend-tls"}]}}'
+
+          # Update frontend ingress
+          kubectl patch ingress {{ .Release.Name }}-frontend-ingress -n {{ .Release.Namespace }} --type='merge' \
+            -p='{"spec":{"rules":[{"host":"lens.'$EXTERNAL_IP'.{{ .Values.ingress.domain }}","http":{"paths":[{"path":"/","pathType":"Prefix","backend":{"service":{"name":"{{ include "corrino-lens.fullname" . }}-frontend","port":{"number":{{ .Values.frontend.servicePort }}}}}}]}}],"tls":[{"hosts":["lens.'$EXTERNAL_IP'.{{ .Values.ingress.domain }}"],"secretName":"{{ .Release.Name }}-frontend-tls"}]}}'
+
+          {{- if .Values.grafana.enabled }}
+          # Update grafana ingress (only when bundled Grafana is enabled)
+          kubectl patch ingress {{ .Release.Name }}-grafana-ingress -n {{ .Release.Namespace }} --type='merge' \
+            -p='{"spec":{"rules":[{"host":"grafana.'$EXTERNAL_IP'.{{ .Values.ingress.domain }}","http":{"paths":[{"path":"/","pathType":"Prefix","backend":{"service":{"name":"{{ .Values.monitoring.grafanaService }}","port":{"number":{{ .Values.monitoring.grafanaPort }}}}}}]}}],"tls":[{"hosts":["grafana.'$EXTERNAL_IP'.{{ .Values.ingress.domain }}"],"secretName":"{{ .Release.Name }}-grafana-tls"}]}}'
+          {{- else }}
+          echo "Skipping Grafana ingress update (using external Grafana)"
+          {{- end }}
+
+          {{- if not .Values.backend.prometheusUrl }}
+          # Update prometheus ingress (only when using chart's Prometheus)
+          kubectl patch ingress {{ .Release.Name }}-prometheus-ingress -n {{ .Release.Namespace }} --type='merge' \
+            -p='{"spec":{"rules":[{"host":"prometheus.'$EXTERNAL_IP'.{{ .Values.ingress.domain }}","http":{"paths":[{"path":"/","pathType":"Prefix","backend":{"service":{"name":"{{ .Values.monitoring.prometheusService }}","port":{"number":{{ .Values.monitoring.prometheusPort }}}}}}]}}],"tls":[{"hosts":["prometheus.'$EXTERNAL_IP'.{{ .Values.ingress.domain }}"],"secretName":"{{ .Release.Name }}-prometheus-tls"}]}}'
+          {{- else }}
+          echo "Skipping Prometheus ingress update (using custom Prometheus URL)"
+          {{- end }}
+
+          {{- if not .Values.backend.prometheusPushgatewayUrl }}
+          # Update pushgateway ingress (only when using chart's Pushgateway)
+          kubectl patch ingress {{ .Release.Name }}-pushgateway-ingress -n {{ .Release.Namespace }} --type='merge' \
+            -p='{"spec":{"rules":[{"host":"pushgateway.'$EXTERNAL_IP'.{{ .Values.ingress.domain }}","http":{"paths":[{"path":"/","pathType":"Prefix","backend":{"service":{"name":"{{ .Values.monitoring.pushgatewayService }}","port":{"number":{{ .Values.monitoring.pushgatewayPort }}}}}}]}}],"tls":[{"hosts":["pushgateway.'$EXTERNAL_IP'.{{ .Values.ingress.domain }}"],"secretName":"{{ .Release.Name }}-pushgateway-tls"}]}}'
+          {{- else }}
+          echo "Skipping Pushgateway ingress update (using custom Pushgateway URL)"
+          {{- end }}
+
+          echo "All ingress resources updated successfully!"
+          echo "Services will be available at:"
+          echo "- Frontend: https://lens.$EXTERNAL_IP.{{ .Values.ingress.domain }}"
+          echo "- Backend API: https://api.$EXTERNAL_IP.{{ .Values.ingress.domain }}"
+          {{- if .Values.grafana.enabled }}
+          echo "- Grafana: https://grafana.$EXTERNAL_IP.{{ .Values.ingress.domain }}"
+          {{- else }}
+          echo "- Grafana: (custom URL from backend.grafanaUrl)"
+          {{- end }}
+          {{- if not .Values.backend.prometheusUrl }}
+          echo "- Prometheus: https://prometheus.$EXTERNAL_IP.{{ .Values.ingress.domain }}"
+          {{- else }}
+          echo "- Prometheus: (custom URL from backend.prometheusUrl)"
+          {{- end }}
+          {{- if not .Values.backend.prometheusPushgatewayUrl }}
+          echo "- Pushgateway: https://pushgateway.$EXTERNAL_IP.{{ .Values.ingress.domain }}"
+          {{- else }}
+          echo "- Pushgateway: (custom URL from backend.prometheusPushgatewayUrl)"
+          {{- end }}

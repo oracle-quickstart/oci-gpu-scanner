@@ -1,0 +1,175 @@
+# helm/templates/grafana-token-job.yaml (corrected for service accounts)
+# Only create this job when using bundled Grafana
+{{- if .Values.grafana.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "corrino-lens.fullname" . }}-grafana-token-setup
+  labels:
+    {{- include "corrino-lens.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      serviceAccountName: {{ .Values.backend.serviceAccount.name }}
+      containers:
+      - name: grafana-token-setup
+        image: docker.io/alpine/k8s:1.31.10
+        env:
+        - name: GRAFANA_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: lens-grafana-secret
+              key: admin-password
+        command:
+        - /bin/sh
+        - -c
+        - |
+          set -e
+          
+          # Install required tools
+          apk add --no-cache curl wget
+          
+          # Install kubectl
+          wget -O /usr/local/bin/kubectl https://dl.k8s.io/release/v1.28.0/bin/linux/amd64/kubectl
+          chmod +x /usr/local/bin/kubectl
+          
+          # Setup kubeconfig for cluster access
+          mkdir -p ~/.kube
+          cat > ~/.kube/config << EOF
+          apiVersion: v1
+          kind: Config
+          clusters:
+          - cluster:
+              certificate-authority-data: $(cat /var/run/secrets/kubernetes.io/serviceaccount/ca.crt | base64 -w 0)
+              server: https://kubernetes.default.svc
+            name: default-cluster
+          contexts:
+          - context:
+              cluster: default-cluster
+              namespace: {{ .Release.Namespace }}
+              user: default-user
+            name: default-context
+          current-context: default-context
+          users:
+          - name: default-user
+            user:
+              token: $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+          EOF
+          
+          # Wait for Grafana to be ready
+          echo "Waiting for Grafana to be ready..."
+          until curl -s -f "http://{{ .Values.monitoring.grafanaService }}:{{ .Values.monitoring.grafanaPort }}/api/health" > /dev/null; do
+            echo "Grafana not ready yet, waiting..."
+            sleep 10
+          done
+          echo "Grafana is ready!"
+          
+          # Check for existing service accounts first
+          echo "Checking for existing Grafana service accounts..."
+          SA_LIST_RESPONSE=$(curl -s -w "%{http_code}" \
+            "http://admin:$GRAFANA_ADMIN_PASSWORD@{{ .Values.monitoring.grafanaService }}:{{ .Values.monitoring.grafanaPort }}/api/serviceaccounts")
+          
+          SA_LIST_HTTP_CODE="${SA_LIST_RESPONSE: -3}"
+          SA_LIST_BODY="${SA_LIST_RESPONSE%???}"
+          
+          echo "SA_LIST_HTTP_CODE: $SA_LIST_HTTP_CODE"
+          echo "SA_LIST_BODY: $SA_LIST_BODY"
+          
+          # Look for existing corrino-lens-sa
+          EXISTING_SA_ID=$(echo "$SA_LIST_BODY" | grep -o '"id":[0-9]*' | head -1 | cut -d':' -f2)
+          
+          if [ -n "$EXISTING_SA_ID" ]; then
+            echo "Found existing service account with ID: $EXISTING_SA_ID"
+            SA_ID="$EXISTING_SA_ID"
+          else
+            echo "No existing service account found, creating new one..."
+            # Create service account
+            SA_RESPONSE=$(curl -s -w "%{http_code}" -X POST \
+              "http://admin:$GRAFANA_ADMIN_PASSWORD@{{ .Values.monitoring.grafanaService }}:{{ .Values.monitoring.grafanaPort }}/api/serviceaccounts" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "name": "corrino-lens-sa",
+                "role": "Admin",
+                "isDisabled": false
+              }')
+            
+            SA_HTTP_CODE="${SA_RESPONSE: -3}"
+            SA_BODY="${SA_RESPONSE%???}"
+            
+            echo "SA_HTTP_CODE: $SA_HTTP_CODE"
+            echo "SA_BODY: $SA_BODY"
+            
+            # Parse service account ID from response
+            if [ "$SA_HTTP_CODE" = "200" ]; then
+              # Extract SA ID from successful creation response
+              SA_ID=$(echo "$SA_BODY" | grep -o '"id":[0-9]*' | cut -d':' -f2)
+              echo "Created new service account with ID: $SA_ID"
+            elif [ "$SA_HTTP_CODE" = "400" ] || [ "$SA_HTTP_CODE" = "409" ]; then
+              # Service account already exists, use hardcoded ID for now
+              # In a real scenario, we'd need to list and find the existing SA
+              SA_ID="2"
+              echo "Service account already exists, using ID: $SA_ID"
+            else
+              echo "Failed to create service account. HTTP code: $SA_HTTP_CODE"
+              echo "Response: $SA_BODY"
+              exit 1
+            fi
+          fi
+          
+          echo "Using service account ID: $SA_ID"
+          
+
+          
+          # Generate unique token name with timestamp
+          TOKEN_NAME="corrino-lens-token-$(date +%s)"
+          echo "Using unique token name: $TOKEN_NAME"
+          
+          # Create token for the service account with unique name
+          TOKEN_RESPONSE=$(curl -s -w "%{http_code}" -X POST \
+            "http://admin:$GRAFANA_ADMIN_PASSWORD@{{ .Values.monitoring.grafanaService }}:{{ .Values.monitoring.grafanaPort }}/api/serviceaccounts/$SA_ID/tokens" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"name\": \"$TOKEN_NAME\"
+            }")
+            
+            TOKEN_HTTP_CODE="${TOKEN_RESPONSE: -3}"
+            TOKEN_BODY="${TOKEN_RESPONSE%???}"
+            echo "TOKEN_HTTP_CODE: $TOKEN_HTTP_CODE"
+            echo "TOKEN_BODY: $TOKEN_BODY"
+            
+            if [ "$TOKEN_HTTP_CODE" = "200" ]; then
+              # Extract token
+              TOKEN=$(echo "$TOKEN_BODY" | grep -o '"key":"[^"]*"' | cut -d'"' -f4)
+              echo "Token created successfully: $TOKEN"
+            else
+              echo "Failed to create token. HTTP code: $TOKEN_HTTP_CODE"
+              echo "Response: $TOKEN_BODY"
+              exit 1
+            fi
+          
+          if [ -n "$TOKEN" ]; then
+            # Update configmap
+            echo "Updating backend configmap with token..."
+            kubectl patch configmap {{ include "corrino-lens.fullname" . }}-backend-configmap \
+              -n {{ .Release.Namespace }} \
+              --type='merge' \
+              -p="{\"data\":{\"GRAFANA_API_TOKEN\":\"$TOKEN\"}}"
+            
+            echo "Configmap updated successfully"
+            
+            # Restart backend deployment to pick up new token
+            echo "Restarting backend deployment..."
+            kubectl rollout restart deployment/{{ include "corrino-lens.fullname" . }}-backend \
+              -n {{ .Release.Namespace }}
+            
+            echo "Grafana token setup completed successfully!"
+          else
+            echo "No token available"
+            exit 1
+          fi
+{{- end }}

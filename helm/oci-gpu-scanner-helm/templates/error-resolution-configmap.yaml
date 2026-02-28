@@ -1,0 +1,23 @@
+{{- if .Values.rebootGPUErrorTag.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "corrino-lens.fullname" . }}-error-resolution-configmap
+  namespace: lens
+  labels:
+    {{- include "corrino-lens.labels" . | nindent 4 }}
+data:
+  error_resolution_type.json: |-
+{{ .Files.Get "files/error_resolution_type.json" | indent 4 }}
+{{- end }}
+
+
+
+
+
+
+
+
+
+
+

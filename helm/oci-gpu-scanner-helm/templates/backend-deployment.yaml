@@ -1,0 +1,180 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "corrino-lens.fullname" . }}-backend
+  labels:
+    {{- include "corrino-lens.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ include "corrino-lens.fullname" . }}-backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ include "corrino-lens.fullname" . }}-backend
+    spec:
+      {{- if .Values.backend.serviceAccount.create }}
+      serviceAccountName: {{ .Values.backend.serviceAccount.name }}
+      {{- end }}
+      automountServiceAccountToken: {{ .Values.backend.serviceAccount.automountToken }}
+      containers:
+        - name: lens
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.backend.containerPort }}
+          env:
+            - name: DEVELOPER_MODE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: DEVELOPER_MODE
+            - name: SERVICE_PREFIX
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: SERVICE_PREFIX
+            # Authentication method for OCI SDK - using workload identity
+            - name: OCI_CLI_AUTH
+              value: "oke_workload_identity"
+            - name: DJANGO_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backend.djangoSecret }}
+                  key: {{ .Values.backend.djangoSecretKey }}
+            - name: DJANGO_ALLOWED_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: DJANGO_ALLOWED_HOSTS
+            - name: DJANGO_CSRF_TRUSTED_ORIGINS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: DJANGO_CSRF_TRUSTED_ORIGINS
+            - name: TENANCY_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: TENANCY_ID
+            - name: AUTHORIZED_COMPARTMENTS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: AUTHORIZED_COMPARTMENTS
+            - name: GPU_UTILIZATION_MONITORING_ENABLED
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: GPU_UTILIZATION_MONITORING_ENABLED
+            - name: GPU_UTILIZATION_CHECK_INTERVAL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: GPU_UTILIZATION_CHECK_INTERVAL
+            - name: GPU_UTILIZATION_THRESHOLD
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: GPU_UTILIZATION_THRESHOLD
+            - name: GPU_MIN_TIME_BETWEEN_CHECKS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: GPU_MIN_TIME_BETWEEN_CHECKS
+            - name: REGION_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: REGION_NAME
+            - name: SKIP_REGIONS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: SKIP_REGIONS
+            - name: LOGGING_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: LOGGING_LEVEL 
+            - name: GRAFANA_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: GRAFANA_URL
+            - name: GRAFANA_API_TOKEN
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: GRAFANA_API_TOKEN
+            - name: GRAFANA_TEMPLATES_GITHUB_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: GRAFANA_TEMPLATES_GITHUB_URL
+            - name: GRAFANA_TEMPLATES_GITHUB_BRANCH
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: GRAFANA_TEMPLATES_GITHUB_BRANCH
+            - name: POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: POSTGRES_HOST
+            - name: POSTGRES_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: POSTGRES_PORT
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.postgresSecret }}
+                  key: {{ .Values.global.postgresUsernameKey }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.postgresSecret }}
+                  key: {{ .Values.global.postgresPasswordKey }}
+            - name: PROMETHEUS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: PROMETHEUS_URL
+            - name: PROMETHEUS_PUSHGATEWAY_URL  
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: PROMETHEUS_PUSHGATEWAY_URL
+            - name: INTERNAL_GRAFANA_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: INTERNAL_GRAFANA_URL
+            - name: INTERNAL_PROMETHEUS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: INTERNAL_PROMETHEUS_URL
+            - name: INTERNAL_PUSHGATEWAY_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+                  key: INTERNAL_PUSHGATEWAY_URL
+          resources:
+            requests:
+              memory: {{ .Values.backend.resources.requests.memory | quote }}
+              cpu: {{ .Values.backend.resources.requests.cpu | quote }}
+            limits:
+              memory: {{ .Values.backend.resources.limits.memory | quote }}
+              cpu: {{ .Values.backend.resources.limits.cpu | quote }}
+      nodeSelector:
+        kubernetes.io/arch: amd64

@@ -1,0 +1,79 @@
+# helm/templates/grafana-external-prometheus-job.yaml
+# Update bundled Grafana's Prometheus datasource when using external Prometheus
+# Only runs when: grafana.enabled=true AND backend.prometheusUrl is set
+{{- if and .Values.grafana.enabled .Values.backend.prometheusUrl }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "corrino-lens.fullname" . }}-grafana-external-prometheus
+  labels:
+    {{- include "corrino-lens.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "4"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      serviceAccountName: {{ .Values.backend.serviceAccount.name }}
+      containers:
+        - name: grafana-external-prometheus
+          image: docker.io/alpine/k8s:1.31.10
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+              
+              GRAFANA_CONFIGMAP="{{ .Values.monitoring.grafanaService }}"
+              PROMETHEUS_URL="{{ .Values.backend.prometheusUrl }}"
+              NAMESPACE="{{ .Release.Namespace }}"
+              
+              echo "========================================="
+              echo "Updating Grafana Prometheus Datasource"
+              echo "========================================="
+              echo "Grafana ConfigMap: $GRAFANA_CONFIGMAP"
+              echo "External Prometheus URL: $PROMETHEUS_URL"
+              echo ""
+              
+              # Create ConfigMap patch file
+              cat > /tmp/cm-patch.yaml << ENDOFPATCH
+              apiVersion: v1
+              kind: ConfigMap
+              metadata:
+                name: $GRAFANA_CONFIGMAP
+                namespace: $NAMESPACE
+              data:
+                datasources.yaml: |
+                  apiVersion: 1
+                  datasources:
+                  - access: proxy
+                    isDefault: true
+                    name: Prometheus
+                    type: prometheus
+                    url: $PROMETHEUS_URL
+                  - access: proxy
+                    name: Infinity
+                    type: yesoreyeram-infinity-datasource
+              ENDOFPATCH
+              
+              echo "Applying ConfigMap patch..."
+              kubectl apply -f /tmp/cm-patch.yaml
+              
+              echo "✓ ConfigMap updated"
+              echo ""
+              
+              # Restart Grafana to pick up new config
+              echo "Restarting Grafana deployment..."
+              kubectl rollout restart deployment/{{ .Values.monitoring.grafanaService }} -n $NAMESPACE
+              
+              echo "Waiting for Grafana to be ready..."
+              kubectl rollout status deployment/{{ .Values.monitoring.grafanaService }} -n $NAMESPACE --timeout=120s
+              
+              echo ""
+              echo "========================================="
+              echo "Grafana datasource update completed!"
+              echo "Prometheus URL: $PROMETHEUS_URL"
+              echo "========================================="
+{{- end }}

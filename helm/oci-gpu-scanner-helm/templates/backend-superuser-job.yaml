@@ -1,0 +1,59 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "corrino-lens.fullname" . }}-createsuperuser
+  labels:
+    {{- include "corrino-lens.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  template:
+    spec:
+      containers:
+        - name: createsuperuser
+          image: {{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}
+          command: ["/bin/sh", "-c", "sleep 20 && python3 --version && python3 manage.py migrate && (python3 manage.py createsuperuser --noinput || echo 'Superuser already exists, skipping.')"]
+          envFrom:
+            - configMapRef:
+                name: {{ include "corrino-lens.fullname" . }}-backend-configmap
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.postgresSecret }}
+                  key: {{ .Values.global.postgresUsernameKey }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.postgresSecret }}
+                  key: {{ .Values.global.postgresPasswordKey }}
+            - name: DJANGO_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backend.djangoSecret }}
+                  key: {{ .Values.backend.djangoSecretKey }}
+            - name: DJANGO_SUPERUSER_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backend.backendSecret }}
+                  key: {{ .Values.backend.superuserUsernameKey }}
+            - name: DJANGO_SUPERUSER_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backend.backendSecret }}
+                  key: {{ .Values.backend.superuserEmailKey }}
+            - name: DJANGO_SUPERUSER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backend.backendSecret }}
+                  key: {{ .Values.backend.superuserPasswordKey }}
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+      restartPolicy: OnFailure 

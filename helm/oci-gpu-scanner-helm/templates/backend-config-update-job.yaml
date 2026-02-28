@@ -1,0 +1,182 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "corrino-lens.fullname" . }}-backend-config-update
+  labels:
+    {{- include "corrino-lens.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "3"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  template:
+    spec:
+      serviceAccountName: {{ .Values.backend.serviceAccount.name }}
+      restartPolicy: OnFailure
+      containers:
+      - name: backend-config-updater
+        image: docker.io/alpine/k8s:1.31.10
+        command:
+        - /bin/bash
+        - -c
+        - |
+          set -e
+
+          NAMESPACE="{{ .Release.Namespace }}"
+          RELEASE_NAME="{{ .Release.Name }}"
+          CONFIGMAP_NAME="{{ include "corrino-lens.fullname" . }}-backend-configmap"
+          BACKEND_SERVICE="{{ include "corrino-lens.fullname" . }}-backend"
+
+          echo "Starting backend configuration update job (internal-only access)..."
+
+          # Wait for backend pod to be ready
+          echo "Waiting for backend service to be ready..."
+          kubectl wait --for=condition=ready pod -l app=$BACKEND_SERVICE -n $NAMESPACE --timeout=300s
+
+          # Use the internal DNS name directly
+          BACKEND_IP="${BACKEND_SERVICE}.${NAMESPACE}.svc.cluster.local"
+          echo "Using backend service DNS: $BACKEND_IP"
+
+          # Optionally get backend pod name for extra trusted origins
+          BACKEND_POD_NAME=$(kubectl get pods -n $NAMESPACE -l app=$BACKEND_SERVICE \
+            --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)
+          echo "Backend pod name: $BACKEND_POD_NAME"
+
+          # Get external IP from ingress controller to build monitoring URLs
+          echo "Getting external IP from ingress controller..."
+          
+          {{- if index .Values "ingress-nginx" "enabled" }}
+          # Using bundled ingress-nginx controller
+          INGRESS_SVC_NAMESPACE="{{ .Release.Namespace }}"
+          INGRESS_SVC_NAME="{{ .Release.Name }}-ingress-nginx-controller"
+          {{- else }}
+          # Using external ingress controller
+          INGRESS_SVC_NAMESPACE="{{ .Values.ingress.external.namespace }}"
+          INGRESS_SVC_NAME="{{ .Values.ingress.external.serviceName }}"
+          {{- end }}
+          
+          echo "Looking for ingress controller: $INGRESS_SVC_NAME in namespace: $INGRESS_SVC_NAMESPACE"
+          
+          EXTERNAL_IP=""
+          for i in {1..30}; do
+            EXTERNAL_IP=$(kubectl get svc -n $INGRESS_SVC_NAMESPACE $INGRESS_SVC_NAME \
+              -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || echo "")
+            if [ -z "$EXTERNAL_IP" ] || [ "$EXTERNAL_IP" = "null" ]; then
+              EXTERNAL_IP=$(kubectl get svc -n $INGRESS_SVC_NAMESPACE $INGRESS_SVC_NAME \
+                -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo "")
+            fi
+            if [ -n "$EXTERNAL_IP" ] && [ "$EXTERNAL_IP" != "null" ]; then
+              echo "Found external IP: $EXTERNAL_IP"
+              break
+            fi
+            echo "Waiting for external IP... (attempt $i/30)"
+            sleep 5
+          done
+          
+          # Build monitoring URLs
+          if [ -n "$EXTERNAL_IP" ] && [ "$EXTERNAL_IP" != "null" ]; then
+            {{- if .Values.backend.prometheusUrl }}
+            # Use custom Prometheus URL when provided by user
+            PROMETHEUS_URL="{{ .Values.backend.prometheusUrl }}"
+            {{- else }}
+            PROMETHEUS_URL="https://prometheus.$EXTERNAL_IP.{{ .Values.ingress.domain }}"
+            {{- end }}
+            {{- if .Values.backend.prometheusPushgatewayUrl }}
+            # Use custom Pushgateway URL when provided by user
+            PUSHGATEWAY_URL="{{ .Values.backend.prometheusPushgatewayUrl }}"
+            {{- else }}
+            PUSHGATEWAY_URL="https://pushgateway.$EXTERNAL_IP.{{ .Values.ingress.domain }}"
+            {{- end }}
+            {{- if .Values.grafana.enabled }}
+            # Using bundled Grafana - generate URL from external IP
+            GRAFANA_URL="https://grafana.$EXTERNAL_IP.{{ .Values.ingress.domain }}"
+            {{- else }}
+            # Using external Grafana - use user-provided URL
+            GRAFANA_URL="{{ .Values.backend.grafanaUrl }}"
+            {{- end }}
+            echo "External monitoring URLs configured:"
+            echo "  Prometheus: $PROMETHEUS_URL"
+            echo "  Pushgateway: $PUSHGATEWAY_URL"
+            echo "  Grafana: $GRAFANA_URL"
+          else
+            # Fallback to values.yaml or empty
+            PROMETHEUS_URL="{{ .Values.backend.prometheusUrl }}"
+            PUSHGATEWAY_URL="{{ .Values.backend.prometheusPushgatewayUrl }}"
+            GRAFANA_URL="{{ .Values.backend.grafanaUrl }}"
+            echo "Warning: Could not get external IP, using values from values.yaml"
+          fi
+
+          # Also add the external ingress hostname to ALLOWED_HOSTS
+          BACKEND_INGRESS_HOST=""
+          if [ -n "$EXTERNAL_IP" ] && [ "$EXTERNAL_IP" != "null" ]; then
+            BACKEND_INGRESS_HOST="api.$EXTERNAL_IP.{{ .Values.ingress.domain }}"
+            echo "Backend ingress hostname: $BACKEND_INGRESS_HOST"
+          fi
+
+          echo "Updating ConfigMap with backend DNS and monitoring URLs..."
+
+          # Build ALLOWED_HOSTS with both internal and external hostnames
+          ALLOWED_HOSTS="127.0.0.1,localhost,$BACKEND_SERVICE,$BACKEND_IP"
+          if [ -n "$BACKEND_POD_NAME" ]; then
+            ALLOWED_HOSTS="$ALLOWED_HOSTS,$BACKEND_POD_NAME"
+          fi
+          if [ -n "$BACKEND_INGRESS_HOST" ]; then
+            ALLOWED_HOSTS="$ALLOWED_HOSTS,$BACKEND_INGRESS_HOST"
+          fi
+
+          # Build CSRF_TRUSTED_ORIGINS with both internal and external URLs
+          CSRF_ORIGINS="http://127.0.0.1,http://localhost,http://$BACKEND_SERVICE,http://$BACKEND_IP,https://$BACKEND_SERVICE,https://$BACKEND_IP"
+          if [ -n "$BACKEND_POD_NAME" ]; then
+            CSRF_ORIGINS="$CSRF_ORIGINS,http://$BACKEND_POD_NAME,https://$BACKEND_POD_NAME"
+          fi
+          if [ -n "$BACKEND_INGRESS_HOST" ]; then
+            CSRF_ORIGINS="$CSRF_ORIGINS,https://$BACKEND_INGRESS_HOST"
+          fi
+
+          {{- if not .Values.grafana.enabled }}
+          echo "External Grafana detected — importing Grafana API token from Secret..."
+
+          GRAFANA_TOKEN=$(kubectl get secret lens-grafana-secret -n $NAMESPACE \
+            -o jsonpath='{.data.grafana-api-token}' 2>/dev/null | base64 -d || true)
+
+          if [ -z "$GRAFANA_TOKEN" ]; then
+            echo "ERROR: grafana.enabled=false but lens-grafana-secret:grafana-api-token is missing or empty"
+            exit 1
+          fi
+
+          kubectl patch configmap $CONFIGMAP_NAME -n $NAMESPACE --type='merge' \
+            -p="{\"data\":{\"GRAFANA_API_TOKEN\":\"$GRAFANA_TOKEN\"}}"
+
+          echo "Grafana API token imported into backend ConfigMap"
+          {{- end }}
+
+          kubectl patch configmap $CONFIGMAP_NAME -n $NAMESPACE --type='merge' \
+            -p="{\"data\":{\"DJANGO_ALLOWED_HOSTS\":\"$ALLOWED_HOSTS\"}}"
+
+          kubectl patch configmap $CONFIGMAP_NAME -n $NAMESPACE --type='merge' \
+            -p="{\"data\":{\"DJANGO_CSRF_TRUSTED_ORIGINS\":\"$CSRF_ORIGINS\"}}"
+
+          kubectl patch configmap $CONFIGMAP_NAME -n $NAMESPACE --type='merge' \
+            -p="{\"data\":{\"PROMETHEUS_URL\":\"$PROMETHEUS_URL\"}}"
+
+          kubectl patch configmap $CONFIGMAP_NAME -n $NAMESPACE --type='merge' \
+            -p="{\"data\":{\"PROMETHEUS_PUSHGATEWAY_URL\":\"$PUSHGATEWAY_URL\"}}"
+
+          kubectl patch configmap $CONFIGMAP_NAME -n $NAMESPACE --type='merge' \
+            -p="{\"data\":{\"GRAFANA_URL\":\"$GRAFANA_URL\"}}"
+
+          echo "ConfigMap updated successfully"
+
+          echo "Restarting backend deployment..."
+          kubectl rollout restart deployment/$BACKEND_SERVICE -n $NAMESPACE
+
+          echo "Waiting for backend deployment to become ready..."
+          kubectl rollout status deployment/$BACKEND_SERVICE -n $NAMESPACE --timeout=300s
+
+          echo "Backend configuration update completed successfully!"
+          echo ""
+          echo "Final Configuration:"
+          echo "  Backend DNS: $BACKEND_IP"
+          echo "  Prometheus URL: $PROMETHEUS_URL"
+          echo "  Pushgateway URL: $PUSHGATEWAY_URL"
+          echo "  Grafana URL: $GRAFANA_URL"
