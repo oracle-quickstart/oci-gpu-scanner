@@ -92,7 +92,7 @@ frontend:
   
   image:
     repository: iad.ocir.io/iduyx1qnmway/corrino-lens-portal
-    tag: v0.0.4
+    tag: v0.0.5
     pullPolicy: Always
 
   env:
