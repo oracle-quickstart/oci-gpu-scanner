@@ -31,7 +31,7 @@ backend:
     automountToken: true
   image:
     repository: iad.ocir.io/iduyx1qnmway/corrino-lens-backend
-    tag: v0.0.7
+    tag: v0.0.8
     pullPolicy: Always
   servicePort: 80
   containerPort: 5000
@@ -79,7 +79,7 @@ frontend:
   
   image:
     repository: iad.ocir.io/iduyx1qnmway/corrino-lens-portal
-    tag: v0.0.4
+    tag: v0.0.5
     pullPolicy: Always
 
   env:
