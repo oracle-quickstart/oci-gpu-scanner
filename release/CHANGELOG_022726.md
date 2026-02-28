@@ -26,6 +26,8 @@ February 27, 2026
 - OCI IAM login for backend ([corrino-lens-cp #61](https://github.com/oci-ai-incubations/corrino-lens-cp/pull/61) , [@jolettacheungoracle](https://github.com/jolettacheungoracle))
 
 #### Quickstart
+- Enhance OCI IAM integration in Helm deployment #90 ([oci-gpu-scanner #90](https://github.com/oracle-quickstart/oci-gpu-scanner/pull/90), [@jolettacheungoracle](https://github.com/jolettacheungoracle))
+
 
 ### Other
 #### Devops
