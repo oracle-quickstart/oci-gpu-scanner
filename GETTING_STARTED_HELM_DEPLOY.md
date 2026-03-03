@@ -56,12 +56,13 @@ The backend deployment uses a Kubernetes service account with workload identity 
 
 #### Create IAM Policy
 
-**Note:** This step requires OCI tenancy-level permissions. Policies are always created in your OCI home region.
+**Note:** Policies are always created in your OCI home region.
 
 1. **Gather Required Information:**
    - `request.principal.cluster_id`: Your existing OKE cluster OCID (e.g., `ocid1.cluster.oc1.iad.aaaaaaaaa...`)
    - `request.principal.namespace`: `lens`
    - `request.principal.service_account`: `corrino-lens-backend-sa`
+   - compartment id
 
 2. **Create Policy in OCI Console:**
    - Navigate to **Identity & Security** > **Policies**
@@ -72,25 +73,6 @@ The backend deployment uses a Kubernetes service account with workload identity 
    - **Policy Builder:** Switch to **Manual Editor**
 
 3. **Add Policy Statements:**
-
-   **Option A: Tenancy-Level Access (Recommended)**
-   ```sql
-   Allow any-user to read instance-family in tenancy where all {
-     request.principal.type = 'workload',
-     request.principal.namespace = 'lens',
-     request.principal.service_account = 'corrino-lens-backend-sa',
-     request.principal.cluster_id = 'YOUR_OKE_CLUSTER_OCID'
-   }
-
-   Allow any-user to read compute-management-family in tenancy where all {
-     request.principal.type = 'workload',
-     request.principal.namespace = 'lens',
-     request.principal.service_account = 'corrino-lens-backend-sa',
-     request.principal.cluster_id = 'YOUR_OKE_CLUSTER_OCID'
-   }
-   ```
-
-   **Option B: Compartment-Level Access (Restricted)**
    ```sql
    Allow any-user to read instance-family in compartment id 'YOUR_COMPARTMENT_OCID' where all {
      request.principal.type = 'workload',
@@ -197,6 +179,7 @@ kubectl -n lens create secret generic lens-grafana-secret \
 helm install lens . -n lens --create-namespace \
   --set backend.tenancyId="YOUR_OCI_TENANCY_OCID" \
   --set backend.regionName="YOUR_OKE_REGION" \
+  --set backend.authorizedCompartments="YOUR_COMPARTMENT_ID" \
   --set backend.ociIamIssuer="https://idcs-<YOUR_IDCS_GUID>.identity.oraclecloud.com:443" \
   --set backend.ociIamClientId="YOUR_OCI_IAM_CLIENT_ID" \
   --set backend.ociIamClientSecret="YOUR_OCI_IAM_CLIENT_SECRET"
@@ -211,7 +194,7 @@ helm install lens . -n lens --create-namespace \
 | `backend.ociIamIssuer` | ✅ | - | OCI IAM (IDCS) issuer URL |
 | `backend.ociIamClientId` | ✅ | - | OAuth2 client ID registered in OCI IAM |
 | `backend.ociIamClientSecret` | ✅ | - | OAuth2 client secret for the registered application |
-| `backend.authorizedCompartments` | optional | (all) | Restrict to specific compartment OCID |
+| `backend.authorizedCompartments` | ✅ | - | Restrict to specific compartment OCID |
 | `ingress.domain` | optional | `nip.io` | Custom domain (see [Custom Domain Setup](INGRESS_AND_TLS_SETUP.md)) |
 
 **Note:** Grafana admin password is auto-generated during installation. See [Access Your Deployment](#2-access-your-deployment) for retrieval instructions.
@@ -222,10 +205,10 @@ helm install lens . -n lens --create-namespace \
 helm install lens . -n lens --create-namespace \
   --set backend.tenancyId="ocid1.tenancy.oc1..aaaaaaaa..." \
   --set backend.regionName="us-ashburn-1" \
+  --set backend.authorizedCompartments="ocid1.compartment.oc1..aaaaaaaa..." \
   --set backend.ociIamIssuer="https://idcs-<YOUR_IDCS_GUID>.identity.oraclecloud.com:443" \
   --set backend.ociIamClientId="YOUR_OCI_IAM_CLIENT_ID" \
   --set backend.ociIamClientSecret="YOUR_OCI_IAM_CLIENT_SECRET" \
-  --set backend.authorizedCompartments="ocid1.compartment.oc1..aaaaaaaa..." \
   --set ingress.domain="gpu-scanner.example.com"
 ```
 
@@ -254,6 +237,7 @@ helm install lens . -n lens --create-namespace \
   --set prometheus.enabled=false \
   --set grafana.enabled=false \
   --set backend.tenancyId="YOUR_OCI_TENANCY_OCID" \
+  --set backend.authorizedCompartments="YOUR_COMPARTMENT_ID" \
   --set backend.regionName="YOUR_OKE_REGION" \
   --set backend.ociIamIssuer="https://idcs-<YOUR_IDCS_GUID>.identity.oraclecloud.com:443" \
   --set backend.ociIamClientId="YOUR_OCI_IAM_CLIENT_ID" \
@@ -274,7 +258,7 @@ helm install lens . -n lens --create-namespace \
 | `backend.ociIamIssuer` | ✅ | - | OCI IAM (IDCS) issuer URL |
 | `backend.ociIamClientId` | ✅ | - | OAuth2 client ID registered in OCI IAM |
 | `backend.ociIamClientSecret` | ✅ | - | OAuth2 client secret for the registered application |
-| `backend.authorizedCompartments` | optional | (all) | Restrict to specific compartment OCID |
+| `backend.authorizedCompartments` | ✅ | - | Restrict to specific compartment OCID |
 | `ingress.domain` | optional | `nip.io` | Custom domain (see [Custom Domain Setup](INGRESS_AND_TLS_SETUP.md)) |
 
 **Example with Optional Flags:**
