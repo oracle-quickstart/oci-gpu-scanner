@@ -177,7 +177,7 @@ kubectl -n lens create secret generic lens-grafana-secret \
 
 ```bash
 helm install lens . -n lens --create-namespace \
-  --set backend.tenancyId="YOUR_OCI_TENANCY_OCID" \
+  --set global.tenancyId="YOUR_OCI_TENANCY_OCID" \
   --set backend.regionName="YOUR_OKE_REGION" \
   --set backend.authorizedCompartments="YOUR_COMPARTMENT_ID" \
   --set backend.ociIamIssuer="https://idcs-<YOUR_IDCS_GUID>.identity.oraclecloud.com:443" \
@@ -189,7 +189,7 @@ helm install lens . -n lens --create-namespace \
 
 | Flag | Required | Default | Description |
 |------|----------|---------|-------------|
-| `backend.tenancyId` | ✅ | - | Your OCI tenancy OCID |
+| `global.tenancyId` | ✅ | - | Your OCI tenancy OCID |
 | `backend.regionName` | ✅ | - | OKE region (e.g., `us-ashburn-1`) |
 | `backend.ociIamIssuer` | ✅ | - | OCI IAM (IDCS) issuer URL |
 | `backend.ociIamClientId` | ✅ | - | OAuth2 client ID registered in OCI IAM |
@@ -203,7 +203,7 @@ helm install lens . -n lens --create-namespace \
 
 ```bash
 helm install lens . -n lens --create-namespace \
-  --set backend.tenancyId="ocid1.tenancy.oc1..aaaaaaaa..." \
+  --set global.tenancyId="ocid1.tenancy.oc1..aaaaaaaa..." \
   --set backend.regionName="us-ashburn-1" \
   --set backend.authorizedCompartments="ocid1.compartment.oc1..aaaaaaaa..." \
   --set backend.ociIamIssuer="https://idcs-<YOUR_IDCS_GUID>.identity.oraclecloud.com:443" \
@@ -236,7 +236,7 @@ helm install lens . -n lens --create-namespace \
   --set backend.grafanaUrl="http://YOUR_GRAFANA_IP:80" \
   --set prometheus.enabled=false \
   --set grafana.enabled=false \
-  --set backend.tenancyId="YOUR_OCI_TENANCY_OCID" \
+  --set global.tenancyId="YOUR_OCI_TENANCY_OCID" \
   --set backend.authorizedCompartments="YOUR_COMPARTMENT_ID" \
   --set backend.regionName="YOUR_OKE_REGION" \
   --set backend.ociIamIssuer="https://idcs-<YOUR_IDCS_GUID>.identity.oraclecloud.com:443" \
@@ -253,7 +253,7 @@ helm install lens . -n lens --create-namespace \
 | `backend.grafanaUrl` | ✅ | - | Your Grafana URL (e.g., `http://grafana.example.com:80`) |
 | `prometheus.enabled` | ✅ | `true` | **Must set to `false`** |
 | `grafana.enabled` | ✅ | `true` | **Must set to `false`** |
-| `backend.tenancyId` | ✅ | - | Your OCI tenancy OCID |
+| `global.tenancyId` | ✅ | - | Your OCI tenancy OCID |
 | `backend.regionName` | ✅ | - | OKE region (e.g., `us-ashburn-1`) |
 | `backend.ociIamIssuer` | ✅ | - | OCI IAM (IDCS) issuer URL |
 | `backend.ociIamClientId` | ✅ | - | OAuth2 client ID registered in OCI IAM |
@@ -270,7 +270,7 @@ helm install lens . -n lens --create-namespace \
   --set backend.grafanaUrl="http://10.0.1.52:80" \
   --set prometheus.enabled=false \
   --set grafana.enabled=false \
-  --set backend.tenancyId="ocid1.tenancy.oc1..aaaaaaaa..." \
+  --set global.tenancyId="ocid1.tenancy.oc1..aaaaaaaa..." \
   --set backend.regionName="us-phoenix-1" \
   --set backend.ociIamIssuer="https://idcs-<YOUR_IDCS_GUID>.identity.oraclecloud.com:443" \
   --set backend.ociIamClientId="YOUR_OCI_IAM_CLIENT_ID" \
