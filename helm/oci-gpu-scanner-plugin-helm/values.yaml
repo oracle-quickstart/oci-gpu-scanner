@@ -16,7 +16,7 @@ goPlugin:
   enabled: true
   image:
     repository: oci_lens_metric_collector
-    tag: v0.0.11
+    tag: v0.0.12
     pullPolicy: Always
   
   config:
@@ -123,7 +123,7 @@ drhpc:
       image:
         repository: oci-dr-hpc-v2       
         rocmVersion: rocm                 # ROCm version prefix
-        tag: 1.0.52.1                       # Tag comes after rocm version
+        tag: 1.0.78                      # Tag comes after rocm version
         pullPolicy: Always
       resultsHostPath: "/var/lib/oci-dr-hpc-v2"
       nodeSelector:
@@ -191,7 +191,7 @@ podNodeMapper:
   replicas: 1
   image:
     repository: oci_lens_pod_node_info
-    tag: v0.0.1
+    tag: v0.0.3
     pullPolicy: Always
   
   # Configuration
