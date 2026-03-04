@@ -220,7 +220,7 @@ terminateNode:
     automountToken: true
   image:
     repository: iad.ocir.io/iduyx1qnmway/terminate-node-image
-    tag: v0.0.1
+    tag: v0.0.2
     pullPolicy: Always
   resources:
     requests:
