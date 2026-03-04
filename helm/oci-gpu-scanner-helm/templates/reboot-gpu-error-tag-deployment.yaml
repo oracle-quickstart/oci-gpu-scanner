@@ -20,12 +20,13 @@ spec:
       automountServiceAccountToken: {{ .Values.rebootGPUErrorTag.serviceAccount.automountToken }}
       initContainers:
       - name: wait-for-backend
-        image: docker.io/alpine/k8s:1.31.10
+        image: container-registry.oracle.com/os/oraclelinux:9-slim
         command:
         - sh
         - -c
         - |
           #!/bin/sh
+          microdnf install -y curl --nodocs
           echo "Waiting for Lens backend service to be ready..."
           
           # Wait for the backend service to be available by checking the login endpoint
@@ -51,14 +52,21 @@ spec:
           #!/bin/bash
           set -e
           
-          # Install curl and jq if not available (alpine-based images)
+          # Install required tools if not available (oracle-linux-based images)
           if ! command -v curl &> /dev/null; then
             echo "Installing curl..."
-            apk add --no-cache curl
+            microdnf install -y curl --nodocs
           fi
           if ! command -v jq &> /dev/null; then
             echo "Installing jq..."
-            apk add --no-cache jq
+            microdnf install -y jq --nodocs
+          fi
+          if ! command -v kubectl &> /dev/null; then
+            echo "Installing kubectl..."
+            KUBECTL_VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt)
+            curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+            chmod +x kubectl
+            mv kubectl /usr/local/bin/kubectl
           fi
           
           # Backend service configuration
