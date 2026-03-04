@@ -49,17 +49,7 @@ backend:
   djangoSecret: lens-django-secret
   djangoSecretKey: django-secret 
   djangoAllowedHosts: "127.0.0.1,localhost,lens-backend.lens.svc.cluster.local"
-  djangoCsrfTrustedOrigins: "http://localhost,http://localhost:8000,http://127.0.0.1,http://127.0.0.1:8000,http://lens-backend.lens.svc.cluster.local"
-  # OAuth 2.0 / OCI IAM configuration
-  #ociIamIssuer: "https://idcs-<idcs-tenant-id>.identity.oraclecloud.com:443"
-  #ociIamClientId: "<oci-iam-client-id>"
-  #ociIamClientSecret: "<oci-iam-client-secret>"
-  ociIamIssuer: ""
-  ociIamClientId: ""
-  ociIamClientSecret: ""
-  ociIamScope: "openid profile email"
-  #ociIamRedirectUri: "https://<backend-ingress-host>/oauth/callback"
-  ociIamRedirectUri: ""
+  djangoCsrfTrustedOrigins: "http://127.0.0.1,http://localhost,http://lens-backend.lens.svc.cluster.local"
   postgresPort: "5432"
   loggingLevel: "DEBUG"
   authorizedCompartments: ""
