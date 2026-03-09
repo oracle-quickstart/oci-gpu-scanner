@@ -27,6 +27,8 @@ March 06, 2026
 ### Bugfix
 #### Backend
 - Resolve node_name server-side at instance creation using K8s Provider ID (OCID) matching with IP fallback [corrino-lens-cp #67](https://github.com/oci-ai-incubations/corrino-lens-cp/pull/67), [@gablyu-oci](https://github.com/gablyu-oci)
+- Removed postgres password from backend logs [corrino-lens-cp #c606d5a](https://github.com/oci-ai-incubations/corrino-lens-cp/commit/c606d5abf8edcf9c04da0b87cb5d71563fad5731), [@gablyu-oci](https://github.com/gablyu-oci)
+
 
 ### Other
 #### Quickstart
