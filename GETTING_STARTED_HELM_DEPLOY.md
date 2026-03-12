@@ -5,6 +5,8 @@
 **This guide covers Control Plane deployment only.**
 
 For Data Plane plugin installation on GPU nodes, see [oci-gpu-scanner-plugin-helm](./helm/oci-gpu-scanner-plugin-helm/README.md).
+Control Plane deployment and Data Plane plugin installations must be installed on the same OKE custer. 
+OCI GPU Scanner monitors GPUs within one OKE cluster.
 
 ### What This Deploys
 
@@ -18,7 +20,6 @@ This deployment supports:
 
 - ✅ **Bring Your Own Monitoring:** Use existing Prometheus & Grafana instead of deploying new instances
 - ✅ **Custom Domains:** Configure your own domain instead of default `nip.io`
-- ✅ **Compartment Restrictions:** Limit OCI access to specific compartments
 - ✅ **Resource Overrides:** Customize replicas, images, storage, and more via Helm values
 
 ---
@@ -110,7 +111,7 @@ The Helm chart is located at `./helm/oci-gpu-scanner-helm` relative to the repos
 
 ### 3. Create Kubernetes Secrets
 
-All installation options require PostgreSQL and superuser credentials. **Run these commands before installation:**
+All installation options require PostgreSQL credentials and superuser credentials. **Run these commands before installation:**
 
 ```bash
 # Create namespace
@@ -174,7 +175,7 @@ kubectl -n lens create secret generic lens-grafana-secret \
 ```bash
 helm install lens . -n lens --create-namespace \
   --set global.tenancyId="YOUR_OCI_TENANCY_OCID" \
-  --set backend.regionName="YOUR_OKE_REGION"
+  --set global.regionName="YOUR_OKE_REGION"
 ```
 
 **Configuration Reference:**
@@ -182,7 +183,7 @@ helm install lens . -n lens --create-namespace \
 | Flag | Required | Default | Description |
 |------|----------|---------|-------------|
 | `global.tenancyId` | ✅ | - | Your OCI tenancy OCID |
-| `backend.regionName` | ✅ | - | OKE region (e.g., `us-ashburn-1`) |
+| `global.regionName` | ✅ | - | OKE region (e.g., `us-ashburn-1`) |
 | `backend.authorizedCompartments` | optional | (all) | Restrict to specific compartment OCID |
 | `ingress.domain` | optional | `nip.io` | Custom domain (see [Custom Domain Setup](INGRESS_AND_TLS_SETUP.md)) |
 
@@ -193,7 +194,7 @@ helm install lens . -n lens --create-namespace \
 ```bash
 helm install lens . -n lens --create-namespace \
   --set global.tenancyId="ocid1.tenancy.oc1..aaaaaaaa..." \
-  --set backend.regionName="us-ashburn-1" \
+  --set global.regionName="us-ashburn-1" \
   --set backend.authorizedCompartments="ocid1.compartment.oc1..aaaaaaaa..." \
   --set ingress.domain="gpu-scanner.example.com"
 ```
@@ -204,6 +205,7 @@ helm install lens . -n lens --create-namespace \
 
 **Prerequisites:**
 - ✅ Prometheus Pushgateway running (accessible URL)
+- ✅ Prometheus (accessible URL)
 - ✅ Grafana ≥10.4.8 running (accessible URL)
 - ✅ Grafana API token with admin rights ([create in Grafana](https://grafana.com/docs/grafana/latest/administration/service-accounts/))
 - ✅ VCN firewall rules allow Control Plane → Prometheus/Grafana
@@ -223,7 +225,7 @@ helm install lens . -n lens --create-namespace \
   --set prometheus.enabled=false \
   --set grafana.enabled=false \
   --set global.tenancyId="YOUR_OCI_TENANCY_OCID" \
-  --set backend.regionName="YOUR_OKE_REGION"
+  --set global.regionName="YOUR_OKE_REGION"
 ```
 
 **Configuration Reference:**
@@ -236,8 +238,8 @@ helm install lens . -n lens --create-namespace \
 | `prometheus.enabled` | ✅ | `true` | **Must set to `false`** |
 | `grafana.enabled` | ✅ | `true` | **Must set to `false`** |
 | `global.tenancyId` | ✅ | - | Your OCI tenancy OCID |
-| `backend.regionName` | ✅ | - | OKE region (e.g., `us-ashburn-1`) |
-| `backend.authorizedCompartments` | optional | (all) | Restrict to specific compartment OCID |
+| `global.regionName` | ✅ | - | OKE region (e.g., `us-ashburn-1`) |
+| `backend.authorizedCompartments` | optional | (all compartments in tenancy) | Restrict to specific compartment OCID |
 | `ingress.domain` | optional | `nip.io` | Custom domain (see [Custom Domain Setup](INGRESS_AND_TLS_SETUP.md)) |
 
 **Example with Optional Flags:**
@@ -250,7 +252,7 @@ helm install lens . -n lens --create-namespace \
   --set prometheus.enabled=false \
   --set grafana.enabled=false \
   --set global.tenancyId="ocid1.tenancy.oc1..aaaaaaaa..." \
-  --set backend.regionName="us-phoenix-1" \
+  --set global.regionName="us-phoenix-1" \
   --set backend.authorizedCompartments="ocid1.compartment.oc1..aaaaaaaa..." \
   --set ingress.domain="gpu-scanner.mycompany.com"
 ```
@@ -323,10 +325,7 @@ kubectl get ingress -n lens
 To start monitoring GPU nodes, install the Data Plane plugin. See [oci-gpu-scanner-plugin-helm](./helm/oci-gpu-scanner-plugin-helm/README.md) for installation instructions.
 
 The plugin can be installed on:
-- Individual GPU instances
-- OKE cluster GPU nodes (via DaemonSet)
-- Slurm cluster nodes
-- Cloud-init scripts for automated deployment
+- OKE cluster GPU nodes (via Helm)
 
 ---
 
@@ -353,15 +352,15 @@ kubectl get secret lens-grafana-secret -A -o name 2>/dev/null || \
 ### Available Dashboards
 
 1. **Standalone Nodes:** Monitor individual GPU instances (utilization, memory, temperature)
-2. **OKE Clusters:** Monitor Kubernetes cluster health and GPU pod metrics
+2. **OKE Cluster:** Monitor Kubernetes cluster health and GPU pod metrics
 3. **Cluster Networks:** Monitor RDMA network performance and topology
 
-### Creating Monitoring Rings
+### Creating Resource Pools
 
 1. Navigate to the Control Plane UI
 2. Go to **Dashboards** section
 3. Select specific resources (nodes, clusters, networks)
-4. Create custom monitoring groups ("rings")
+4. Create custom resource pools ("rings")
 5. View aggregated metrics in Grafana
 
 ### Advanced Features
